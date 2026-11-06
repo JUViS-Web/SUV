@@ -330,6 +330,8 @@ if (teacherForm) {
   teacherForm.addEventListener("submit", async event => {
     event.preventDefault();
 
+    const id = document.getElementById("teacherId").value;
+
     const firstName =
       document.getElementById("teacherFirstName").value.trim();
 
@@ -337,32 +339,59 @@ if (teacherForm) {
       document.getElementById("teacherLastName").value.trim();
 
     const shortCode =
-      document.getElementById("teacherShortCode").value.trim().toUpperCase();
+      document.getElementById("teacherShortCode").value
+        .trim()
+        .toUpperCase();
 
     const weeklyHours =
       Number(document.getElementById("teacherWeeklyHours").value);
 
-    teacherMessage.textContent = "Lehrkraft wird gespeichert ...";
+    const saveButton =
+      document.getElementById("teacherSaveButton");
 
-    const { error } = await suvDb
-      .from("teachers")
-      .insert({
-        first_name: firstName,
-        last_name: lastName,
-        short_code: shortCode,
-        weekly_required_hours: weeklyHours
-      });
+    saveButton.disabled = true;
+    teacherMessage.textContent = "Wird gespeichert ...";
 
-    if (error) {
+    const teacherData = {
+      first_name: firstName,
+      last_name: lastName,
+      short_code: shortCode,
+      weekly_required_hours: weeklyHours
+    };
+
+    let result;
+
+    if (id) {
+      result = await suvDb
+        .from("teachers")
+        .update(teacherData)
+        .eq("id", id);
+    } else {
+      result = await suvDb
+        .from("teachers")
+        .insert(teacherData);
+    }
+
+    saveButton.disabled = false;
+
+    if (result.error) {
       teacherMessage.textContent =
-        "Fehler: " + error.message;
+        "Fehler: " + result.error.message;
       return;
     }
 
-    teacherMessage.textContent =
-      "Lehrkraft erfolgreich gespeichert.";
+    teacherMessage.textContent = id
+      ? "Lehrkraft erfolgreich aktualisiert."
+      : "Lehrkraft erfolgreich gespeichert.";
 
     teacherForm.reset();
+
+    document.getElementById("teacherId").value = "";
+
+    saveButton.textContent = "Lehrkraft speichern";
+
+    document.getElementById("teacherCancelEdit").style.display =
+      "none";
 
     await loadTeachers();
   });
