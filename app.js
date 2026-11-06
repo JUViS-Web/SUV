@@ -252,3 +252,91 @@ async function checkSUVLogin() {
 }
 
 checkSUVLogin();
+
+// SUV – Lehrkräfteverwaltung
+
+const teacherForm = document.getElementById("teacherForm");
+const teacherList = document.getElementById("teacherList");
+const teacherMessage = document.getElementById("teacherMessage");
+
+async function loadTeachers() {
+  if (!teacherList) return;
+
+  teacherList.textContent = "Lehrkräfte werden geladen ...";
+
+  const { data, error } = await suvDb
+    .from("teachers")
+    .select("*")
+    .order("last_name", { ascending: true });
+
+  if (error) {
+    teacherList.textContent =
+      "Fehler beim Laden: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    teacherList.textContent = "Noch keine Lehrkräfte vorhanden.";
+    return;
+  }
+
+  teacherList.innerHTML = "";
+
+  data.forEach(teacher => {
+    const entry = document.createElement("div");
+
+    entry.className = "teacher-entry";
+
+    entry.innerHTML = `
+      <strong>${teacher.first_name} ${teacher.last_name}</strong>
+      <span>Kürzel: ${teacher.short_code || "–"}</span>
+      <span>Pflichtstunden: ${teacher.weekly_required_hours ?? "–"}</span>
+    `;
+
+    teacherList.appendChild(entry);
+  });
+}
+
+if (teacherForm) {
+  teacherForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const firstName =
+      document.getElementById("teacherFirstName").value.trim();
+
+    const lastName =
+      document.getElementById("teacherLastName").value.trim();
+
+    const shortCode =
+      document.getElementById("teacherShortCode").value.trim().toUpperCase();
+
+    const weeklyHours =
+      Number(document.getElementById("teacherWeeklyHours").value);
+
+    teacherMessage.textContent = "Lehrkraft wird gespeichert ...";
+
+    const { error } = await suvDb
+      .from("teachers")
+      .insert({
+        first_name: firstName,
+        last_name: lastName,
+        short_code: shortCode,
+        weekly_required_hours: weeklyHours
+      });
+
+    if (error) {
+      teacherMessage.textContent =
+        "Fehler: " + error.message;
+      return;
+    }
+
+    teacherMessage.textContent =
+      "Lehrkraft erfolgreich gespeichert.";
+
+    teacherForm.reset();
+
+    await loadTeachers();
+  });
+}
+
+loadTeachers();
