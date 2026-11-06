@@ -472,3 +472,212 @@ async function deleteTeacher(id) {
 
   await loadTeachers();
 }
+
+// SUV – Fächerverwaltung
+
+const subjectForm = document.getElementById("subjectForm");
+const subjectList = document.getElementById("subjectList");
+const subjectMessage = document.getElementById("subjectMessage");
+
+async function loadSubjects() {
+  if (!subjectList) return;
+
+  subjectList.textContent = "Fächer werden geladen ...";
+
+  const { data, error } = await suvDb
+    .from("subjects")
+    .select("*")
+    .order("name", { ascending: true });
+
+  if (error) {
+    subjectList.textContent =
+      "Fehler beim Laden: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    subjectList.textContent = "Noch keine Fächer vorhanden.";
+    return;
+  }
+
+  subjectList.innerHTML = "";
+
+  data.forEach(subject => {
+    const entry = document.createElement("div");
+    entry.className = "teacher-entry";
+
+    const details = document.createElement("div");
+
+    const name = document.createElement("strong");
+    name.textContent = subject.name;
+
+    const info = document.createElement("p");
+    info.textContent =
+      `Kürzel: ${subject.short_code || "–"} · Fachbereich: ${subject.department || "–"} · Raumtyp: ${subject.required_room_type || "Keiner"}`;
+
+    details.appendChild(name);
+    details.appendChild(info);
+
+    const actions = document.createElement("div");
+    actions.className = "teacher-actions";
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.textContent = "Bearbeiten";
+    editButton.addEventListener("click", () => {
+      editSubject(subject);
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "Löschen";
+    deleteButton.addEventListener("click", () => {
+      deleteSubject(subject.id);
+    });
+
+    actions.appendChild(editButton);
+    actions.appendChild(deleteButton);
+
+    entry.appendChild(details);
+    entry.appendChild(actions);
+
+    subjectList.appendChild(entry);
+  });
+}
+
+
+// Fach bearbeiten
+
+function editSubject(subject) {
+  document.getElementById("subjectId").value = subject.id;
+
+  document.getElementById("subjectName").value =
+    subject.name || "";
+
+  document.getElementById("subjectShortCode").value =
+    subject.short_code || "";
+
+  document.getElementById("subjectDepartment").value =
+    subject.department || "";
+
+  document.getElementById("subjectRoomType").value =
+    subject.required_room_type || "";
+
+  document.getElementById("subjectSaveButton").textContent =
+    "Änderungen speichern";
+
+  document.getElementById("subjectCancelEdit").style.display =
+    "inline-block";
+
+  subjectMessage.textContent =
+    "Bearbeitungsmodus: " + subject.name;
+}
+
+
+// Bearbeitung abbrechen
+
+document.getElementById("subjectCancelEdit")
+  .addEventListener("click", () => {
+    subjectForm.reset();
+
+    document.getElementById("subjectId").value = "";
+
+    document.getElementById("subjectSaveButton").textContent =
+      "Fach speichern";
+
+    document.getElementById("subjectCancelEdit").style.display =
+      "none";
+
+    subjectMessage.textContent = "";
+  });
+
+
+// Fach löschen
+
+async function deleteSubject(id) {
+  const confirmed = confirm(
+    "Möchtest du dieses Fach wirklich löschen?"
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await suvDb
+    .from("subjects")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert("Fehler beim Löschen: " + error.message);
+    return;
+  }
+
+  subjectMessage.textContent =
+    "Fach erfolgreich gelöscht.";
+
+  await loadSubjects();
+}
+
+
+// Fach speichern oder aktualisieren
+
+if (subjectForm) {
+  subjectForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const id = document.getElementById("subjectId").value;
+
+    const subjectData = {
+      name: document.getElementById("subjectName").value.trim(),
+      short_code: document.getElementById("subjectShortCode").value
+        .trim()
+        .toUpperCase(),
+      department: document.getElementById("subjectDepartment").value.trim() || null,
+      required_room_type:
+        document.getElementById("subjectRoomType").value || null
+    };
+
+    const saveButton =
+      document.getElementById("subjectSaveButton");
+
+    saveButton.disabled = true;
+    subjectMessage.textContent = "Fach wird gespeichert ...";
+
+    let result;
+
+    if (id) {
+      result = await suvDb
+        .from("subjects")
+        .update(subjectData)
+        .eq("id", id);
+    } else {
+      result = await suvDb
+        .from("subjects")
+        .insert(subjectData);
+    }
+
+    saveButton.disabled = false;
+
+    if (result.error) {
+      subjectMessage.textContent =
+        "Fehler: " + result.error.message;
+      return;
+    }
+
+    subjectMessage.textContent = id
+      ? "Fach erfolgreich aktualisiert."
+      : "Fach erfolgreich gespeichert.";
+
+    subjectForm.reset();
+
+    document.getElementById("subjectId").value = "";
+
+    saveButton.textContent = "Fach speichern";
+
+    document.getElementById("subjectCancelEdit").style.display =
+      "none";
+
+    await loadSubjects();
+  });
+}
+
+loadSubjects();
