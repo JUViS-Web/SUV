@@ -133,19 +133,22 @@ loginForm.addEventListener("submit", async (event) => {
       .eq("id", data.user.id)
       .single();
 
-        // SUV – Benutzerrolle erkennen
-
-    const allowedRoles = [
-      "administrator",
-      "planner",
-      "teacher"
-    ];
-
-    if (!allowedRoles.includes(profile.role)) {
-      throw new Error("Ungültige Benutzerrolle: " + profile.role);
+    if (profileError) {
+      throw new Error(
+        "Benutzerprofil konnte nicht geladen werden: " +
+        profileError.message
+      );
     }
 
-    // Benutzerinformationen anzeigen
+    const roleNames = {
+      administrator: "Administrator",
+      planner: "Stundenplaner",
+      teacher: "Lehrkraft"
+    };
+
+    if (!roleNames[profile.role]) {
+      throw new Error("Ungültige Benutzerrolle: " + profile.role);
+    }
 
     document.querySelector(".user-avatar").textContent =
       (profile.first_name || "U").charAt(0).toUpperCase();
@@ -157,22 +160,18 @@ loginForm.addEventListener("submit", async (event) => {
         .filter(Boolean)
         .join(" ") || "Benutzer";
 
-    const roleNames = {
-      administrator: "Administrator",
-      planner: "Stundenplaner",
-      teacher: "Lehrkraft"
-    };
-
     userArea.querySelector("span").textContent =
       roleNames[profile.role];
-    // Administrationsbereich nur für Administratoren
 
-const adminNavItem = document.getElementById("adminNavItem");
+    const adminNavItem = document.getElementById("adminNavItem");
 
-if (adminNavItem) {
-  adminNavItem.style.display =
-    profile.role === "administrator" ? "flex" : "none";
-}
+    if (adminNavItem) {
+      adminNavItem.style.display =
+        profile.role === "administrator" ? "flex" : "none";
+    }
+
+    // Anmeldemaske nach erfolgreicher Anmeldung ausblenden
+    loginScreen.style.display = "none";
 
   } catch (error) {
     loginMessage.textContent = error.message;
