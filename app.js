@@ -104,12 +104,38 @@ loginForm.addEventListener("submit", async (event) => {
       .eq("id", data.user.id)
       .single();
 
-    if (profileError) {
-      throw new Error(
-        "Benutzerprofil konnte nicht geladen werden: " +
-        profileError.message
-      );
+        // SUV – Benutzerrolle erkennen
+
+    const allowedRoles = [
+      "administrator",
+      "planner",
+      "teacher"
+    ];
+
+    if (!allowedRoles.includes(profile.role)) {
+      throw new Error("Ungültige Benutzerrolle: " + profile.role);
     }
+
+    // Benutzerinformationen anzeigen
+
+    document.querySelector(".user-avatar").textContent =
+      (profile.first_name || "U").charAt(0).toUpperCase();
+
+    const userArea = document.querySelector(".user-area");
+
+    userArea.querySelector("strong").textContent =
+      [profile.first_name, profile.last_name]
+        .filter(Boolean)
+        .join(" ") || "Benutzer";
+
+    const roleNames = {
+      administrator: "Administrator",
+      planner: "Stundenplaner",
+      teacher: "Lehrkraft"
+    };
+
+    userArea.querySelector("span").textContent =
+      roleNames[profile.role];
 
     loginScreen.style.display = "none";
 
