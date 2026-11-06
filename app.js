@@ -548,7 +548,6 @@ async function loadSubjects() {
 // Fach bearbeiten
 
 function editSubject(subject) {
-  function editSubject(subject) {
   document.getElementById("subjectId").value = subject.id;
 
   document.getElementById("subjectName").value =
@@ -576,6 +575,115 @@ function editSubject(subject) {
     "Bearbeitungsmodus: " + subject.name;
 }
 
+
+// Bearbeitung abbrechen
+
+document.getElementById("subjectCancelEdit")
+  .addEventListener("click", () => {
+    subjectForm.reset();
+
+    document.getElementById("subjectId").value = "";
+
+    document.getElementById("subjectSaveButton").textContent =
+      "Fach speichern";
+
+    document.getElementById("subjectCancelEdit").style.display =
+      "none";
+
+    subjectMessage.textContent = "";
+  });
+
+
+// Fach löschen
+
+async function deleteSubject(id) {
+  const confirmed = confirm(
+    "Möchtest du dieses Fach wirklich löschen?"
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await suvDb
+    .from("subjects")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert("Fehler beim Löschen: " + error.message);
+    return;
+  }
+
+  subjectMessage.textContent =
+    "Fach erfolgreich gelöscht.";
+
+  await loadSubjects();
+}
+
+
+// Fach speichern oder aktualisieren
+
+if (subjectForm) {
+  subjectForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const id = document.getElementById("subjectId").value;
+
+    const subjectData = {
+      name: document.getElementById("subjectName").value.trim(),
+      short_code: document.getElementById("subjectShortCode").value
+        .trim()
+        .toUpperCase(),
+      department: document.getElementById("subjectDepartment").value.trim() || null,
+      required_room_type:
+        document.getElementById("subjectRoomType").value || null,
+      color: document.getElementById("subjectColor").value
+    };
+
+    const saveButton =
+      document.getElementById("subjectSaveButton");
+
+    saveButton.disabled = true;
+    subjectMessage.textContent = "Fach wird gespeichert ...";
+
+    let result;
+
+    if (id) {
+      result = await suvDb
+        .from("subjects")
+        .update(subjectData)
+        .eq("id", id);
+    } else {
+      result = await suvDb
+        .from("subjects")
+        .insert(subjectData);
+    }
+
+    saveButton.disabled = false;
+
+    if (result.error) {
+      subjectMessage.textContent =
+        "Fehler: " + result.error.message;
+      return;
+    }
+
+    subjectMessage.textContent = id
+      ? "Fach erfolgreich aktualisiert."
+      : "Fach erfolgreich gespeichert.";
+
+    subjectForm.reset();
+
+    document.getElementById("subjectId").value = "";
+
+    saveButton.textContent = "Fach speichern";
+
+    document.getElementById("subjectCancelEdit").style.display =
+      "none";
+
+    await loadSubjects();
+  });
+}
+
+loadSubjects();
 
 // Bearbeitung abbrechen
 
