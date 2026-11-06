@@ -362,17 +362,12 @@
     <p>Unterrichtsräume und deren Eigenschaften verwalten.</p>
 
     <form id="roomForm">
-
       <input type="hidden" id="roomId">
 
       <div>
         <label for="roomName">Raumname / Raumnummer</label>
-        <input
-          type="text"
-          id="roomName"
-          placeholder="z. B. R 204"
-          required
-        >
+        <input type="text" id="roomName"
+          placeholder="z. B. R 204" required>
       </div>
 
       <div>
@@ -398,16 +393,46 @@
 
       <div>
         <label for="roomCapacity">Raumkapazität</label>
-        <input
-          type="number"
-          id="roomCapacity"
-          min="1"
-          placeholder="z. B. 30"
-          required
-        >
+        <input type="number" id="roomCapacity"
+          min="1" placeholder="z. B. 30" required>
       </div>
 
       <div>
+        <label for="roomEquipment">Ausstattung</label>
+        <textarea id="roomEquipment"
+          placeholder="z. B. Beamer, Smartboard ..."
+          rows="3"></textarea>
+      </div>
+
+      <div>
+        <label for="roomActive">Raumstatus</label>
+        <select id="roomActive">
+          <option value="true">Aktiv</option>
+          <option value="false">Inaktiv</option>
+        </select>
+      </div>
+
+      <div class="teacher-form-actions">
+        <button type="submit" id="roomSaveButton">
+          Raum speichern
+        </button>
+
+        <button type="button" id="roomCancelEdit"
+          style="display: none;">
+          Abbrechen
+        </button>
+      </div>
+
+      <div id="roomMessage"></div>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3>Erfasste Räume</h3>
+    <div id="roomList">Räume werden geladen ...</div>
+  </div>
+
+</div>
         <label for="roomEquipment">Ausstattung</label>
         <textarea
           id="roomEquipment"
