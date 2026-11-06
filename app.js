@@ -259,7 +259,7 @@ const teacherForm = document.getElementById("teacherForm");
 const teacherList = document.getElementById("teacherList");
 const teacherMessage = document.getElementById("teacherMessage");
 
-aasync function loadTeachers() {
+async function loadTeachers() {
   if (!teacherList) return;
 
   teacherList.textContent = "Lehrkräfte werden geladen ...";
@@ -325,6 +325,7 @@ aasync function loadTeachers() {
     teacherList.appendChild(entry);
   });
 }
+
 if (teacherForm) {
   teacherForm.addEventListener("submit", async event => {
     event.preventDefault();
