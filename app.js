@@ -631,14 +631,15 @@ if (subjectForm) {
     const id = document.getElementById("subjectId").value;
 
     const subjectData = {
-      name: document.getElementById("subjectName").value.trim(),
-      short_code: document.getElementById("subjectShortCode").value
-        .trim()
-        .toUpperCase(),
-      department: document.getElementById("subjectDepartment").value.trim() || null,
-      required_room_type:
-        document.getElementById("subjectRoomType").value || null
-    };
+  name: document.getElementById("subjectName").value.trim(),
+  short_code: document.getElementById("subjectShortCode").value
+    .trim()
+    .toUpperCase(),
+  department: document.getElementById("subjectDepartment").value.trim() || null,
+  required_room_type:
+    document.getElementById("subjectRoomType").value || null,
+  color: document.getElementById("subjectColor").value
+};
 
     const saveButton =
       document.getElementById("subjectSaveButton");
