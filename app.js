@@ -840,7 +840,11 @@ async function loadRooms() {
         ${room.capacity} Plätze ·
         ${room.is_active ? "Aktiv" : "Inaktiv"}
       </p>
-      <p>${room.equipment || "Keine Ausstattung angegeben"}</p>
+      <p>${
+  Array.isArray(room.equipment) && room.equipment.length > 0
+    ? room.equipment.join(", ")
+    : "Keine Ausstattung angegeben"
+}</p>
     `;
 
     const actions = document.createElement("div");
