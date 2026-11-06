@@ -938,15 +938,23 @@ if (roomForm) {
 
     const id = document.getElementById("roomId").value;
 
-    const roomData = {
-      name: document.getElementById("roomName").value.trim(),
-      room_type: document.getElementById("roomType").value,
-      capacity: Number(document.getElementById("roomCapacity").value),
-      equipment:
-  document.getElementById("roomEquipment").value.trim() || "Keine besondere Ausstattung",
-      is_active:
-        document.getElementById("roomActive").value === "true"
-    };
+   const roomData = {
+  name: document.getElementById("roomName").value.trim(),
+
+  room_type: document.getElementById("roomType").value,
+
+  capacity: Number(
+    document.getElementById("roomCapacity").value
+  ),
+
+  equipment: document.getElementById("roomEquipment").value
+    .split(",")
+    .map(item => item.trim())
+    .filter(item => item.length > 0),
+
+  is_active:
+    document.getElementById("roomActive").value === "true"
+};
 
     const saveButton =
       document.getElementById("roomSaveButton");
