@@ -555,3 +555,55 @@ body {
     flex: 1;
   }
 }
+
+/* SUV – Modernes Design der Fächerverwaltung */
+
+#subjectForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  max-width: 850px;
+}
+
+#subjectForm > div:not(.teacher-form-actions) {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+#subjectForm label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+#subjectForm input:not([type="hidden"]),
+#subjectForm select {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 46px;
+  padding: 11px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #172b4d;
+  font-size: 15px;
+}
+
+#subjectForm input:focus,
+#subjectForm select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+#subjectForm input[type="color"] {
+  padding: 5px;
+  cursor: pointer;
+}
+
+@media (max-width: 650px) {
+  #subjectForm {
+    grid-template-columns: 1fr;
+  }
+}
