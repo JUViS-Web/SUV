@@ -175,11 +175,77 @@
         </div>
 
         <div id="teachers" class="page">
-          <div class="panel">
-            <h3>Lehrkräfte</h3>
-            <p>Hier entsteht die Lehrkräfteverwaltung.</p>
-          </div>
-        </div>
+
+  <div class="panel">
+    <h3>Lehrkräfteverwaltung</h3>
+    <p>Lehrkräfte erfassen und verwalten.</p>
+
+    <form id="teacherForm">
+
+      <div>
+        <label for="teacherFirstName">Vorname</label>
+        <input
+          type="text"
+          id="teacherFirstName"
+          placeholder="Vorname"
+          required
+        >
+      </div>
+
+      <div>
+        <label for="teacherLastName">Nachname</label>
+        <input
+          type="text"
+          id="teacherLastName"
+          placeholder="Nachname"
+          required
+        >
+      </div>
+
+      <div>
+        <label for="teacherShortCode">Lehrkraftkürzel</label>
+        <input
+          type="text"
+          id="teacherShortCode"
+          placeholder="z. B. MU"
+          maxlength="10"
+          required
+        >
+      </div>
+
+      <div>
+        <label for="teacherWeeklyHours">
+          Wöchentliche Pflichtstundenzahl
+        </label>
+        <input
+          type="number"
+          id="teacherWeeklyHours"
+          min="0"
+          max="50"
+          step="0.5"
+          placeholder="z. B. 25,5"
+          required
+        >
+      </div>
+
+      <button type="submit" id="teacherSaveButton">
+        Lehrkraft speichern
+      </button>
+
+      <div id="teacherMessage"></div>
+
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3>Erfasste Lehrkräfte</h3>
+
+    <div id="teacherList">
+      Lehrkräfte werden geladen ...
+    </div>
+  </div>
+
+</div>
 
         <div id="subjects" class="page">
           <div class="panel">
