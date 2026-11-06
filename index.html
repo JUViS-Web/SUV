@@ -9,7 +9,38 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="brand-icon">S</div>
 
+      <h1>SUV</h1>
+      <p>Schulunterrichtsverwaltung</p>
+
+      <form id="loginForm">
+        <label for="loginEmail">E-Mail-Adresse</label>
+        <input
+          type="email"
+          id="loginEmail"
+          placeholder="name@schule.de"
+          required
+        >
+
+        <label for="loginPassword">Passwort</label>
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Passwort eingeben"
+          required
+        >
+
+        <button type="submit" id="loginButton">
+          Anmelden
+        </button>
+
+        <div id="loginMessage"></div>
+      </form>
+    </div>
+  </div>
   <div class="app">
 
     <aside class="sidebar">
