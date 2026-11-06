@@ -489,10 +489,14 @@ async function loadSubjects() {
     .order("name", { ascending: true });
 
   if (error) {
-    subjectList.textContent =
-      "Fehler beim Laden: " + error.message;
-    return;
-  }
+  roomList.textContent =
+    "Fehler beim Laden der Räume: " +
+    error.message +
+    " (Code: " + error.code + ")";
+
+  console.error("SUV Räume:", error);
+  return;
+}
 
   if (!data || data.length === 0) {
     subjectList.textContent = "Noch keine Fächer vorhanden.";
