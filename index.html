@@ -1,1 +1,187 @@
 
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#17243a">
+  <title>SUV – Schulunterrichtsverwaltung</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">S</div>
+        <div>
+          <h1>SUV</h1>
+          <span>Schulverwaltung</span>
+        </div>
+      </div>
+
+      <div class="navigation-label">HAUPTMENÜ</div>
+
+      <nav>
+        <button class="nav-item active" data-page="dashboard">
+          <span>▦</span> Übersicht
+        </button>
+        <button class="nav-item" data-page="timetable">
+          <span>▤</span> Stundenplanung
+        </button>
+
+        <div class="navigation-label">STAMMDATEN</div>
+
+        <button class="nav-item" data-page="teachers">
+          <span>♙</span> Lehrkräfte
+        </button>
+        <button class="nav-item" data-page="subjects">
+          <span>▣</span> Fächer
+        </button>
+        <button class="nav-item" data-page="rooms">
+          <span>▧</span> Räume
+        </button>
+        <button class="nav-item" data-page="classes">
+          <span>▦</span> Klassen
+        </button>
+        <button class="nav-item" data-page="times">
+          <span>◷</span> Zeitmodell
+        </button>
+
+        <div class="navigation-label">PLANUNG</div>
+
+        <button class="nav-item" data-page="conflicts">
+          <span>⚠</span> Konfliktprüfung
+        </button>
+        <button class="nav-item" data-page="administration">
+          <span>⚙</span> Administration
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="status-dot"></span>
+        System bereit
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="breadcrumb">SUV / Verwaltung</div>
+          <h2 id="pageTitle">Übersicht</h2>
+        </div>
+
+        <div class="user-area">
+          <div class="user-avatar">A</div>
+          <div>
+            <strong>Administrator</strong>
+            <span>Systemverwaltung</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="content">
+
+        <div id="dashboard" class="page active">
+          <div class="welcome">
+            <div>
+              <span class="eyebrow">SCHULVERWALTUNG</span>
+              <h2>Willkommen bei SUV</h2>
+              <p>Deine zentrale Plattform für die schulische Stundenplanung.</p>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span>Lehrkräfte</span>
+              <strong>0</strong>
+              <small>Erfasste Lehrkräfte</small>
+            </div>
+            <div class="stat-card">
+              <span>Klassen</span>
+              <strong>0</strong>
+              <small>Erfasste Klassen</small>
+            </div>
+            <div class="stat-card">
+              <span>Räume</span>
+              <strong>0</strong>
+              <small>Verfügbare Räume</small>
+            </div>
+            <div class="stat-card">
+              <span>Stundenpläne</span>
+              <strong>0</strong>
+              <small>Aktuelle Planungen</small>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Systemübersicht</h3>
+            <p>Die Grundoberfläche von SUV wurde eingerichtet.</p>
+            <p class="muted">Die Stammdatenverwaltung und Stundenplanung werden schrittweise ergänzt.</p>
+          </div>
+        </div>
+
+        <div id="timetable" class="page">
+          <div class="panel">
+            <h3>Stundenplanung</h3>
+            <p>Hier entsteht der zentrale Stundenplaneditor.</p>
+          </div>
+        </div>
+
+        <div id="teachers" class="page">
+          <div class="panel">
+            <h3>Lehrkräfte</h3>
+            <p>Hier entsteht die Lehrkräfteverwaltung.</p>
+          </div>
+        </div>
+
+        <div id="subjects" class="page">
+          <div class="panel">
+            <h3>Fächer</h3>
+            <p>Hier entsteht die Fächerverwaltung.</p>
+          </div>
+        </div>
+
+        <div id="rooms" class="page">
+          <div class="panel">
+            <h3>Räume</h3>
+            <p>Hier entsteht die Raumverwaltung.</p>
+          </div>
+        </div>
+
+        <div id="classes" class="page">
+          <div class="panel">
+            <h3>Klassen</h3>
+            <p>Hier entsteht die Klassenverwaltung.</p>
+          </div>
+        </div>
+
+        <div id="times" class="page">
+          <div class="panel">
+            <h3>Zeitmodell</h3>
+            <p>Hier entsteht die Verwaltung des einheitlichen Stundenrasters.</p>
+          </div>
+        </div>
+
+        <div id="conflicts" class="page">
+          <div class="panel">
+            <h3>Konfliktprüfung</h3>
+            <p>Hier werden später Planungsfehler und Warnungen angezeigt.</p>
+          </div>
+        </div>
+
+        <div id="administration" class="page">
+          <div class="panel">
+            <h3>Administration</h3>
+            <p>Hier entstehen die Systemeinstellungen und Benutzerrechte.</p>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
