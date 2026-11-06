@@ -1,1 +1,310 @@
 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f3f5f9;
+  color: #17243a;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 255px;
+  background: #17243a;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  flex-shrink: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 10px 30px;
+}
+
+.brand-icon {
+  width: 42px;
+  height: 42px;
+  background: #dbeafe;
+  color: #17243a;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.brand h1 {
+  font-size: 23px;
+}
+
+.brand span {
+  color: #aebbd0;
+  font-size: 12px;
+}
+
+.navigation-label {
+  color: #8392aa;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  padding: 18px 10px 9px;
+}
+
+.nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin: 2px 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #cbd5e1;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.nav-item span {
+  width: 20px;
+  text-align: center;
+  font-size: 17px;
+}
+
+.nav-item:hover {
+  background: #263750;
+  color: white;
+}
+
+.nav-item.active {
+  background: #314b70;
+  color: white;
+  font-weight: 600;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 18px 10px 0;
+  color: #b8c5d6;
+  font-size: 12px;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #39c58b;
+  border-radius: 50%;
+  margin-right: 7px;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar {
+  min-height: 88px;
+  background: white;
+  border-bottom: 1px solid #e4e9f0;
+  padding: 18px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.breadcrumb {
+  color: #8491a5;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.topbar h2 {
+  font-size: 22px;
+}
+
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  background: #e7edf7;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.user-area strong,
+.user-area span {
+  display: block;
+}
+
+.user-area strong {
+  font-size: 13px;
+}
+
+.user-area span {
+  color: #8491a5;
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.content {
+  padding: 30px;
+  max-width: 1500px;
+  margin: auto;
+}
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+.welcome {
+  background: #1d3556;
+  color: white;
+  padding: 32px;
+  border-radius: 14px;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #b9cbe5;
+}
+
+.welcome h2 {
+  font-size: 27px;
+  margin: 10px 0;
+}
+
+.welcome p {
+  color: #d0dced;
+  font-size: 14px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card,
+.panel {
+  background: white;
+  border: 1px solid #e6eaf0;
+  border-radius: 12px;
+  padding: 22px;
+}
+
+.stat-card span,
+.stat-card small {
+  display: block;
+  color: #8290a4;
+  font-size: 12px;
+}
+
+.stat-card strong {
+  display: block;
+  font-size: 30px;
+  margin: 12px 0 5px;
+}
+
+.panel h3 {
+  font-size: 17px;
+  margin-bottom: 12px;
+}
+
+.panel p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.muted {
+  color: #8491a5;
+  margin-top: 7px;
+}
+
+@media (max-width: 850px) {
+  .sidebar {
+    width: 210px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .content {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  .app {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .brand {
+    padding-bottom: 12px;
+  }
+
+  .sidebar nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 5px;
+  }
+
+  .navigation-label,
+  .sidebar-footer {
+    display: none;
+  }
+
+  .nav-item {
+    white-space: nowrap;
+    width: auto;
+  }
+
+  .topbar {
+    padding: 16px;
+  }
+
+  .user-area > div:last-child {
+    display: none;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .welcome {
+    padding: 22px;
+  }
+}
