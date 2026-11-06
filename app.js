@@ -136,6 +136,14 @@ loginForm.addEventListener("submit", async (event) => {
 
     userArea.querySelector("span").textContent =
       roleNames[profile.role];
+    // Administrationsbereich nur für Administratoren
+
+const adminNavItem = document.getElementById("adminNavItem");
+
+if (adminNavItem) {
+  adminNavItem.style.display =
+    profile.role === "administrator" ? "flex" : "none";
+}
 
   } catch (error) {
     loginMessage.textContent = error.message;
