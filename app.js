@@ -939,7 +939,7 @@ if (roomForm) {
       room_type: document.getElementById("roomType").value,
       capacity: Number(document.getElementById("roomCapacity").value),
       equipment:
-        document.getElementById("roomEquipment").value.trim() || null,
+  document.getElementById("roomEquipment").value.trim() || "Keine besondere Ausstattung",
       is_active:
         document.getElementById("roomActive").value === "true"
     };
