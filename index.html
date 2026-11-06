@@ -262,11 +262,86 @@
 </div>
 
         <div id="subjects" class="page">
-          <div class="panel">
-            <h3>Fächer</h3>
-            <p>Hier entsteht die Fächerverwaltung.</p>
-          </div>
-        </div>
+
+  <div class="panel">
+    <h3>Fächerverwaltung</h3>
+    <p>Fächer und deren Eigenschaften verwalten.</p>
+
+    <form id="subjectForm">
+
+      <input type="hidden" id="subjectId">
+
+      <div>
+        <label for="subjectName">Fachname</label>
+        <input
+          type="text"
+          id="subjectName"
+          placeholder="z. B. Mathematik"
+          required
+        >
+      </div>
+
+      <div>
+        <label for="subjectShortCode">Fachkürzel</label>
+        <input
+          type="text"
+          id="subjectShortCode"
+          placeholder="z. B. MA"
+          maxlength="10"
+          required
+        >
+      </div>
+
+      <div>
+        <label for="subjectDepartment">Fachbereich</label>
+        <input
+          type="text"
+          id="subjectDepartment"
+          placeholder="z. B. Naturwissenschaften"
+        >
+      </div>
+
+      <div>
+        <label for="subjectRoomType">Erforderlicher Raumtyp</label>
+        <select id="subjectRoomType">
+          <option value="">Kein besonderer Raum</option>
+          <option value="classroom">Klassenraum</option>
+          <option value="chemistry">Chemieraum</option>
+          <option value="physics">Physikraum</option>
+          <option value="biology">Biologieraum</option>
+          <option value="sports_hall">Sporthalle</option>
+          <option value="computer_room">Computerraum</option>
+          <option value="other">Sonstiger Fachraum</option>
+        </select>
+      </div>
+
+      <div class="teacher-form-actions">
+
+        <button type="submit" id="subjectSaveButton">
+          Fach speichern
+        </button>
+
+        <button
+          type="button"
+          id="subjectCancelEdit"
+          style="display: none;"
+        >
+          Abbrechen
+        </button>
+
+      </div>
+
+      <div id="subjectMessage"></div>
+
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3>Erfasste Fächer</h3>
+    <div id="subjectList">Fächer werden geladen ...</div>
+  </div>
+
+</div>
 
         <div id="rooms" class="page">
           <div class="panel">
