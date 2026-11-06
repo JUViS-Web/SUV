@@ -183,7 +183,7 @@ if (adminNavItem) {
   }
 });
 
-// Vorhandene Anmeldung überprüfen
+/// SUV – Anmeldung und Benutzerrolle wiederherstellen
 
 async function checkSUVLogin() {
   const { data, error } = await suvDb.auth.getSession();
@@ -193,9 +193,62 @@ async function checkSUVLogin() {
     return;
   }
 
-  if (data.session) {
-    loginScreen.style.display = "none";
+  if (!data.session) {
+    loginScreen.style.display = "flex";
+    return;
   }
+
+  const userId = data.session.user.id;
+
+  const { data: profile, error: profileError } = await suvDb
+    .from("profiles")
+    .select("first_name, last_name, role")
+    .eq("id", userId)
+    .single();
+
+  if (profileError) {
+    loginMessage.textContent =
+      "Benutzerprofil konnte nicht geladen werden: " +
+      profileError.message;
+    return;
+  }
+
+  const roleNames = {
+    administrator: "Administrator",
+    planner: "Stundenplaner",
+    teacher: "Lehrkraft"
+  };
+
+  if (!roleNames[profile.role]) {
+    loginMessage.textContent = "Ungültige Benutzerrolle.";
+    return;
+  }
+
+  // Benutzeranzeige aktualisieren
+
+  document.querySelector(".user-avatar").textContent =
+    (profile.first_name || "U").charAt(0).toUpperCase();
+
+  const userArea = document.querySelector(".user-area");
+
+  userArea.querySelector("strong").textContent =
+    [profile.first_name, profile.last_name]
+      .filter(Boolean)
+      .join(" ") || "Benutzer";
+
+  userArea.querySelector("span").textContent =
+    roleNames[profile.role];
+
+  // Administrationsmenü steuern
+
+  const adminNavItem = document.getElementById("adminNavItem");
+
+  if (adminNavItem) {
+    adminNavItem.style.display =
+      profile.role === "administrator" ? "flex" : "none";
+  }
+
+  loginScreen.style.display = "none";
 }
 
 checkSUVLogin();
