@@ -549,6 +549,7 @@ async function loadSubjects() {
 // Fach bearbeiten
 
 function editSubject(subject) {
+  function editSubject(subject) {
   document.getElementById("subjectId").value = subject.id;
 
   document.getElementById("subjectName").value =
@@ -562,6 +563,9 @@ function editSubject(subject) {
 
   document.getElementById("subjectRoomType").value =
     subject.required_room_type || "";
+
+  document.getElementById("subjectColor").value =
+    subject.color || "#2563eb";
 
   document.getElementById("subjectSaveButton").textContent =
     "Änderungen speichern";
