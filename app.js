@@ -72,3 +72,79 @@ async function testSUVConnection() {
 }
 
 testSUVConnection();
+
+// SUV – Benutzeranmeldung
+
+const loginForm = document.getElementById("loginForm");
+const loginScreen = document.getElementById("loginScreen");
+const loginMessage = document.getElementById("loginMessage");
+
+loginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const loginButton = document.getElementById("loginButton");
+
+  loginButton.disabled = true;
+  loginButton.textContent = "Anmeldung läuft ...";
+  loginMessage.textContent = "";
+
+  try {
+    const { data, error } = await suvDb.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) throw error;
+
+    const { data: profile, error: profileError } = await suvDb
+      .from("profiles")
+      .select("first_name, last_name, role")
+      .eq("id", data.user.id)
+      .single();
+
+    if (profileError) {
+      throw new Error(
+        "Benutzerprofil konnte nicht geladen werden: " +
+        profileError.message
+      );
+    }
+
+    loginScreen.style.display = "none";
+
+    const userArea = document.querySelector(".user-area");
+
+    if (userArea) {
+      userArea.querySelector("strong").textContent =
+        [profile.first_name, profile.last_name].filter(Boolean).join(" ") ||
+        "Benutzer";
+
+      userArea.querySelector("span").textContent = profile.role;
+    }
+
+  } catch (error) {
+    loginMessage.textContent = error.message;
+    loginMessage.style.color = "#b42318";
+  } finally {
+    loginButton.disabled = false;
+    loginButton.textContent = "Anmelden";
+  }
+});
+
+// Vorhandene Anmeldung überprüfen
+
+async function checkSUVLogin() {
+  const { data, error } = await suvDb.auth.getSession();
+
+  if (error) {
+    loginMessage.textContent = error.message;
+    return;
+  }
+
+  if (data.session) {
+    loginScreen.style.display = "none";
+  }
+}
+
+checkSUVLogin();
