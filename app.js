@@ -8,10 +8,40 @@ const suvDb = createClient(
 );
 
 console.log("SUV: Supabase-Verbindung initialisiert.");
+// SUV – Navigation mit Rollenprüfung
+
 document.querySelectorAll(".nav-item").forEach(button => {
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
     const pageId = button.dataset.page;
 
+    // Benutzerrolle aus der Datenbank prüfen
+    const { data: sessionData } = await suvDb.auth.getSession();
+
+    if (!sessionData.session) {
+      return;
+    }
+
+    const { data: profile, error } = await suvDb
+      .from("profiles")
+      .select("role")
+      .eq("id", sessionData.session.user.id)
+      .single();
+
+    if (error || !profile) {
+      alert("Benutzerrechte konnten nicht geprüft werden.");
+      return;
+    }
+
+    // Administrationsbereich schützen
+    if (
+      pageId === "administration" &&
+      profile.role !== "administrator"
+    ) {
+      alert("Du hast keine Berechtigung für diesen Bereich.");
+      return;
+    }
+
+    // Navigation ausführen
     document.querySelectorAll(".nav-item").forEach(item => {
       item.classList.remove("active");
     });
@@ -28,11 +58,10 @@ document.querySelectorAll(".nav-item").forEach(button => {
       selectedPage.classList.add("active");
     }
 
-    const title = button.textContent.trim();
-    document.getElementById("pageTitle").textContent = title;
+    document.getElementById("pageTitle").textContent =
+      button.textContent.trim();
   });
 });
-
 // SUV – Verbindungstest
 
 async function testSUVConnection() {
