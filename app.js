@@ -793,3 +793,195 @@ if (subjectForm) {
 }
 
 loadSubjects();
+
+
+// SUV – Räumeverwaltung
+
+const roomForm = document.getElementById("roomForm");
+const roomList = document.getElementById("roomList");
+const roomMessage = document.getElementById("roomMessage");
+
+
+// Räume laden
+
+async function loadRooms() {
+  const { data, error } = await suvDb
+    .from("rooms")
+    .select("*")
+    .order("name");
+
+  if (error) {
+    roomList.textContent =
+      "Fehler beim Laden: " + error.message;
+    return;
+  }
+
+  roomList.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    roomList.textContent = "Noch keine Räume vorhanden.";
+    return;
+  }
+
+  data.forEach(room => {
+    const card = document.createElement("div");
+    card.className = "teacher-entry";
+
+    const info = document.createElement("div");
+
+    info.innerHTML = `
+      <strong>${room.name}</strong>
+      <p>
+        ${room.room_type || "Kein Raumtyp"} ·
+        ${room.capacity} Plätze ·
+        ${room.is_active ? "Aktiv" : "Inaktiv"}
+      </p>
+      <p>${room.equipment || "Keine Ausstattung angegeben"}</p>
+    `;
+
+    const actions = document.createElement("div");
+    actions.className = "teacher-entry-actions";
+
+    const editButton = document.createElement("button");
+    editButton.textContent = "Bearbeiten";
+    editButton.addEventListener("click", () => editRoom(room));
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Löschen";
+    deleteButton.addEventListener("click", () => deleteRoom(room.id));
+
+    actions.append(editButton, deleteButton);
+    card.append(info, actions);
+    roomList.appendChild(card);
+  });
+}
+
+
+// Raum bearbeiten
+
+function editRoom(room) {
+  document.getElementById("roomId").value = room.id;
+  document.getElementById("roomName").value = room.name || "";
+  document.getElementById("roomType").value = room.room_type || "";
+  document.getElementById("roomCapacity").value = room.capacity || "";
+  document.getElementById("roomEquipment").value = room.equipment || "";
+  document.getElementById("roomActive").value =
+    String(room.is_active !== false);
+
+  document.getElementById("roomSaveButton").textContent =
+    "Änderungen speichern";
+
+  document.getElementById("roomCancelEdit").style.display =
+    "inline-block";
+
+  roomMessage.textContent =
+    "Bearbeitungsmodus: " + room.name;
+}
+
+
+// Bearbeitung abbrechen
+
+document.getElementById("roomCancelEdit")
+  .addEventListener("click", () => {
+    roomForm.reset();
+
+    document.getElementById("roomId").value = "";
+
+    document.getElementById("roomSaveButton").textContent =
+      "Raum speichern";
+
+    document.getElementById("roomCancelEdit").style.display =
+      "none";
+
+    roomMessage.textContent = "";
+  });
+
+
+// Raum löschen
+
+async function deleteRoom(id) {
+  const confirmed = confirm(
+    "Möchtest du diesen Raum wirklich löschen?"
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await suvDb
+    .from("rooms")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert("Fehler beim Löschen: " + error.message);
+    return;
+  }
+
+  roomMessage.textContent = "Raum erfolgreich gelöscht.";
+
+  await loadRooms();
+}
+
+
+// Raum speichern oder aktualisieren
+
+if (roomForm) {
+  roomForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const id = document.getElementById("roomId").value;
+
+    const roomData = {
+      name: document.getElementById("roomName").value.trim(),
+      room_type: document.getElementById("roomType").value,
+      capacity: Number(document.getElementById("roomCapacity").value),
+      equipment:
+        document.getElementById("roomEquipment").value.trim() || null,
+      is_active:
+        document.getElementById("roomActive").value === "true"
+    };
+
+    const saveButton =
+      document.getElementById("roomSaveButton");
+
+    saveButton.disabled = true;
+    roomMessage.textContent = "Raum wird gespeichert ...";
+
+    let result;
+
+    if (id) {
+      result = await suvDb
+        .from("rooms")
+        .update(roomData)
+        .eq("id", id);
+    } else {
+      result = await suvDb
+        .from("rooms")
+        .insert(roomData);
+    }
+
+    saveButton.disabled = false;
+
+    if (result.error) {
+      roomMessage.textContent =
+        "Fehler: " + result.error.message;
+      return;
+    }
+
+    roomMessage.textContent = id
+      ? "Raum erfolgreich aktualisiert."
+      : "Raum erfolgreich gespeichert.";
+
+    roomForm.reset();
+
+    document.getElementById("roomId").value = "";
+
+    saveButton.textContent = "Raum speichern";
+
+    document.getElementById("roomCancelEdit").style.display =
+      "none";
+
+    await loadRooms();
+  });
+}
+
+loadRooms();
