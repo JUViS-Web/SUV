@@ -405,3 +405,153 @@ body {
   margin-top: 10px;
   font-size: 14px;
 }
+
+/* SUV – Lehrkräfteverwaltung */
+
+#teachers .panel {
+  margin-bottom: 24px;
+}
+
+#teachers .panel h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #172b4d;
+}
+
+#teachers .panel > p {
+  color: #64748b;
+  margin-bottom: 24px;
+}
+
+#teacherForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  max-width: 850px;
+}
+
+#teacherForm > div:not(.teacher-form-actions) {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+#teacherForm label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+#teacherForm input:not([type="hidden"]) {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 46px;
+  padding: 11px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #172b4d;
+  font-size: 15px;
+}
+
+#teacherForm input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.teacher-form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
+
+.teacher-form-actions button {
+  min-height: 44px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 9px;
+  background: #1d4ed8;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#teacherCancelEdit {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.teacher-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px;
+  margin-bottom: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.teacher-entry strong {
+  display: block;
+  color: #172b4d;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.teacher-entry p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.teacher-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.teacher-actions button {
+  padding: 9px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.teacher-actions button:last-child {
+  color: #b42318;
+  border-color: #f1c5c2;
+  background: #fff7f6;
+}
+
+.teacher-form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 650px) {
+  #teacherForm {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-entry {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .teacher-actions {
+    width: 100%;
+  }
+
+  .teacher-actions button {
+    flex: 1;
+  }
+}
