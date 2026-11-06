@@ -137,18 +137,6 @@ loginForm.addEventListener("submit", async (event) => {
     userArea.querySelector("span").textContent =
       roleNames[profile.role];
 
-    loginScreen.style.display = "none";
-
-    const userArea = document.querySelector(".user-area");
-
-    if (userArea) {
-      userArea.querySelector("strong").textContent =
-        [profile.first_name, profile.last_name].filter(Boolean).join(" ") ||
-        "Benutzer";
-
-      userArea.querySelector("span").textContent = profile.role;
-    }
-
   } catch (error) {
     loginMessage.textContent = error.message;
     loginMessage.style.color = "#b42318";
