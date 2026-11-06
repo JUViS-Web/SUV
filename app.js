@@ -259,7 +259,7 @@ const teacherForm = document.getElementById("teacherForm");
 const teacherList = document.getElementById("teacherList");
 const teacherMessage = document.getElementById("teacherMessage");
 
-async function loadTeachers() {
+aasync function loadTeachers() {
   if (!teacherList) return;
 
   teacherList.textContent = "Lehrkräfte werden geladen ...";
@@ -284,19 +284,47 @@ async function loadTeachers() {
 
   data.forEach(teacher => {
     const entry = document.createElement("div");
-
     entry.className = "teacher-entry";
 
-    entry.innerHTML = `
-      <strong>${teacher.first_name} ${teacher.last_name}</strong>
-      <span>Kürzel: ${teacher.short_code || "–"}</span>
-      <span>Pflichtstunden: ${teacher.weekly_required_hours ?? "–"}</span>
-    `;
+    const details = document.createElement("div");
+
+    const name = document.createElement("strong");
+    name.textContent =
+      `${teacher.first_name} ${teacher.last_name}`;
+
+    const info = document.createElement("p");
+    info.textContent =
+      `Kürzel: ${teacher.short_code || "–"} · Pflichtstunden: ${teacher.weekly_required_hours ?? "–"}`;
+
+    details.appendChild(name);
+    details.appendChild(info);
+
+    const actions = document.createElement("div");
+    actions.className = "teacher-actions";
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.textContent = "Bearbeiten";
+    editButton.addEventListener("click", () => {
+      editTeacher(teacher);
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "Löschen";
+    deleteButton.addEventListener("click", () => {
+      deleteTeacher(teacher.id);
+    });
+
+    actions.appendChild(editButton);
+    actions.appendChild(deleteButton);
+
+    entry.appendChild(details);
+    entry.appendChild(actions);
 
     teacherList.appendChild(entry);
   });
 }
-
 if (teacherForm) {
   teacherForm.addEventListener("submit", async event => {
     event.preventDefault();
