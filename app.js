@@ -369,3 +369,77 @@ if (teacherForm) {
 }
 
 loadTeachers();
+
+// Lehrkraft bearbeiten
+
+function editTeacher(teacher) {
+  document.getElementById("teacherId").value = teacher.id;
+
+  document.getElementById("teacherFirstName").value =
+    teacher.first_name;
+
+  document.getElementById("teacherLastName").value =
+    teacher.last_name;
+
+  document.getElementById("teacherShortCode").value =
+    teacher.short_code || "";
+
+  document.getElementById("teacherWeeklyHours").value =
+    teacher.weekly_required_hours ?? "";
+
+  document.getElementById("teacherSaveButton").textContent =
+    "Änderungen speichern";
+
+  document.getElementById("teacherCancelEdit").style.display =
+    "inline-block";
+
+  teacherMessage.textContent =
+    "Bearbeitungsmodus: " +
+    teacher.first_name + " " + teacher.last_name;
+
+  document.getElementById("teacherFirstName").focus();
+}
+
+
+// Bearbeitung abbrechen
+
+document.getElementById("teacherCancelEdit")
+  .addEventListener("click", () => {
+    teacherForm.reset();
+
+    document.getElementById("teacherId").value = "";
+
+    document.getElementById("teacherSaveButton").textContent =
+      "Lehrkraft speichern";
+
+    document.getElementById("teacherCancelEdit").style.display =
+      "none";
+
+    teacherMessage.textContent = "";
+  });
+
+
+// Lehrkraft löschen
+
+async function deleteTeacher(id) {
+  const confirmed = confirm(
+    "Möchtest du diese Lehrkraft wirklich löschen?"
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await suvDb
+    .from("teachers")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert("Fehler beim Löschen: " + error.message);
+    return;
+  }
+
+  teacherMessage.textContent =
+    "Lehrkraft erfolgreich gelöscht.";
+
+  await loadTeachers();
+}
