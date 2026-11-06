@@ -867,7 +867,6 @@ function editRoom(room) {
   document.getElementById("roomName").value = room.name || "";
   document.getElementById("roomType").value = room.room_type || "";
   document.getElementById("roomCapacity").value = room.capacity || "";
-  document.getElementById("roomEquipment").value = room.equipment || "";
   document.getElementById("roomActive").value =
     String(room.is_active !== false);
 
