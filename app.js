@@ -1059,6 +1059,7 @@ async function loadClasses() {
     .select(`
       id,
       name,
+      grade_level_id,
       student_count,
       grade_levels (
         name,
@@ -1082,7 +1083,6 @@ async function loadClasses() {
 
   data.forEach(schoolClass => {
     const card = document.createElement("div");
-
     card.className = "teacher-card";
 
     const heading = document.createElement("h4");
@@ -1097,10 +1097,37 @@ async function loadClasses() {
     students.textContent =
       "Schülerzahl: " + schoolClass.student_count;
 
-    card.append(heading, grade, students);
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.textContent = "Bearbeiten";
 
+    editButton.addEventListener("click", () => {
+      editClass(schoolClass);
+    });
+
+    card.append(heading, grade, students, editButton);
     classList.appendChild(card);
   });
+}
+
+
+// Klasse bearbeiten
+
+function editClass(schoolClass) {
+  document.getElementById("classId").value = schoolClass.id;
+  document.getElementById("className").value = schoolClass.name;
+  classGrade.value = schoolClass.grade_level_id;
+
+  document.getElementById("classStudentCount").value =
+    schoolClass.student_count;
+
+  document.getElementById("classSaveButton").textContent =
+    "Änderungen speichern";
+
+  document.getElementById("classCancelEdit").style.display =
+    "inline-block";
+
+  classMessage.textContent = "Klasse wird bearbeitet.";
 }
 
 
@@ -1113,7 +1140,8 @@ async function initClassManagement() {
 
 initClassManagement();
 
-// Klasse speichern
+
+// Klasse speichern oder aktualisieren
 
 if (classForm) {
   classForm.addEventListener("submit", async event => {
@@ -1124,6 +1152,8 @@ if (classForm) {
       return;
     }
 
+    const classId = document.getElementById("classId").value;
+
     const classData = {
       school_year_id: activeSUVSchoolYearId,
       grade_level_id: classGrade.value,
@@ -1133,21 +1163,59 @@ if (classForm) {
       )
     };
 
-    const { error } = await suvDb
-      .from("classes")
-      .insert(classData);
+    let result;
 
-    if (error) {
-      classMessage.textContent = error.message;
+    if (classId) {
+      result = await suvDb
+        .from("classes")
+        .update(classData)
+        .eq("id", classId);
+    } else {
+      result = await suvDb
+        .from("classes")
+        .insert(classData);
+    }
+
+    if (result.error) {
+      classMessage.textContent = result.error.message;
       return;
     }
 
-    classMessage.textContent = "Klasse erfolgreich gespeichert.";
+    classMessage.textContent = classId
+      ? "Klasse erfolgreich aktualisiert."
+      : "Klasse erfolgreich gespeichert.";
 
     classForm.reset();
 
+    document.getElementById("classId").value = "";
     document.getElementById("classStudentCount").value = 0;
 
+    document.getElementById("classSaveButton").textContent =
+      "Klasse speichern";
+
+    document.getElementById("classCancelEdit").style.display =
+      "none";
+
     await loadClasses();
+  });
+}
+
+
+// Bearbeitung abbrechen
+
+document.getElementById("classCancelEdit")
+  .addEventListener("click", () => {
+    classForm.reset();
+
+    document.getElementById("classId").value = "";
+    document.getElementById("classStudentCount").value = 0;
+
+    document.getElementById("classSaveButton").textContent =
+      "Klasse speichern";
+
+    document.getElementById("classCancelEdit").style.display =
+      "none";
+
+    classMessage.textContent = "";
   });
 }
