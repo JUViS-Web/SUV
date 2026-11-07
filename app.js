@@ -3153,6 +3153,7 @@ let distributionEntries = [];
 
 
 // Schuljahre für die Unterrichtsverteilung laden
+
 async function loadDistributionSchoolYears() {
 
   const { data, error } = await suvDb
@@ -3162,12 +3163,19 @@ async function loadDistributionSchoolYears() {
 
   if (error) {
     distributionMessage.textContent =
-      "Schuljahre konnten nicht geladen werden: " + error.message;
+      "Schuljahre konnten nicht geladen werden: " +
+      error.message;
     return;
   }
 
   distributionSchoolYear.innerHTML =
     '<option value="">Schuljahr auswählen</option>';
+
+  if (!data || data.length === 0) {
+    distributionMessage.textContent =
+      "Keine Schuljahre vorhanden.";
+    return;
+  }
 
   data.forEach(year => {
 
@@ -3178,19 +3186,18 @@ async function loadDistributionSchoolYears() {
 
     distributionSchoolYear.appendChild(option);
 
-    if (year.is_active) {
-      distributionSchoolYear.value = year.id;
-    }
-
   });
 
-  if (distributionSchoolYear.value) {
-    selectedDistributionSchoolYearId =
-      distributionSchoolYear.value;
+  const activeYear = data.find(year => year.is_active);
 
-    await loadDistributionClasses(
-      selectedDistributionSchoolYearId
-    );
+  if (activeYear) {
+
+    distributionSchoolYear.value = activeYear.id;
+
+    selectedDistributionSchoolYearId = activeYear.id;
+
+    await loadDistributionClasses(activeYear.id);
+
   }
 }
 
