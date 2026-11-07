@@ -2084,7 +2084,7 @@ let activeTimetableVersionId = null;
 let selectedTimetableClassId = null;
 let selectedTimetableSchoolYearId = null;
 let timetableEntries = [];
-
+let activeTimetableVersionStatus = null;
 
 // Schuljahre für die Stundenplanung laden
 
