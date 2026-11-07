@@ -2634,3 +2634,28 @@ timetableEntryForm.addEventListener("submit", async (event) => {
 
   await loadTimetableGrid();
 });
+
+
+// Stundenplanformular zurücksetzen
+
+function resetTimetableEntryForm() {
+  timetableEntryForm.reset();
+
+  timetableEntryId.value = "";
+
+  timetableSaveButton.textContent =
+    "Unterrichtseinheit speichern";
+
+  timetableCancelEdit.style.display =
+    "none";
+}
+
+
+// Bearbeitung abbrechen
+
+timetableCancelEdit.addEventListener("click", () => {
+  resetTimetableEntryForm();
+
+  timetableMessage.textContent =
+    "Bearbeitung abgebrochen.";
+});
