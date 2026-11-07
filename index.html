@@ -272,14 +272,100 @@
 </div>
 
         <!-- Unterrichtsverteilung -->
+<!-- Unterrichtsverteilung -->
 <div id="distribution" class="page">
+
   <div class="panel">
     <h3>Unterrichtsverteilung</h3>
-    <p>
-      Hier werden Unterrichtsfächer, Lehrkräfte und Wochenstunden
-      den einzelnen Klassen zugeordnet.
-    </p>
+    <p>Fächer, Lehrkräfte und Wochenstunden den Klassen zuordnen.</p>
+
+    <div class="timetable-selection">
+
+      <div>
+        <label for="distributionSchoolYear">Schuljahr</label>
+        <select id="distributionSchoolYear">
+          <option value="">Schuljahre werden geladen ...</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="distributionClass">Klasse</label>
+        <select id="distributionClass">
+          <option value="">Bitte Schuljahr auswählen</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div id="distributionMessage"></div>
   </div>
+
+  <div class="panel">
+    <h3>Fach und Lehrkräfte zuordnen</h3>
+
+    <form id="distributionForm">
+
+      <input type="hidden" id="distributionEntryId">
+
+      <div>
+        <label for="distributionSubject">Fach</label>
+        <select id="distributionSubject" required>
+          <option value="">Fach auswählen</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="distributionWeeklyPeriods">Wochenstunden</label>
+        <input
+          type="number"
+          id="distributionWeeklyPeriods"
+          min="1"
+          max="40"
+          required
+          placeholder="Anzahl der Wochenstunden"
+        >
+      </div>
+
+      <div>
+        <label for="distributionTeachers">Lehrkräfte</label>
+        <select id="distributionTeachers" multiple>
+        </select>
+        <small>Bei mehreren Lehrkräften kannst du mehrere Einträge auswählen.</small>
+      </div>
+
+      <div>
+        <label for="distributionNotes">Anmerkungen</label>
+        <textarea
+          id="distributionNotes"
+          rows="3"
+          placeholder="Optionale Anmerkungen"
+        ></textarea>
+      </div>
+
+      <div class="teacher-form-actions">
+        <button type="submit" id="distributionSaveButton">
+          Zuordnung speichern
+        </button>
+
+        <button
+          type="button"
+          id="distributionCancelEdit"
+          style="display: none;"
+        >
+          Abbrechen
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3>Bestehende Unterrichtsverteilung</h3>
+    <div id="distributionList">
+      <p>Bitte zuerst eine Klasse auswählen.</p>
+    </div>
+  </div>
+
 </div>
 
         <div id="teachers" class="page">
