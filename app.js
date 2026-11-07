@@ -2221,6 +2221,46 @@ async function loadTimetableClasses(schoolYearId) {
   });
 }
 
+// Klassen für die Unterrichtsverteilung laden
+
+async function loadDistributionClasses(schoolYearId) {
+
+  distributionClass.innerHTML =
+    '<option value="">Klasse auswählen</option>';
+
+  const { data, error } = await suvDb
+    .from("classes")
+    .select(`
+      id,
+      name,
+      school_year_id
+    `)
+    .eq("school_year_id", schoolYearId)
+    .order("name");
+
+  if (error) {
+    distributionMessage.textContent =
+      "Klassen konnten nicht geladen werden.";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    distributionMessage.textContent =
+      "Für dieses Schuljahr sind keine Klassen angelegt.";
+    return;
+  }
+
+  data.forEach(schoolClass => {
+
+    const option = document.createElement("option");
+
+    option.value = schoolClass.id;
+    option.textContent = schoolClass.name;
+
+    distributionClass.appendChild(option);
+
+  });
+}
 
 // Klassenauswahl
 
