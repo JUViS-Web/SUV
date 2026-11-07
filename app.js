@@ -1572,6 +1572,39 @@ if (schoolYearCancelEdit) {
 
 loadSchoolYears();
 
+// SUV – Zeitmodell: Unterrichtstage
+
+const timeModelDays = document.getElementById("timeModelDays");
+
+const weekDays = [
+  "Montag",
+  "Dienstag",
+  "Mittwoch",
+  "Donnerstag",
+  "Freitag"
+];
+
+function loadTimeModelDays() {
+  timeModelDays.innerHTML = "";
+
+  weekDays.forEach((day, index) => {
+    const label = document.createElement("label");
+    label.className = "time-day-option";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = index + 1;
+    checkbox.checked = true;
+
+    const text = document.createElement("span");
+    text.textContent = day;
+
+    label.append(checkbox, text);
+    timeModelDays.appendChild(label);
+  });
+}
+
+loadTimeModelDays();
 
 // SUV – Zeitmodell: Unterrichtsstunden
 
