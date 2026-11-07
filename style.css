@@ -739,3 +739,59 @@ body {
     min-height: 48px;
   }
 }
+
+/* SUV – Klassenverwaltung */
+
+#classList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.class-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 5px solid #c62828;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.class-card h4 {
+  font-size: 24px;
+  margin: 0 0 14px;
+  color: #172033;
+}
+
+.class-card p {
+  font-size: 14px;
+  color: #526071;
+  margin: 8px 0;
+}
+
+.class-card button {
+  margin-top: 14px;
+  margin-right: 8px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.class-card button:first-of-type {
+  background: #e8edf5;
+  color: #243247;
+}
+
+.class-card button:last-of-type {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+@media (max-width: 600px) {
+  #classList {
+    grid-template-columns: 1fr;
+  }
+}
