@@ -1202,14 +1202,9 @@ function editClass(schoolClass) {
 async function initClassManagement() {
   await loadClassGradeLevels();
   await loadActiveSUVSchoolYear();
-  await loadClassSchoolYears();
-
-  classSchoolYearSelect.value = activeSUVSchoolYearId;
-  selectedSUVSchoolYearId = activeSUVSchoolYearId;
-
-  updateClassEditingState();
 }
 
+initClassManagement();
 
 // Schuljahr wechseln
 
