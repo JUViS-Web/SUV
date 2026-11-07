@@ -944,3 +944,58 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* SUV – Zeitmodell */
+
+#times .panel {
+  margin-bottom: 24px;
+}
+
+#lessonTimeForm {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+#lessonTimeForm label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+#lessonTimeForm input {
+  width: 100%;
+}
+
+#lessonTimeForm .teacher-form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#lessonTimeList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+#lessonTimeList .class-card {
+  margin: 0;
+}
+
+#timeModelMessage {
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+@media (max-width: 650px) {
+  #lessonTimeForm {
+    grid-template-columns: 1fr;
+  }
+
+  #lessonTimeForm .teacher-form-actions {
+    grid-column: auto;
+  }
+}
