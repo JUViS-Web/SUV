@@ -2084,3 +2084,99 @@ let activeTimetableVersionId = null;
 let selectedTimetableClassId = null;
 let selectedTimetableSchoolYearId = null;
 let timetableEntries = [];
+
+
+// Schuljahre für die Stundenplanung laden
+
+async function loadTimetableSchoolYears() {
+  const { data, error } = await suvDb
+    .from("school_years")
+    .select("id, name, is_active")
+    .order("name", { ascending: false });
+
+  if (error) {
+    timetableMessage.textContent =
+      "Schuljahre konnten nicht geladen werden.";
+    return;
+  }
+
+  timetableSchoolYear.innerHTML =
+    '<option value="">Schuljahr auswählen</option>';
+
+  data.forEach(year => {
+    const option = document.createElement("option");
+
+    option.value = year.id;
+    option.textContent = year.name;
+
+    timetableSchoolYear.appendChild(option);
+  });
+
+  const activeYear = data.find(year => year.is_active);
+
+  if (activeYear) {
+    timetableSchoolYear.value = activeYear.id;
+    await loadTimetableVersion(activeYear.id);
+  }
+}
+
+
+// Stundenplanversion laden
+
+async function loadTimetableVersion(schoolYearId) {
+  selectedTimetableSchoolYearId = schoolYearId;
+  activeTimetableVersionId = null;
+
+  const { data, error } = await suvDb
+    .from("timetable_versions")
+    .select("id, name, status")
+    .eq("school_year_id", schoolYearId)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    timetableMessage.textContent =
+      "Stundenplanversion konnte nicht geladen werden.";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    timetableMessage.textContent =
+      "Für dieses Schuljahr gibt es noch keine Stundenplanversion.";
+    return;
+  }
+
+  activeTimetableVersionId = data[0].id;
+
+  timetableMessage.textContent =
+    "Stundenplan: " + data[0].name +
+    " (" + data[0].status + ")";
+
+  await loadTimetableClasses(schoolYearId);
+}
+
+
+// Schuljahresauswahl
+
+timetableSchoolYear.addEventListener("change", async () => {
+  const schoolYearId = timetableSchoolYear.value;
+
+  timetableClass.innerHTML =
+    '<option value="">Bitte Klasse auswählen</option>';
+
+  timetableGrid.innerHTML =
+    "<p>Bitte zuerst eine Klasse auswählen.</p>";
+
+  if (!schoolYearId) {
+    activeTimetableVersionId = null;
+    selectedTimetableSchoolYearId = null;
+    return;
+  }
+
+  await loadTimetableVersion(schoolYearId);
+});
+
+
+// Initialisierung
+
+loadTimetableSchoolYears();
