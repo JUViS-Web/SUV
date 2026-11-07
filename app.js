@@ -2147,6 +2147,7 @@ async function loadTimetableVersion(schoolYearId) {
   }
 
   activeTimetableVersionId = data[0].id;
+  activeTimetableVersionStatus = data[0].status;
 
   timetableMessage.textContent =
     "Stundenplan: " + data[0].name +
