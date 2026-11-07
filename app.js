@@ -1571,3 +1571,188 @@ if (schoolYearCancelEdit) {
 // Schuljahresverwaltung initialisieren
 
 loadSchoolYears();
+
+
+// SUV – Zeitmodell: Unterrichtsstunden
+
+const lessonTimeForm = document.getElementById("lessonTimeForm");
+const lessonTimeList = document.getElementById("lessonTimeList");
+const timeModelMessage = document.getElementById("timeModelMessage");
+
+
+// Unterrichtsstunden laden
+
+async function loadLessonTimes() {
+  const { data, error } = await suvDb
+    .from("lesson_times")
+    .select("*")
+    .order("lesson_number");
+
+  if (error) {
+    timeModelMessage.textContent = error.message;
+    return;
+  }
+
+  lessonTimeList.innerHTML = "";
+
+  if (!data.length) {
+    lessonTimeList.textContent =
+      "Noch keine Unterrichtsstunden vorhanden.";
+    return;
+  }
+
+  data.forEach(lesson => {
+    const card = document.createElement("div");
+    card.className = "class-card";
+
+    const heading = document.createElement("h4");
+    heading.textContent = lesson.lesson_number + ". Stunde";
+
+    const time = document.createElement("p");
+    time.textContent =
+      lesson.start_time.slice(0, 5) +
+      " – " +
+      lesson.end_time.slice(0, 5) +
+      " Uhr";
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.textContent = "Bearbeiten";
+
+    editButton.addEventListener("click", () => {
+      document.getElementById("lessonTimeId").value = lesson.id;
+      document.getElementById("lessonNumber").value =
+        lesson.lesson_number;
+      document.getElementById("lessonStart").value =
+        lesson.start_time.slice(0, 5);
+      document.getElementById("lessonEnd").value =
+        lesson.end_time.slice(0, 5);
+
+      document.getElementById("lessonTimeSaveButton").textContent =
+        "Änderungen speichern";
+
+      document.getElementById("lessonTimeCancelEdit").style.display =
+        "inline-block";
+
+      timeModelMessage.textContent =
+        "Unterrichtsstunde wird bearbeitet.";
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "Löschen";
+
+    deleteButton.addEventListener("click", async () => {
+      if (!confirm(
+        "Soll die " + lesson.lesson_number +
+        ". Unterrichtsstunde wirklich gelöscht werden?"
+      )) {
+        return;
+      }
+
+      const { error } = await suvDb
+        .from("lesson_times")
+        .delete()
+        .eq("id", lesson.id);
+
+      if (error) {
+        timeModelMessage.textContent = error.message;
+        return;
+      }
+
+      timeModelMessage.textContent =
+        "Unterrichtsstunde erfolgreich gelöscht.";
+
+      await loadLessonTimes();
+    });
+
+    card.append(heading, time, editButton, deleteButton);
+    lessonTimeList.appendChild(card);
+  });
+}
+
+
+// Unterrichtsstunde speichern oder aktualisieren
+
+if (lessonTimeForm) {
+  lessonTimeForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const lessonId =
+      document.getElementById("lessonTimeId").value;
+
+    const startTime =
+      document.getElementById("lessonStart").value;
+
+    const endTime =
+      document.getElementById("lessonEnd").value;
+
+    if (endTime <= startTime) {
+      timeModelMessage.textContent =
+        "Das Ende muss nach dem Beginn liegen.";
+      return;
+    }
+
+    const lessonData = {
+      lesson_number: Number(
+        document.getElementById("lessonNumber").value
+      ),
+      start_time: startTime,
+      end_time: endTime
+    };
+
+    let result;
+
+    if (lessonId) {
+      result = await suvDb
+        .from("lesson_times")
+        .update(lessonData)
+        .eq("id", lessonId);
+    } else {
+      result = await suvDb
+        .from("lesson_times")
+        .insert(lessonData);
+    }
+
+    if (result.error) {
+      timeModelMessage.textContent = result.error.message;
+      return;
+    }
+
+    timeModelMessage.textContent = lessonId
+      ? "Unterrichtsstunde erfolgreich aktualisiert."
+      : "Unterrichtsstunde erfolgreich gespeichert.";
+
+    resetLessonTimeForm();
+    await loadLessonTimes();
+  });
+}
+
+
+// Formular zurücksetzen
+
+function resetLessonTimeForm() {
+  lessonTimeForm.reset();
+
+  document.getElementById("lessonTimeId").value = "";
+
+  document.getElementById("lessonTimeSaveButton").textContent =
+    "Unterrichtsstunde speichern";
+
+  document.getElementById("lessonTimeCancelEdit").style.display =
+    "none";
+}
+
+
+// Bearbeitung abbrechen
+
+document.getElementById("lessonTimeCancelEdit")
+  .addEventListener("click", () => {
+    resetLessonTimeForm();
+    timeModelMessage.textContent = "";
+  });
+
+
+// Zeitmodell initialisieren
+
+loadLessonTimes();
