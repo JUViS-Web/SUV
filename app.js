@@ -2599,6 +2599,94 @@ distributionSchoolYear.addEventListener("change", async () => {
   }
 });
 
+// Bearbeiten und Löschen von Unterrichtszuordnungen
+
+distributionList.addEventListener("click", async (event) => {
+
+  const editButton = event.target.closest(
+    "[data-distribution-edit]"
+  );
+
+  const deleteButton = event.target.closest(
+    "[data-distribution-delete]"
+  );
+
+  // Eintrag bearbeiten
+  if (editButton) {
+    const entryId = editButton.dataset.distributionEdit;
+
+    const entry = distributionEntries.find(
+      item => item.id === entryId
+    );
+
+    if (!entry) return;
+
+    distributionEntryId.value = entry.id;
+    distributionSubject.value = entry.subjects?.id || "";
+    distributionWeeklyPeriods.value = entry.weekly_periods;
+    distributionNotes.value = entry.notes || "";
+
+    const selectedTeacherIds =
+      (entry.class_subject_teachers || [])
+        .map(item => item.teacher_id);
+
+    Array.from(distributionTeachers.options).forEach(option => {
+      option.selected = selectedTeacherIds.includes(option.value);
+    });
+
+    distributionSaveButton.textContent = "Änderungen speichern";
+    distributionCancelEdit.hidden = false;
+
+    distributionMessage.textContent =
+      "Unterrichtszuordnung wird bearbeitet.";
+
+    distributionForm.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+
+    return;
+  }
+
+  // Eintrag löschen
+  if (deleteButton) {
+    const entryId = deleteButton.dataset.distributionDelete;
+
+    if (!confirm("Soll diese Unterrichtszuordnung wirklich gelöscht werden?")) {
+      return;
+    }
+
+    const { error: teacherDeleteError } = await suvDb
+      .from("class_subject_teachers")
+      .delete()
+      .eq("class_subject_id", entryId);
+
+    if (teacherDeleteError) {
+      distributionMessage.textContent =
+        "Lehrkräfte-Zuordnungen konnten nicht gelöscht werden: " +
+        teacherDeleteError.message;
+      return;
+    }
+
+    const { error: entryDeleteError } = await suvDb
+      .from("class_subjects")
+      .delete()
+      .eq("id", entryId);
+
+    if (entryDeleteError) {
+      distributionMessage.textContent =
+        "Unterrichtszuordnung konnte nicht gelöscht werden: " +
+        entryDeleteError.message;
+      return;
+    }
+
+    distributionMessage.textContent =
+      "Unterrichtszuordnung erfolgreich gelöscht.";
+
+    await loadDistributionEntries();
+  }
+
+});
 
 // Klassen-Auswahl
 distributionClass.addEventListener("change", async () => {
