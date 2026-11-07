@@ -2982,16 +2982,25 @@ async function loadTimetableFormOptions() {
   // Fächer der ausgewählten Klasse laden
 
   const { data: classSubjects, error: subjectsError } = await suvDb
-    .from("class_subjects")
-    .select(`
-      id,
-      weekly_periods,
-      subjects (
-        name,
+  .from("class_subjects")
+  .select(`
+    id,
+    weekly_periods,
+    subjects (
+      name,
+      short_code
+    ),
+    class_subject_teachers (
+      teacher_id,
+      teachers (
+        id,
+        first_name,
+        last_name,
         short_code
       )
-    `)
-    .eq("class_id", selectedTimetableClassId);
+    )
+  `)
+  .eq("class_id", selectedTimetableClassId);
 
   if (subjectsError) {
     timetableMessage.textContent =
