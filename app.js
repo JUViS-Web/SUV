@@ -2432,6 +2432,48 @@ async function loadDistributionOptions() {
   });
 }
 
+// DOM-Elemente
+const distributionSchoolYear =
+  document.getElementById("distributionSchoolYear");
+
+const distributionClass =
+  document.getElementById("distributionClass");
+
+const distributionMessage =
+  document.getElementById("distributionMessage");
+
+const distributionForm =
+  document.getElementById("distributionForm");
+
+const distributionEntryId =
+  document.getElementById("distributionEntryId");
+
+const distributionSubject =
+  document.getElementById("distributionSubject");
+
+const distributionWeeklyPeriods =
+  document.getElementById("distributionWeeklyPeriods");
+
+const distributionTeachers =
+  document.getElementById("distributionTeachers");
+
+const distributionNotes =
+  document.getElementById("distributionNotes");
+
+const distributionList =
+  document.getElementById("distributionList");
+
+const distributionSaveButton =
+  document.getElementById("distributionSaveButton");
+
+const distributionCancelEdit =
+  document.getElementById("distributionCancelEdit");
+
+// Zustände
+let selectedDistributionClassId = null;
+let selectedDistributionSchoolYearId = null;
+let distributionEntries = [];
+
 // Unterrichtsverteilung speichern
 
 distributionForm.addEventListener("submit", async (event) => {
