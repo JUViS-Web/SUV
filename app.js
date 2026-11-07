@@ -2033,3 +2033,54 @@ document.getElementById("breakTimeCancelEdit")
 // Pausenverwaltung initialisieren
 
 loadBreakTimes();
+
+
+// SUV – Stundenplanung
+// DOM-Elemente
+
+const timetableSchoolYear =
+  document.getElementById("timetableSchoolYear");
+
+const timetableClass =
+  document.getElementById("timetableClass");
+
+const timetableMessage =
+  document.getElementById("timetableMessage");
+
+const timetableGrid =
+  document.getElementById("timetableGrid");
+
+const timetableEntryForm =
+  document.getElementById("timetableEntryForm");
+
+const timetableEntryId =
+  document.getElementById("timetableEntryId");
+
+const timetableDay =
+  document.getElementById("timetableDay");
+
+const timetableLesson =
+  document.getElementById("timetableLesson");
+
+const timetableSubject =
+  document.getElementById("timetableSubject");
+
+const timetableTeacher =
+  document.getElementById("timetableTeacher");
+
+const timetableRoom =
+  document.getElementById("timetableRoom");
+
+const timetableSaveButton =
+  document.getElementById("timetableSaveButton");
+
+const timetableCancelEdit =
+  document.getElementById("timetableCancelEdit");
+
+
+// Aktuelle Stundenplan-Auswahl
+
+let activeTimetableVersionId = null;
+let selectedTimetableClassId = null;
+let selectedTimetableSchoolYearId = null;
+let timetableEntries = [];
