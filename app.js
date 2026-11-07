@@ -992,7 +992,6 @@ if (roomForm) {
 loadRooms();
 
 // SUV – Klassenverwaltung
-// DOM-Elemente der Klassenverwaltung
 
 const classForm = document.getElementById("classForm");
 const classList = document.getElementById("classList");
@@ -1003,6 +1002,7 @@ const classSchoolYearSelect =
 
 let activeSUVSchoolYearId = null;
 let selectedSUVSchoolYearId = null;
+
 
 // Jahrgangsstufen laden
 
@@ -1022,10 +1022,8 @@ async function loadClassGradeLevels() {
 
   data.forEach(grade => {
     const option = document.createElement("option");
-
     option.value = grade.id;
     option.textContent = grade.name;
-
     classGrade.appendChild(option);
   });
 }
@@ -1043,17 +1041,17 @@ async function loadActiveSUVSchoolYear() {
   if (error) {
     classMessage.textContent =
       "Aktives Schuljahr konnte nicht geladen werden.";
-
     return;
   }
 
   activeSUVSchoolYearId = data.id;
-selectedSUVSchoolYearId = data.id;
+  selectedSUVSchoolYearId = data.id;
 
   await loadClasses();
 }
 
-// Schuljahre für die Klassenverwaltung laden
+
+// Schuljahre laden
 
 async function loadClassSchoolYears() {
   const { data, error } = await suvDb
@@ -1062,9 +1060,6 @@ async function loadClassSchoolYears() {
     .order("start_date", { ascending: false });
 
   if (error) {
-    classSchoolYearSelect.innerHTML =
-      '<option value="">Fehler beim Laden</option>';
-
     classMessage.textContent = error.message;
     return;
   }
@@ -1081,6 +1076,7 @@ async function loadClassSchoolYears() {
     classSchoolYearSelect.appendChild(option);
   });
 }
+
 
 // Klassen laden
 
@@ -1105,12 +1101,12 @@ async function loadClasses() {
     return;
   }
 
+  classList.innerHTML = "";
+
   if (!data.length) {
     classList.textContent = "Noch keine Klassen vorhanden.";
     return;
   }
-
-  classList.innerHTML = "";
 
   data.forEach(schoolClass => {
     const card = document.createElement("div");
@@ -1129,45 +1125,55 @@ async function loadClasses() {
       "Schülerzahl: " + schoolClass.student_count;
 
     const editButton = document.createElement("button");
-editButton.type = "button";
-editButton.textContent = "Bearbeiten";
+    editButton.type = "button";
+    editButton.textContent = "Bearbeiten";
 
-editButton.addEventListener("click", () => {
-  editClass(schoolClass);
-});
+    editButton.addEventListener("click", () => {
+      editClass(schoolClass);
+    });
 
-const deleteButton = document.createElement("button");
-deleteButton.type = "button";
-deleteButton.textContent = "Löschen";
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "Löschen";
 
-deleteButton.addEventListener("click", async () => {
-    if (selectedSUVSchoolYearId !== activeSUVSchoolYearId) {
-    classMessage.textContent =
-      "Klassen vergangener Schuljahre können nicht gelöscht werden.";
-    return;
-  }
-  if (!confirm(
-    "Soll die Klasse " + schoolClass.name + " wirklich gelöscht werden?"
-  )) {
-    return;
-  }
+    deleteButton.addEventListener("click", async () => {
 
-  const { error } = await suvDb
-    .from("classes")
-    .delete()
-    .eq("id", schoolClass.id);
+      if (selectedSUVSchoolYearId !== activeSUVSchoolYearId) {
+        classMessage.textContent =
+          "Klassen vergangener Schuljahre können nicht gelöscht werden.";
+        return;
+      }
 
-  if (error) {
-    classMessage.textContent = error.message;
-    return;
-  }
+      if (!confirm(
+        "Soll die Klasse " + schoolClass.name +
+        " wirklich gelöscht werden?"
+      )) {
+        return;
+      }
 
-  classMessage.textContent = "Klasse erfolgreich gelöscht.";
-  await loadClasses();
-});
+      const { error } = await suvDb
+        .from("classes")
+        .delete()
+        .eq("id", schoolClass.id);
 
-card.append(heading, grade, students, editButton, deleteButton);
-classList.appendChild(card);
+      if (error) {
+        classMessage.textContent = error.message;
+        return;
+      }
+
+      classMessage.textContent = "Klasse erfolgreich gelöscht.";
+      await loadClasses();
+    });
+
+    card.append(
+      heading,
+      grade,
+      students,
+      editButton,
+      deleteButton
+    );
+
+    classList.appendChild(card);
   });
 }
 
@@ -1175,6 +1181,13 @@ classList.appendChild(card);
 // Klasse bearbeiten
 
 function editClass(schoolClass) {
+
+  if (selectedSUVSchoolYearId !== activeSUVSchoolYearId) {
+    classMessage.textContent =
+      "Klassen vergangener Schuljahre können nicht bearbeitet werden.";
+    return;
+  }
+
   document.getElementById("classId").value = schoolClass.id;
   document.getElementById("className").value = schoolClass.name;
   classGrade.value = schoolClass.grade_level_id;
@@ -1190,31 +1203,6 @@ function editClass(schoolClass) {
 
   classMessage.textContent = "Klasse wird bearbeitet.";
 }
-
-  if (selectedSUVSchoolYearId !== activeSUVSchoolYearId) {
-    classMessage.textContent =
-      "Klassen vergangener Schuljahre können nicht bearbeitet werden.";
-    return;
-  }
-
-// Klassenverwaltung initialisieren
-
-async function initClassManagement() {
-  await loadClassGradeLevels();
-  await loadActiveSUVSchoolYear();
-}
-
-initClassManagement();
-
-// Schuljahr wechseln
-
-classSchoolYearSelect.addEventListener("change", async () => {
-  selectedSUVSchoolYearId = classSchoolYearSelect.value;
-
-  await loadClasses();
-
-  updateClassEditingState();
-});
 
 
 // Bearbeitungsrechte aktualisieren
@@ -1233,6 +1221,28 @@ function updateClassEditingState() {
 }
 
 
+// Schuljahr wechseln
+
+classSchoolYearSelect.addEventListener("change", async () => {
+  selectedSUVSchoolYearId = classSchoolYearSelect.value;
+
+  await loadClasses();
+  updateClassEditingState();
+});
+
+
+// Klassenverwaltung initialisieren
+
+async function initClassManagement() {
+  await loadClassGradeLevels();
+  await loadActiveSUVSchoolYear();
+  await loadClassSchoolYears();
+
+  classSchoolYearSelect.value = activeSUVSchoolYearId;
+
+  updateClassEditingState();
+}
+
 initClassManagement();
 
 
@@ -1241,6 +1251,12 @@ initClassManagement();
 if (classForm) {
   classForm.addEventListener("submit", async event => {
     event.preventDefault();
+
+    if (selectedSUVSchoolYearId !== activeSUVSchoolYearId) {
+      classMessage.textContent =
+        "Vergangene Schuljahre können nicht bearbeitet werden.";
+      return;
+    }
 
     if (!activeSUVSchoolYearId) {
       classMessage.textContent = "Kein aktives Schuljahr gefunden.";
@@ -1298,7 +1314,8 @@ if (classForm) {
 
 // Bearbeitung abbrechen
 
-const classCancelEdit = document.getElementById("classCancelEdit");
+const classCancelEdit =
+  document.getElementById("classCancelEdit");
 
 if (classCancelEdit) {
   classCancelEdit.addEventListener("click", () => {
