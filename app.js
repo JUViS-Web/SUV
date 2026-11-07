@@ -3203,6 +3203,46 @@ timetableEntryForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  // Wochenstunden des Fachs prüfen
+
+  const { data: subjectData, error: subjectDataError } =
+    await suvDb
+      .from("class_subjects")
+      .select("weekly_periods")
+      .eq("id", timetableSubject.value)
+      .single();
+
+  if (subjectDataError || !subjectData) {
+    timetableMessage.textContent =
+      "Wochenstunden konnten nicht geladen werden.";
+    return;
+  }
+
+  let weeklyQuery = suvDb
+    .from("timetable_entries")
+    .select("id")
+    .eq("timetable_version_id", activeTimetableVersionId)
+    .eq("class_subject_id", timetableSubject.value);
+
+  if (entryId) {
+    weeklyQuery = weeklyQuery.neq("id", entryId);
+  }
+
+  const { data: existingLessons, error: weeklyError } =
+    await weeklyQuery;
+
+  if (weeklyError) {
+    timetableMessage.textContent =
+      "Wochenstunden konnten nicht überprüft werden.";
+    return;
+  }
+
+  if (existingLessons.length >= subjectData.weekly_periods) {
+    timetableMessage.textContent =
+      "Die festgelegten Wochenstunden für dieses Fach sind bereits vollständig verplant.";
+    return;
+  }
+  
   // Speichern oder aktualisieren
 
   let result;
