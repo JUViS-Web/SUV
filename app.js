@@ -3028,24 +3028,25 @@ async function loadTimetableFormOptions() {
   });
 
 
-  // Aktive Lehrkräfte laden
+  // Lehrkräfte passend zum ausgewählten Fach anzeigen
 
-  const { data: teachers, error: teachersError } = await suvDb
-    .from("teachers")
-    .select("id, first_name, last_name, short_code")
-    .eq("is_active", true)
-    .order("last_name");
+timetableSubject.onchange = () => {
+  const selectedClassSubject = classSubjects.find(
+    item => item.id === timetableSubject.value
+  );
 
-  if (teachersError) {
-    timetableMessage.textContent =
-      "Lehrkräfte konnten nicht geladen werden.";
-    return;
-  }
+  timetableTeachers.innerHTML = "";
 
-  timetableTeacher.innerHTML =
-    '<option value="">Lehrkraft auswählen</option>';
+  if (!selectedClassSubject) return;
 
-  teachers.forEach(teacher => {
+  const assignedTeachers =
+    selectedClassSubject.class_subject_teachers || [];
+
+  assignedTeachers.forEach(item => {
+    const teacher = item.teachers;
+
+    if (!teacher) return;
+
     const option = document.createElement("option");
 
     option.value = teacher.id;
@@ -3053,8 +3054,9 @@ async function loadTimetableFormOptions() {
       teacher.first_name + " " + teacher.last_name +
       (teacher.short_code ? " (" + teacher.short_code + ")" : "");
 
-    timetableTeacher.appendChild(option);
+    timetableTeachers.appendChild(option);
   });
+};
   
 // Lehrkräfte passend zum ausgewählten Fach anzeigen
 
