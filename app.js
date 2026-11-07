@@ -3201,7 +3201,21 @@ async function loadDistributionSchoolYears() {
   }
 }
 
-
 // Initialisierung Unterrichtsverteilung
-loadDistributionOptions();
-loadDistributionSchoolYears();
+
+distributionMessage.textContent =
+  "Test: Initialisierung wird ausgeführt.";
+
+loadDistributionOptions()
+  .catch(error => {
+    distributionMessage.textContent =
+      "Fehler beim Laden der Fächer und Lehrkräfte: " +
+      error.message;
+  });
+
+loadDistributionSchoolYears()
+  .catch(error => {
+    distributionMessage.textContent =
+      "Fehler beim Laden der Schuljahre: " +
+      error.message;
+  });
