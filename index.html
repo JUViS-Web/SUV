@@ -551,6 +551,54 @@
     </form>
 
     <div id="lessonTimeList"></div>
+
+    <div class="panel">
+  <h3>Pausenzeiten</h3>
+  <p>Pausen und deren Zeiträume verwalten.</p>
+
+  <form id="breakTimeForm">
+
+    <input type="hidden" id="breakTimeId">
+
+    <div>
+      <label for="breakName">Bezeichnung</label>
+      <input
+        type="text"
+        id="breakName"
+        placeholder="z. B. Erste große Pause"
+        required
+      >
+    </div>
+
+    <div>
+      <label for="breakStart">Beginn</label>
+      <input type="time" id="breakStart" required>
+    </div>
+
+    <div>
+      <label for="breakEnd">Ende</label>
+      <input type="time" id="breakEnd" required>
+    </div>
+
+    <div class="teacher-form-actions">
+      <button type="submit" id="breakTimeSaveButton">
+        Pause speichern
+      </button>
+
+      <button
+        type="button"
+        id="breakTimeCancelEdit"
+        style="display: none;"
+      >
+        Abbrechen
+      </button>
+    </div>
+
+  </form>
+
+  <div id="breakTimeMessage"></div>
+  <div id="breakTimeList"></div>
+</div>
   </div>
 
 </div>
