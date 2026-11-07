@@ -530,44 +530,6 @@ async function loadSubjects() {
     editButton.addEventListener("click", () => {
       editSubject(subject);
     });
-
-// Schuljahr aktivieren
-
-if (!schoolYear.is_active) {
-  const activateButton = document.createElement("button");
-  activateButton.type = "button";
-  activateButton.textContent = "Schuljahr aktivieren";
-
-  activateButton.addEventListener("click", async () => {
-    const confirmed = confirm(
-      "Möchtest du das Schuljahr " +
-      schoolYear.name +
-      " aktivieren?"
-    );
-
-    if (!confirmed) return;
-
-    const { error } = await suvDb.rpc(
-      "activate_school_year",
-      {
-        target_school_year_id: schoolYear.id
-      }
-    );
-
-    if (error) {
-      schoolYearMessage.textContent = error.message;
-      return;
-    }
-
-    schoolYearMessage.textContent =
-      "Schuljahr erfolgreich aktiviert.";
-
-    await loadSchoolYears();
-    await loadActiveSUVSchoolYear();
-  });
-
-  card.appendChild(activateButton);
-}
     
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
