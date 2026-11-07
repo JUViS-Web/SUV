@@ -2812,3 +2812,46 @@ const distributionCancelEdit =
 let selectedDistributionClassId = null;
 let selectedDistributionSchoolYearId = null;
 let distributionEntries = [];
+
+
+// Schuljahre für die Unterrichtsverteilung laden
+async function loadDistributionSchoolYears() {
+
+  const { data, error } = await suvDb
+    .from("school_years")
+    .select("id, name, is_active")
+    .order("name", { ascending: false });
+
+  if (error) {
+    distributionMessage.textContent =
+      "Schuljahre konnten nicht geladen werden: " + error.message;
+    return;
+  }
+
+  distributionSchoolYear.innerHTML =
+    '<option value="">Schuljahr auswählen</option>';
+
+  data.forEach(year => {
+
+    const option = document.createElement("option");
+
+    option.value = year.id;
+    option.textContent = year.name;
+
+    distributionSchoolYear.appendChild(option);
+
+    if (year.is_active) {
+      distributionSchoolYear.value = year.id;
+    }
+
+  });
+
+  if (distributionSchoolYear.value) {
+    selectedDistributionSchoolYearId =
+      distributionSchoolYear.value;
+
+    await loadDistributionClasses(
+      selectedDistributionSchoolYearId
+    );
+  }
+}
