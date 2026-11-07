@@ -999,3 +999,52 @@ body {
     grid-column: auto;
   }
 }
+
+
+/* SUV – Unterrichtstage */
+
+#timeModelDays {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.time-day-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 16px;
+  background: var(--panel-bg, #ffffff);
+  border: 1px solid var(--border-color, #dddddd);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.time-day-option:hover {
+  border-color: #c62828;
+}
+
+.time-day-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: #c62828;
+  cursor: pointer;
+}
+
+.time-day-option span {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.time-day-option:has(input:checked) {
+  border-color: #c62828;
+  background: rgba(198, 40, 40, 0.06);
+}
+
+@media (max-width: 600px) {
+  #timeModelDays {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
