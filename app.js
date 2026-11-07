@@ -1111,6 +1111,11 @@ deleteButton.type = "button";
 deleteButton.textContent = "Löschen";
 
 deleteButton.addEventListener("click", async () => {
+    if (selectedSUVSchoolYearId !== activeSUVSchoolYearId) {
+    classMessage.textContent =
+      "Klassen vergangener Schuljahre können nicht gelöscht werden.";
+    return;
+  }
   if (!confirm(
     "Soll die Klasse " + schoolClass.name + " wirklich gelöscht werden?"
   )) {
