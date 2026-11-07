@@ -2595,7 +2595,18 @@ if (teacherIds.length > 0) {
 
   distributionForm.reset();
 
-  await loadDistributionEntries();
+distributionEntryId.value = "";
+
+distributionSaveButton.textContent =
+  "Zuordnung speichern";
+
+distributionCancelEdit.hidden = true;
+
+Array.from(distributionTeachers.options).forEach(option => {
+  option.selected = false;
+});
+
+await loadDistributionEntries();
 
   distributionSaveButton.disabled = false;
   distributionSaveButton.textContent = "Zuordnung speichern";
