@@ -2530,3 +2530,107 @@ timetableClass.addEventListener("change", async () => {
 
   await loadTimetableFormOptions();
 });
+
+
+// Unterrichtseinheit speichern
+
+timetableEntryForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!activeTimetableVersionId || !selectedTimetableClassId) {
+    timetableMessage.textContent =
+      "Bitte zuerst Schuljahr und Klasse auswählen.";
+    return;
+  }
+
+  if (activeTimetableVersionStatus !== "draft") {
+    timetableMessage.textContent =
+      "Dieser Stundenplan ist nicht mehr bearbeitbar.";
+    return;
+  }
+
+  const day = Number(timetableDay.value);
+  const lesson = Number(timetableLesson.value);
+
+  if (
+    !day ||
+    day < 1 ||
+    day > 5 ||
+    !lesson ||
+    !timetableSubject.value ||
+    !timetableTeacher.value
+  ) {
+    timetableMessage.textContent =
+      "Bitte alle Pflichtfelder ausfüllen.";
+    return;
+  }
+
+  const entryId = timetableEntryId.value;
+
+  const entryData = {
+    timetable_version_id: activeTimetableVersionId,
+    class_subject_id: timetableSubject.value,
+    teacher_id: timetableTeacher.value,
+    room_id: timetableRoom.value || null,
+    class_id: selectedTimetableClassId,
+    weekday: day,
+    period_number: lesson
+  };
+
+  // Doppelte Belegung der Klasse prüfen
+
+  let duplicateQuery = suvDb
+    .from("timetable_entries")
+    .select("id")
+    .eq("timetable_version_id", activeTimetableVersionId)
+    .eq("class_id", selectedTimetableClassId)
+    .eq("weekday", day)
+    .eq("period_number", lesson);
+
+  if (entryId) {
+    duplicateQuery = duplicateQuery.neq("id", entryId);
+  }
+
+  const { data: duplicates, error: duplicateError } =
+    await duplicateQuery;
+
+  if (duplicateError) {
+    timetableMessage.textContent =
+      "Belegung konnte nicht geprüft werden.";
+    return;
+  }
+
+  if (duplicates.length > 0) {
+    timetableMessage.textContent =
+      "Diese Klasse hat zu diesem Zeitpunkt bereits Unterricht.";
+    return;
+  }
+
+  // Speichern oder aktualisieren
+
+  let result;
+
+  if (entryId) {
+    result = await suvDb
+      .from("timetable_entries")
+      .update(entryData)
+      .eq("id", entryId);
+  } else {
+    result = await suvDb
+      .from("timetable_entries")
+      .insert(entryData);
+  }
+
+  if (result.error) {
+    timetableMessage.textContent =
+      "Unterrichtseinheit konnte nicht gespeichert werden.";
+    return;
+  }
+
+  timetableMessage.textContent =
+    "Unterrichtseinheit erfolgreich gespeichert.";
+
+  resetTimetableEntryForm();
+
+  await loadTimetableGrid();
+});
