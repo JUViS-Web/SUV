@@ -1000,7 +1000,7 @@ const classGrade = document.getElementById("classGrade");
 const classMessage = document.getElementById("classMessage");
 
 let activeSUVSchoolYearId = null;
-
+let canEditActiveSchoolYear = false;
 
 // Jahrgangsstufen laden
 
