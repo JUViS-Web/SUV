@@ -1046,6 +1046,7 @@ async function loadActiveSUVSchoolYear() {
   }
 
   activeSUVSchoolYearId = data.id;
+selectedSUVSchoolYearId = data.id;
 
   await loadClasses();
 }
