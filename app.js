@@ -2395,3 +2395,137 @@ async function loadTimetableGrid() {
   timetableGrid.innerHTML = "";
   timetableGrid.appendChild(table);
 }
+
+
+// Eingabefelder der Stundenplanung befüllen
+
+async function loadTimetableFormOptions() {
+
+  // Unterrichtsstunden laden
+
+  const { data: lessons, error: lessonsError } = await suvDb
+    .from("lesson_times")
+    .select("lesson_number")
+    .order("lesson_number");
+
+  if (lessonsError) {
+    timetableMessage.textContent =
+      "Unterrichtsstunden konnten nicht geladen werden.";
+    return;
+  }
+
+  timetableLesson.innerHTML =
+    '<option value="">Stunde auswählen</option>';
+
+  lessons.forEach(lesson => {
+    const option = document.createElement("option");
+    option.value = lesson.lesson_number;
+    option.textContent = lesson.lesson_number + ". Stunde";
+    timetableLesson.appendChild(option);
+  });
+
+
+  // Fächer der ausgewählten Klasse laden
+
+  const { data: classSubjects, error: subjectsError } = await suvDb
+    .from("class_subjects")
+    .select(`
+      id,
+      weekly_periods,
+      subjects (
+        name,
+        short_code
+      )
+    `)
+    .eq("class_id", selectedTimetableClassId);
+
+  if (subjectsError) {
+    timetableMessage.textContent =
+      "Klassenfächer konnten nicht geladen werden.";
+    return;
+  }
+
+  timetableSubject.innerHTML =
+    '<option value="">Fach auswählen</option>';
+
+  classSubjects.forEach(item => {
+    const option = document.createElement("option");
+
+    option.value = item.id;
+
+    const subject = item.subjects;
+
+    option.textContent =
+      (subject?.short_code || subject?.name || "Fach") +
+      " (" + item.weekly_periods + " Wochenstunden)";
+
+    timetableSubject.appendChild(option);
+  });
+
+
+  // Aktive Lehrkräfte laden
+
+  const { data: teachers, error: teachersError } = await suvDb
+    .from("teachers")
+    .select("id, first_name, last_name, short_code")
+    .eq("is_active", true)
+    .order("last_name");
+
+  if (teachersError) {
+    timetableMessage.textContent =
+      "Lehrkräfte konnten nicht geladen werden.";
+    return;
+  }
+
+  timetableTeacher.innerHTML =
+    '<option value="">Lehrkraft auswählen</option>';
+
+  teachers.forEach(teacher => {
+    const option = document.createElement("option");
+
+    option.value = teacher.id;
+    option.textContent =
+      teacher.first_name + " " + teacher.last_name +
+      (teacher.short_code ? " (" + teacher.short_code + ")" : "");
+
+    timetableTeacher.appendChild(option);
+  });
+
+
+  // Aktive Räume laden
+
+  const { data: rooms, error: roomsError } = await suvDb
+    .from("rooms")
+    .select("id, name")
+    .eq("is_active", true)
+    .order("name");
+
+  if (roomsError) {
+    timetableMessage.textContent =
+      "Räume konnten nicht geladen werden.";
+    return;
+  }
+
+  timetableRoom.innerHTML =
+    '<option value="">Raum auswählen</option>';
+
+  rooms.forEach(room => {
+    const option = document.createElement("option");
+
+    option.value = room.id;
+    option.textContent = room.name;
+
+    timetableRoom.appendChild(option);
+  });
+}
+
+
+// Auswahlfelder bei Klassenwechsel aktualisieren
+
+timetableClass.addEventListener("change", async () => {
+  if (!selectedTimetableClassId) {
+    return;
+  }
+
+  await loadTimetableFormOptions();
+});
