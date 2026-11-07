@@ -2506,15 +2506,17 @@ distributionForm.addEventListener("submit", async (event) => {
 
   // Fachzuordnung speichern
   const { data: classSubject, error: subjectError } = await suvDb
-    .from("class_subjects")
-    .insert({
-      class_id: selectedDistributionClassId,
-      subject_id: subjectId,
-      weekly_periods: weeklyPeriods,
-      notes: notes || null
-    })
-    .select("id")
-    .single();
+  .from("class_subjects")
+  .upsert({
+    class_id: selectedDistributionClassId,
+    subject_id: subjectId,
+    weekly_periods: weeklyPeriods,
+    notes: notes || null
+  }, {
+    onConflict: "class_id,subject_id"
+  })
+  .select("id")
+  .single();
 
   if (subjectError) {
     distributionMessage.textContent =
