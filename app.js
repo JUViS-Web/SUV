@@ -1218,4 +1218,3 @@ document.getElementById("classCancelEdit")
 
     classMessage.textContent = "";
   });
-}
