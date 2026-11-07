@@ -3153,14 +3153,22 @@ timetableEntryForm.addEventListener("submit", async (event) => {
   const day = Number(timetableDay.value);
   const lesson = Number(timetableLesson.value);
 
-  if (
-    !day ||
-    day < 1 ||
-    day > 5 ||
-    !lesson ||
-    !timetableSubject.value ||
-    !timetableTeacher.value
-  ) {
+  const selectedTeacherIds = Array.from(
+  timetableTeachers.selectedOptions
+).map(option => option.value);
+
+if (
+  !day ||
+  day < 1 ||
+  day > 5 ||
+  !lesson ||
+  !timetableSubject.value ||
+  selectedTeacherIds.length === 0
+) {
+  timetableMessage.textContent =
+    "Bitte alle Pflichtfelder ausfüllen und mindestens eine Lehrkraft auswählen.";
+  return;
+}
     timetableMessage.textContent =
       "Bitte alle Pflichtfelder ausfüllen.";
     return;
