@@ -495,11 +495,64 @@
 
 </div>
 
-        <<div id="times" class="page">
+        <div id="times" class="page">
+
   <div class="panel">
     <h3>Zeitmodell</h3>
-    <p>Hier entsteht die Verwaltung des einheitlichen Stundenrasters.</p>
+    <p>Unterrichtszeiten und Pausen verwalten.</p>
+
+    <div id="timeModelMessage"></div>
   </div>
+
+  <div class="panel">
+    <h3>Unterrichtstage</h3>
+    <div id="timeModelDays"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Unterrichtsstunden</h3>
+
+    <form id="lessonTimeForm">
+
+      <input type="hidden" id="lessonTimeId">
+
+      <div>
+        <label for="lessonNumber">Stundennummer</label>
+        <input
+          type="number"
+          id="lessonNumber"
+          min="1"
+          max="15"
+          required
+        >
+      </div>
+
+      <div>
+        <label for="lessonStart">Beginn</label>
+        <input type="time" id="lessonStart" required>
+      </div>
+
+      <div>
+        <label for="lessonEnd">Ende</label>
+        <input type="time" id="lessonEnd" required>
+      </div>
+
+      <div class="teacher-form-actions">
+        <button type="submit" id="lessonTimeSaveButton">
+          Unterrichtsstunde speichern
+        </button>
+
+        <button type="button" id="lessonTimeCancelEdit"
+          style="display: none;">
+          Abbrechen
+        </button>
+      </div>
+
+    </form>
+
+    <div id="lessonTimeList"></div>
+  </div>
+
 </div>
           
         <div id="conflicts" class="page">
