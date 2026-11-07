@@ -3204,6 +3204,7 @@ async function loadDistributionSchoolYears() {
 
 // Initialisierung Unterrichtsverteilung
 
+alert("Unterrichtsverteilung wird initialisiert");
 distributionMessage.textContent =
   "Test: Initialisierung wird ausgeführt.";
 
