@@ -2529,29 +2529,41 @@ distributionForm.addEventListener("submit", async (event) => {
   }
 
   // Lehrkräfte zuordnen
-  if (teacherIds.length > 0) {
+  const { error: deleteTeachersError } = await suvDb
+  .from("class_subject_teachers")
+  .delete()
+  .eq("class_subject_id", classSubject.id);
 
-    const teacherRows = teacherIds.map(teacherId => ({
-      class_subject_id: classSubject.id,
-      teacher_id: teacherId
-    }));
+if (deleteTeachersError) {
+  distributionMessage.textContent =
+    "Fach wurde gespeichert, aber alte Lehrkräfte konnten nicht entfernt werden: " +
+    deleteTeachersError.message;
+  distributionSaveButton.disabled = false;
+  distributionSaveButton.textContent = "Zuordnung speichern";
+  return;
+}
 
-    const { error: teacherError } = await suvDb
-      .from("class_subject_teachers")
-      .insert(teacherRows);
+if (teacherIds.length > 0) {
+  const teacherRows = teacherIds.map(teacherId => ({
+    class_subject_id: classSubject.id,
+    teacher_id: teacherId
+  }));
 
-    if (teacherError) {
-      distributionMessage.textContent =
-        "Fach wurde gespeichert, aber die Lehrkräfte konnten nicht zugeordnet werden: " +
-        teacherError.message;
+  const { error: teacherError } = await suvDb
+    .from("class_subject_teachers")
+    .insert(teacherRows);
 
-      distributionSaveButton.disabled = false;
-      distributionSaveButton.textContent = "Zuordnung speichern";
-      await loadDistributionEntries();
-      return;
-    }
+  if (teacherError) {
+    distributionMessage.textContent =
+      "Fach wurde gespeichert, aber die Lehrkräfte konnten nicht zugeordnet werden: " +
+      teacherError.message;
+    distributionSaveButton.disabled = false;
+    distributionSaveButton.textContent = "Zuordnung speichern";
+    await loadDistributionEntries();
+    return;
   }
-
+}
+  
   distributionMessage.textContent =
     "Unterrichtsverteilung erfolgreich gespeichert.";
 
