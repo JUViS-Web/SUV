@@ -2399,6 +2399,16 @@ async function loadTimetableGrid() {
   cell.className = "timetable-empty";
 }
 
+              });
+
+        tbody.appendChild(row);
+      });
+
+      table.appendChild(tbody);
+
+      timetableGrid.innerHTML = "";
+      timetableGrid.appendChild(table);
+  }
 
 // Eingabefelder der Stundenplanung befüllen
 
