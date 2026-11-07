@@ -1202,7 +1202,41 @@ function editClass(schoolClass) {
 async function initClassManagement() {
   await loadClassGradeLevels();
   await loadActiveSUVSchoolYear();
+  await loadClassSchoolYears();
+
+  classSchoolYearSelect.value = activeSUVSchoolYearId;
+  selectedSUVSchoolYearId = activeSUVSchoolYearId;
+
+  updateClassEditingState();
 }
+
+
+// Schuljahr wechseln
+
+classSchoolYearSelect.addEventListener("change", async () => {
+  selectedSUVSchoolYearId = classSchoolYearSelect.value;
+
+  await loadClasses();
+
+  updateClassEditingState();
+});
+
+
+// Bearbeitungsrechte aktualisieren
+
+function updateClassEditingState() {
+  const canEdit =
+    selectedSUVSchoolYearId === activeSUVSchoolYearId;
+
+  classForm.querySelectorAll("input, select, button").forEach(element => {
+    element.disabled = !canEdit;
+  });
+
+  classMessage.textContent = canEdit
+    ? "Aktuelles Schuljahr: Bearbeitung möglich."
+    : "Vergangenes Schuljahr: Nur Lesezugriff.";
+}
+
 
 initClassManagement();
 
