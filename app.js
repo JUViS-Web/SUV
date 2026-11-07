@@ -1203,8 +1203,10 @@ if (classForm) {
 
 // Bearbeitung abbrechen
 
-document.getElementById("classCancelEdit")
-  .addEventListener("click", () => {
+const classCancelEdit = document.getElementById("classCancelEdit");
+
+if (classCancelEdit) {
+  classCancelEdit.addEventListener("click", () => {
     classForm.reset();
 
     document.getElementById("classId").value = "";
@@ -1213,8 +1215,8 @@ document.getElementById("classCancelEdit")
     document.getElementById("classSaveButton").textContent =
       "Klasse speichern";
 
-    document.getElementById("classCancelEdit").style.display =
-      "none";
+    classCancelEdit.style.display = "none";
 
     classMessage.textContent = "";
   });
+}
