@@ -2940,6 +2940,8 @@ async function loadTimetableGrid() {
   cell.className = "timetable-empty";
 }
 
+      row.appendChild(cell);
+      
               });
 
         tbody.appendChild(row);
