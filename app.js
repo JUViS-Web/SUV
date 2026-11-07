@@ -3193,3 +3193,8 @@ async function loadDistributionSchoolYears() {
     );
   }
 }
+
+
+// Initialisierung Unterrichtsverteilung
+loadDistributionOptions();
+loadDistributionSchoolYears();
