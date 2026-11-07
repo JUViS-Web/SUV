@@ -1312,8 +1312,58 @@ async function loadSchoolYears() {
       schoolYearForm.scrollIntoView({ behavior: "smooth" });
     });
 
-    card.append(heading, start, end, status, editButton);
-    schoolYearList.appendChild(card);
+    const deleteButton = document.createElement("button");
+deleteButton.type = "button";
+deleteButton.textContent = "Löschen";
+
+deleteButton.addEventListener("click", async () => {
+
+  if (schoolYear.is_active) {
+    schoolYearMessage.textContent =
+      "Das aktive Schuljahr kann nicht gelöscht werden.";
+    return;
+  }
+
+  const { count, error: countError } = await suvDb
+    .from("classes")
+    .select("id", { count: "exact", head: true })
+    .eq("school_year_id", schoolYear.id);
+
+  if (countError) {
+    schoolYearMessage.textContent = countError.message;
+    return;
+  }
+
+  if (count > 0) {
+    schoolYearMessage.textContent =
+      "Dieses Schuljahr enthält noch Klassen und kann nicht gelöscht werden.";
+    return;
+  }
+
+  const confirmed = confirm(
+    "Soll das Schuljahr " + schoolYear.name + " wirklich gelöscht werden?"
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await suvDb
+    .from("school_years")
+    .delete()
+    .eq("id", schoolYear.id);
+
+  if (error) {
+    schoolYearMessage.textContent = error.message;
+    return;
+  }
+
+  schoolYearMessage.textContent =
+    "Schuljahr erfolgreich gelöscht.";
+
+  await loadSchoolYears();
+});
+
+card.append(heading, start, end, status, editButton, deleteButton);
+schoolYearList.appendChild(card);
   });
 }
 
