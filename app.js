@@ -2179,11 +2179,7 @@ timetableSchoolYear.addEventListener("change", async () => {
 
 
 // Initialisierung
-distributionMessage.textContent =
-  "Test: Unterrichtsverteilung wird initialisiert.";
-
-loadDistributionOptions();
-loadDistributionSchoolYears();
+loadTimetableSchoolYears();
 
 
 // Klassen für die Stundenplanung laden
