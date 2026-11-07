@@ -1245,3 +1245,57 @@ if (classCancelEdit) {
     classMessage.textContent = "";
   });
 }
+
+// SUV – Schuljahresverwaltung
+
+const schoolYearList = document.getElementById("schoolYearList");
+const schoolYearMessage = document.getElementById("schoolYearMessage");
+
+
+// Schuljahre laden
+
+async function loadSchoolYears() {
+  const { data, error } = await suvDb
+    .from("school_years")
+    .select("id, name, start_date, end_date, is_active")
+    .order("start_date", { ascending: false });
+
+  if (error) {
+    schoolYearList.textContent = error.message;
+    return;
+  }
+
+  if (!data.length) {
+    schoolYearList.textContent = "Noch keine Schuljahre vorhanden.";
+    return;
+  }
+
+  schoolYearList.innerHTML = "";
+
+  data.forEach(schoolYear => {
+    const card = document.createElement("div");
+    card.className = "class-card";
+
+    const heading = document.createElement("h4");
+    heading.textContent = schoolYear.name;
+
+    const start = document.createElement("p");
+    start.textContent = "Beginn: " + schoolYear.start_date;
+
+    const end = document.createElement("p");
+    end.textContent = "Ende: " + schoolYear.end_date;
+
+    const status = document.createElement("p");
+    status.textContent = schoolYear.is_active
+      ? "Status: Aktives Schuljahr"
+      : "Status: Inaktiv";
+
+    card.append(heading, start, end, status);
+    schoolYearList.appendChild(card);
+  });
+}
+
+
+// Schuljahresverwaltung initialisieren
+
+loadSchoolYears();
