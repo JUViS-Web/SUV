@@ -1083,7 +1083,7 @@ async function loadClasses() {
 
   data.forEach(schoolClass => {
     const card = document.createElement("div");
-    card.className = "teacher-card";
+    card.className = "class-card";
 
     const heading = document.createElement("h4");
     heading.textContent = schoolClass.name;
