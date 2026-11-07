@@ -1102,10 +1102,36 @@ async function loadClasses() {
     editButton.textContent = "Bearbeiten";
 
     editButton.addEventListener("click", () => {
-      editClass(schoolClass);
-    });
+  editClass(schoolClass);
+});
 
-    card.append(heading, grade, students, editButton);
+const deleteButton = document.createElement("button");
+deleteButton.type = "button";
+deleteButton.textContent = "Löschen";
+
+deleteButton.addEventListener("click", async () => {
+  const confirmed = confirm(
+    "Soll die Klasse " + schoolClass.name + " wirklich gelöscht werden?"
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await suvDb
+    .from("classes")
+    .delete()
+    .eq("id", schoolClass.id);
+
+  if (error) {
+    classMessage.textContent = error.message;
+    return;
+  }
+
+  classMessage.textContent = "Klasse erfolgreich gelöscht.";
+
+  await loadClasses();
+});
+
+card.append(heading, grade, students, editButton, deleteButton);
     classList.appendChild(card);
   });
 }
