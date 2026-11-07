@@ -2180,3 +2180,60 @@ timetableSchoolYear.addEventListener("change", async () => {
 // Initialisierung
 
 loadTimetableSchoolYears();
+
+
+// Klassen für die Stundenplanung laden
+
+async function loadTimetableClasses(schoolYearId) {
+  timetableClass.innerHTML =
+    '<option value="">Klasse auswählen</option>';
+
+  const { data, error } = await suvDb
+    .from("classes")
+    .select(`
+      id,
+      name,
+      school_year_id
+    `)
+    .eq("school_year_id", schoolYearId)
+    .order("name");
+
+  if (error) {
+    timetableMessage.textContent =
+      "Klassen konnten nicht geladen werden.";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    timetableMessage.textContent =
+      "Für dieses Schuljahr sind keine Klassen angelegt.";
+    return;
+  }
+
+  data.forEach(schoolClass => {
+    const option = document.createElement("option");
+
+    option.value = schoolClass.id;
+    option.textContent = schoolClass.name;
+
+    timetableClass.appendChild(option);
+  });
+}
+
+
+// Klassenauswahl
+
+timetableClass.addEventListener("change", async () => {
+  selectedTimetableClassId = timetableClass.value;
+
+  timetableGrid.innerHTML =
+    "<p>Stundenplan wird geladen ...</p>";
+
+  if (!selectedTimetableClassId) {
+    timetableGrid.innerHTML =
+      "<p>Bitte zuerst eine Klasse auswählen.</p>";
+    return;
+  }
+
+  await loadTimetableGrid();
+});
