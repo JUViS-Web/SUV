@@ -1112,3 +1112,42 @@ async function initClassManagement() {
 }
 
 initClassManagement();
+
+// Klasse speichern
+
+if (classForm) {
+  classForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (!activeSUVSchoolYearId) {
+      classMessage.textContent = "Kein aktives Schuljahr gefunden.";
+      return;
+    }
+
+    const classData = {
+      school_year_id: activeSUVSchoolYearId,
+      grade_level_id: classGrade.value,
+      name: document.getElementById("className").value.trim(),
+      student_count: Number(
+        document.getElementById("classStudentCount").value
+      )
+    };
+
+    const { error } = await suvDb
+      .from("classes")
+      .insert(classData);
+
+    if (error) {
+      classMessage.textContent = error.message;
+      return;
+    }
+
+    classMessage.textContent = "Klasse erfolgreich gespeichert.";
+
+    classForm.reset();
+
+    document.getElementById("classStudentCount").value = 0;
+
+    await loadClasses();
+  });
+}
