@@ -2074,8 +2074,8 @@ const timetableLesson =
 const timetableSubject =
   document.getElementById("timetableSubject");
 
-const timetableTeacher =
-  document.getElementById("timetableTeacher");
+const timetableTeachers =
+  document.getElementById("timetableTeachers");
 
 const timetableRoom =
   document.getElementById("timetableRoom");
