@@ -3014,6 +3014,7 @@ timetableCancelEdit.addEventListener("click", () => {
 
                  // Unterrichtseinheit bearbeiten und löschen
 
+alert("Test A: Vor dem Listener");
 timetableGrid.addEventListener("click", async (event) => {
 
   const editButton = event.target.closest(
@@ -3064,6 +3065,7 @@ timetableGrid.addEventListener("click", async (event) => {
       behavior: "smooth",
       block: "start"
     });
+    alert("Test B: Nach dem Listener");
   }
 
 
