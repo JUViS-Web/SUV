@@ -1227,3 +1227,75 @@ body {
     grid-column: 1;
   }
 }
+
+
+/* SUV – Wochenstundenplan */
+
+.timetable-table {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin-top: 16px;
+}
+
+.timetable-table th,
+.timetable-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.timetable-table thead th {
+  background: #a71920;
+  color: white;
+  font-weight: 600;
+}
+
+.timetable-table tbody th {
+  background: #f3f3f3;
+  min-width: 95px;
+  font-size: 13px;
+  white-space: pre-line;
+}
+
+.timetable-table td {
+  min-width: 110px;
+  height: 75px;
+}
+
+.timetable-filled {
+  background: #fff0f0;
+}
+
+.timetable-filled strong,
+.timetable-filled span {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.timetable-filled strong {
+  color: #a71920;
+  font-size: 14px;
+}
+
+.timetable-filled span {
+  font-size: 12px;
+}
+
+.timetable-empty {
+  color: #aaa;
+  font-size: 18px;
+}
+
+@media (max-width: 650px) {
+  .timetable-table {
+    min-width: 650px;
+  }
+
+  .timetable-table th,
+  .timetable-table td {
+    padding: 7px;
+  }
+}
