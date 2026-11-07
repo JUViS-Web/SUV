@@ -990,3 +990,125 @@ if (roomForm) {
 }
 
 loadRooms();
+
+// SUV – Klassenverwaltung
+// DOM-Elemente der Klassenverwaltung
+
+const classForm = document.getElementById("classForm");
+const classList = document.getElementById("classList");
+const classGrade = document.getElementById("classGrade");
+const classMessage = document.getElementById("classMessage");
+
+let activeSUVSchoolYearId = null;
+
+
+// Jahrgangsstufen laden
+
+async function loadClassGradeLevels() {
+  const { data, error } = await suvDb
+    .from("grade_levels")
+    .select("id, name, sort_order")
+    .order("sort_order");
+
+  if (error) {
+    classMessage.textContent = error.message;
+    return;
+  }
+
+  classGrade.innerHTML =
+    '<option value="">Jahrgangsstufe auswählen</option>';
+
+  data.forEach(grade => {
+    const option = document.createElement("option");
+
+    option.value = grade.id;
+    option.textContent = grade.name;
+
+    classGrade.appendChild(option);
+  });
+}
+
+
+// Aktives Schuljahr laden
+
+async function loadActiveSUVSchoolYear() {
+  const { data, error } = await suvDb
+    .from("school_years")
+    .select("id, name")
+    .eq("is_active", true)
+    .single();
+
+  if (error) {
+    classMessage.textContent =
+      "Aktives Schuljahr konnte nicht geladen werden.";
+
+    return;
+  }
+
+  activeSUVSchoolYearId = data.id;
+
+  await loadClasses();
+}
+
+
+// Klassen laden
+
+async function loadClasses() {
+  const { data, error } = await suvDb
+    .from("classes")
+    .select(`
+      id,
+      name,
+      student_count,
+      grade_levels (
+        name,
+        sort_order
+      )
+    `)
+    .eq("school_year_id", activeSUVSchoolYearId)
+    .order("name");
+
+  if (error) {
+    classList.textContent = error.message;
+    return;
+  }
+
+  if (!data.length) {
+    classList.textContent = "Noch keine Klassen vorhanden.";
+    return;
+  }
+
+  classList.innerHTML = "";
+
+  data.forEach(schoolClass => {
+    const card = document.createElement("div");
+
+    card.className = "teacher-card";
+
+    const heading = document.createElement("h4");
+    heading.textContent = schoolClass.name;
+
+    const grade = document.createElement("p");
+    grade.textContent =
+      "Jahrgangsstufe: " +
+      (schoolClass.grade_levels?.name || "Unbekannt");
+
+    const students = document.createElement("p");
+    students.textContent =
+      "Schülerzahl: " + schoolClass.student_count;
+
+    card.append(heading, grade, students);
+
+    classList.appendChild(card);
+  });
+}
+
+
+// Klassenverwaltung initialisieren
+
+async function initClassManagement() {
+  await loadClassGradeLevels();
+  await loadActiveSUVSchoolYear();
+}
+
+initClassManagement();
