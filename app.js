@@ -1584,25 +1584,91 @@ const weekDays = [
   "Freitag"
 ];
 
-function loadTimeModelDays() {
+
+// Unterrichtstage laden
+
+async function loadTimeModelDays() {
+  timeModelDays.innerHTML = "Unterrichtstage werden geladen ...";
+
+  const { data, error } = await suvDb
+    .from("school_days")
+    .select("*")
+    .order("day_number");
+
+  if (error) {
+    timeModelDays.textContent = error.message;
+    return;
+  }
+
+  // Standardtage beim ersten Aufruf anlegen
+
+  if (data.length === 0) {
+    const defaultDays = weekDays.map((day, index) => ({
+      day_number: index + 1,
+      day_name: day,
+      is_active: true
+    }));
+
+    const { error: insertError } = await suvDb
+      .from("school_days")
+      .insert(defaultDays);
+
+    if (insertError) {
+      timeModelDays.textContent = insertError.message;
+      return;
+    }
+
+    await loadTimeModelDays();
+    return;
+  }
+
   timeModelDays.innerHTML = "";
 
   weekDays.forEach((day, index) => {
+    const savedDay = data.find(
+      item => item.day_number === index + 1
+    );
+
     const label = document.createElement("label");
     label.className = "time-day-option";
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.value = index + 1;
-    checkbox.checked = true;
+    checkbox.checked = savedDay
+      ? savedDay.is_active
+      : false;
 
     const text = document.createElement("span");
     text.textContent = day;
+
+    checkbox.addEventListener("change", async () => {
+      const { error } = await suvDb
+        .from("school_days")
+        .update({
+          is_active: checkbox.checked
+        })
+        .eq("day_number", index + 1);
+
+      if (error) {
+        checkbox.checked = !checkbox.checked;
+        timeModelMessage.textContent =
+          "Unterrichtstag konnte nicht gespeichert werden: " +
+          error.message;
+        return;
+      }
+
+      timeModelMessage.textContent =
+        day + " wurde erfolgreich gespeichert.";
+    });
 
     label.append(checkbox, text);
     timeModelDays.appendChild(label);
   });
 }
+
+
+// Unterrichtstage initialisieren
 
 loadTimeModelDays();
 
