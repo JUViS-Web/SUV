@@ -1248,6 +1248,7 @@ if (classCancelEdit) {
 
 // SUV – Schuljahresverwaltung
 
+const schoolYearForm = document.getElementById("schoolYearForm");
 const schoolYearList = document.getElementById("schoolYearList");
 const schoolYearMessage = document.getElementById("schoolYearMessage");
 
@@ -1290,8 +1291,105 @@ async function loadSchoolYears() {
       ? "Status: Aktives Schuljahr"
       : "Status: Inaktiv";
 
-    card.append(heading, start, end, status);
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.textContent = "Bearbeiten";
+
+    editButton.addEventListener("click", () => {
+      document.getElementById("schoolYearId").value = schoolYear.id;
+      document.getElementById("schoolYearName").value = schoolYear.name;
+      document.getElementById("schoolYearStart").value = schoolYear.start_date;
+      document.getElementById("schoolYearEnd").value = schoolYear.end_date;
+
+      document.getElementById("schoolYearSaveButton").textContent =
+        "Änderungen speichern";
+
+      document.getElementById("schoolYearCancelEdit").style.display =
+        "inline-block";
+
+      schoolYearMessage.textContent = "Schuljahr wird bearbeitet.";
+
+      schoolYearForm.scrollIntoView({ behavior: "smooth" });
+    });
+
+    card.append(heading, start, end, status, editButton);
     schoolYearList.appendChild(card);
+  });
+}
+
+
+// Schuljahr speichern oder aktualisieren
+
+if (schoolYearForm) {
+  schoolYearForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const id = document.getElementById("schoolYearId").value;
+
+    const schoolYearData = {
+      name: document.getElementById("schoolYearName").value.trim(),
+      start_date: document.getElementById("schoolYearStart").value,
+      end_date: document.getElementById("schoolYearEnd").value
+    };
+
+    if (schoolYearData.start_date >= schoolYearData.end_date) {
+      schoolYearMessage.textContent =
+        "Das Enddatum muss nach dem Anfangsdatum liegen.";
+      return;
+    }
+
+    let result;
+
+    if (id) {
+      result = await suvDb
+        .from("school_years")
+        .update(schoolYearData)
+        .eq("id", id);
+    } else {
+      result = await suvDb
+        .from("school_years")
+        .insert(schoolYearData);
+    }
+
+    if (result.error) {
+      schoolYearMessage.textContent = result.error.message;
+      return;
+    }
+
+    schoolYearMessage.textContent = id
+      ? "Schuljahr erfolgreich aktualisiert."
+      : "Schuljahr erfolgreich gespeichert.";
+
+    resetSchoolYearForm();
+    await loadSchoolYears();
+  });
+}
+
+
+// Formular zurücksetzen
+
+function resetSchoolYearForm() {
+  schoolYearForm.reset();
+
+  document.getElementById("schoolYearId").value = "";
+
+  document.getElementById("schoolYearSaveButton").textContent =
+    "Schuljahr speichern";
+
+  document.getElementById("schoolYearCancelEdit").style.display =
+    "none";
+}
+
+
+// Bearbeitung abbrechen
+
+const schoolYearCancelEdit =
+  document.getElementById("schoolYearCancelEdit");
+
+if (schoolYearCancelEdit) {
+  schoolYearCancelEdit.addEventListener("click", () => {
+    resetSchoolYearForm();
+    schoolYearMessage.textContent = "";
   });
 }
 
