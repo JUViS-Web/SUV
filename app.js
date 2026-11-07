@@ -2505,18 +2505,44 @@ distributionForm.addEventListener("submit", async (event) => {
   distributionSaveButton.textContent = "Wird gespeichert ...";
 
   // Fachzuordnung speichern
-  const { data: classSubject, error: subjectError } = await suvDb
-  .from("class_subjects")
-  .upsert({
-    class_id: selectedDistributionClassId,
-    subject_id: subjectId,
-    weekly_periods: weeklyPeriods,
-    notes: notes || null
-  }, {
-    onConflict: "class_id,subject_id"
-  })
-  .select("id")
-  .single();
+  let classSubject;
+let subjectError;
+
+if (distributionEntryId.value) {
+
+  const { data, error } = await suvDb
+    .from("class_subjects")
+    .update({
+      subject_id: subjectId,
+      weekly_periods: weeklyPeriods,
+      notes: notes || null
+    })
+    .eq("id", distributionEntryId.value)
+    .select("id")
+    .single();
+
+  classSubject = data;
+  subjectError = error;
+
+} else {
+
+  const { data, error } = await suvDb
+    .from("class_subjects")
+    .upsert({
+      class_id: selectedDistributionClassId,
+      subject_id: subjectId,
+      weekly_periods: weeklyPeriods,
+      notes: notes || null
+    }, {
+      onConflict: "class_id,subject_id"
+    })
+    .select("id")
+    .single();
+
+  classSubject = data;
+  subjectError = error;
+
+}
 
   if (subjectError) {
     distributionMessage.textContent =
