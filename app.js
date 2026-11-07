@@ -1,4 +1,11 @@
-alert("app.js wird geladen");
+window.onerror = function(message, source, lineno, colno) {
+  alert(
+    "JavaScript-Fehler:\n" +
+    message +
+    "\nZeile: " + lineno +
+    "\nSpalte: " + colno
+  );
+};
 // SUV – Supabase-Verbindung
 
 const { createClient } = supabase;
