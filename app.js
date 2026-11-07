@@ -998,6 +998,8 @@ const classForm = document.getElementById("classForm");
 const classList = document.getElementById("classList");
 const classGrade = document.getElementById("classGrade");
 const classMessage = document.getElementById("classMessage");
+const classSchoolYearSelect =
+  document.getElementById("classSchoolYearSelect");
 
 let activeSUVSchoolYearId = null;
 let selectedSUVSchoolYearId = null;
