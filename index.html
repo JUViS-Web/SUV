@@ -504,11 +504,62 @@
         </div>
 
         <div id="administration" class="page">
-          <div class="panel">
-            <h3>Administration</h3>
-            <p>Hier entstehen die Systemeinstellungen und Benutzerrechte.</p>
-          </div>
-        </div>
+
+  <div class="panel">
+    <h3>Schuljahresverwaltung</h3>
+    <p>Schuljahre anlegen und verwalten.</p>
+
+    <form id="schoolYearForm">
+
+      <input type="hidden" id="schoolYearId">
+
+      <div>
+        <label for="schoolYearName">Schuljahr</label>
+        <input
+          type="text"
+          id="schoolYearName"
+          placeholder="z. B. 2027/2028"
+          required
+        >
+      </div>
+
+      <div>
+        <label for="schoolYearStart">Beginn des Schuljahres</label>
+        <input type="date" id="schoolYearStart" required>
+      </div>
+
+      <div>
+        <label for="schoolYearEnd">Ende des Schuljahres</label>
+        <input type="date" id="schoolYearEnd" required>
+      </div>
+
+      <div class="teacher-form-actions">
+        <button type="submit" id="schoolYearSaveButton">
+          Schuljahr speichern
+        </button>
+
+        <button
+          type="button"
+          id="schoolYearCancelEdit"
+          style="display: none;"
+        >
+          Abbrechen
+        </button>
+      </div>
+
+      <div id="schoolYearMessage"></div>
+
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3>Erfasste Schuljahre</h3>
+    <div id="schoolYearList">
+      Schuljahre werden geladen ...
+    </div>
+  </div>
+
+</div>
 
       </section>
     </main>
