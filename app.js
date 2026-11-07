@@ -3109,6 +3109,7 @@ timetableGrid.addEventListener("click", async (event) => {
 // ==========================================
 // SUV – Unterrichtsverteilung
 // ==========================================
+alert("Vor Unterrichtsverteilung erreicht");
 
 // DOM-Elemente
 const distributionSchoolYear =
