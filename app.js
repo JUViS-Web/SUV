@@ -1156,6 +1156,11 @@ function editClass(schoolClass) {
   classMessage.textContent = "Klasse wird bearbeitet.";
 }
 
+  if (selectedSUVSchoolYearId !== activeSUVSchoolYearId) {
+    classMessage.textContent =
+      "Klassen vergangener Schuljahre können nicht bearbeitet werden.";
+    return;
+  }
 
 // Klassenverwaltung initialisieren
 
