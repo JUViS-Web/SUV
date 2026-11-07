@@ -2356,45 +2356,47 @@ async function loadTimetableGrid() {
       );
 
       if (entry) {
-        const subject =
-          entry.class_subjects?.subjects;
+  const subject =
+    entry.class_subjects?.subjects;
 
-        const teacher = entry.teachers;
-        const room = entry.rooms;
+  const teacher = entry.teachers;
+  const room = entry.rooms;
 
-        const subjectName = document.createElement("strong");
-        subjectName.textContent =
-          subject?.short_code || subject?.name || "Fach";
+  const subjectName = document.createElement("strong");
+  subjectName.textContent =
+    subject?.short_code || subject?.name || "Fach";
 
-        const teacherName = document.createElement("span");
-        teacherName.textContent = teacher
-          ? teacher.first_name + " " + teacher.last_name
-          : "Keine Lehrkraft";
+  const teacherName = document.createElement("span");
+  teacherName.textContent = teacher
+    ? teacher.first_name + " " + teacher.last_name
+    : "Keine Lehrkraft";
 
-        const roomName = document.createElement("span");
-        roomName.textContent =
-          room?.name || "Kein Raum";
+  const roomName = document.createElement("span");
+  roomName.textContent =
+    room?.name || "Kein Raum";
 
-        cell.appendChild(subjectName);
-        cell.appendChild(teacherName);
-        cell.appendChild(roomName);
+  const editButton = document.createElement("button");
+  editButton.type = "button";
+  editButton.textContent = "Bearbeiten";
+  editButton.className = "timetable-edit-button";
+  editButton.dataset.entryId = entry.id;
 
-        cell.className = "timetable-filled";
-      } else {
-        cell.textContent = "–";
-        cell.className = "timetable-empty";
-      }
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.textContent = "Löschen";
+  deleteButton.className = "timetable-delete-button";
+  deleteButton.dataset.entryId = entry.id;
 
-      row.appendChild(cell);
-    });
+  cell.appendChild(subjectName);
+  cell.appendChild(teacherName);
+  cell.appendChild(roomName);
+  cell.appendChild(editButton);
+  cell.appendChild(deleteButton);
 
-    tbody.appendChild(row);
-  });
-
-  table.appendChild(tbody);
-
-  timetableGrid.innerHTML = "";
-  timetableGrid.appendChild(table);
+  cell.className = "timetable-filled";
+} else {
+  cell.textContent = "–";
+  cell.className = "timetable-empty";
 }
 
 
