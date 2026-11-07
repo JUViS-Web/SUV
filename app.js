@@ -1067,7 +1067,7 @@ async function loadClasses() {
         sort_order
       )
     `)
-    .eq("school_year_id", activeSUVSchoolYearId)
+    .eq("school_year_id", selectedSUVSchoolYearId)
     .order("name");
 
   if (error) {
