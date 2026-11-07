@@ -168,11 +168,105 @@
         </div>
 
         <div id="timetable" class="page">
-          <div class="panel">
-            <h3>Stundenplanung</h3>
-            <p>Hier entsteht der zentrale Stundenplaneditor.</p>
-          </div>
-        </div>
+
+  <div class="panel">
+    <h3>Stundenplanung</h3>
+    <p>Wochenstundenpläne erstellen und verwalten.</p>
+
+    <div class="timetable-selection">
+
+      <div>
+        <label for="timetableSchoolYear">Schuljahr</label>
+        <select id="timetableSchoolYear">
+          <option value="">Schuljahre werden geladen ...</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="timetableClass">Klasse</label>
+        <select id="timetableClass">
+          <option value="">Bitte Schuljahr auswählen</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div id="timetableMessage"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Wochenstundenplan</h3>
+
+    <div id="timetableGrid">
+      <p>Bitte zuerst eine Klasse auswählen.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Unterrichtseinheit hinzufügen</h3>
+
+    <form id="timetableEntryForm">
+
+      <input type="hidden" id="timetableEntryId">
+
+      <div>
+        <label for="timetableDay">Wochentag</label>
+        <select id="timetableDay" required>
+          <option value="">Tag auswählen</option>
+          <option value="1">Montag</option>
+          <option value="2">Dienstag</option>
+          <option value="3">Mittwoch</option>
+          <option value="4">Donnerstag</option>
+          <option value="5">Freitag</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="timetableLesson">Unterrichtsstunde</label>
+        <select id="timetableLesson" required>
+          <option value="">Stunde auswählen</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="timetableSubject">Fach</label>
+        <select id="timetableSubject" required>
+          <option value="">Fach auswählen</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="timetableTeacher">Lehrkraft</label>
+        <select id="timetableTeacher" required>
+          <option value="">Lehrkraft auswählen</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="timetableRoom">Raum</label>
+        <select id="timetableRoom" required>
+          <option value="">Raum auswählen</option>
+        </select>
+      </div>
+
+      <div class="teacher-form-actions">
+        <button type="submit" id="timetableSaveButton">
+          Unterrichtseinheit speichern
+        </button>
+
+        <button
+          type="button"
+          id="timetableCancelEdit"
+          style="display: none;"
+        >
+          Abbrechen
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
 
         <div id="teachers" class="page">
 
