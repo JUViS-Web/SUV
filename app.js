@@ -2661,3 +2661,97 @@ timetableCancelEdit.addEventListener("click", () => {
   timetableMessage.textContent =
     "Bearbeitung abgebrochen.";
 });
+
+
+                 // Unterrichtseinheit bearbeiten und löschen
+
+timetableGrid.addEventListener("click", async (event) => {
+
+  const editButton = event.target.closest(
+    ".timetable-edit-button"
+  );
+
+  const deleteButton = event.target.closest(
+    ".timetable-delete-button"
+  );
+
+
+  // Bearbeiten
+
+  if (editButton) {
+
+    if (activeTimetableVersionStatus !== "draft") {
+      timetableMessage.textContent =
+        "Dieser Stundenplan ist nicht bearbeitbar.";
+      return;
+    }
+
+    const entry = timetableEntries.find(
+      item => item.id === editButton.dataset.entryId
+    );
+
+    if (!entry) return;
+
+    timetableEntryId.value = entry.id;
+    timetableDay.value = entry.weekday;
+    timetableLesson.value = entry.period_number;
+
+    await loadTimetableFormOptions();
+
+    timetableSubject.value = entry.class_subject_id;
+    timetableTeacher.value = entry.teacher_id;
+    timetableRoom.value = entry.room_id || "";
+
+    timetableSaveButton.textContent =
+      "Änderungen speichern";
+
+    timetableCancelEdit.style.display =
+      "inline-block";
+
+    timetableMessage.textContent =
+      "Unterrichtseinheit wird bearbeitet.";
+
+    timetableEntryForm.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
+
+
+  // Löschen
+
+  if (deleteButton) {
+
+    if (activeTimetableVersionStatus !== "draft") {
+      timetableMessage.textContent =
+        "Dieser Stundenplan ist nicht bearbeitbar.";
+      return;
+    }
+
+    const confirmed = confirm(
+      "Möchtest du diese Unterrichtseinheit wirklich löschen?"
+    );
+
+    if (!confirmed) return;
+
+    const entryId = deleteButton.dataset.entryId;
+
+    const { error } = await suvDb
+      .from("timetable_entries")
+      .delete()
+      .eq("id", entryId)
+      .eq("timetable_version_id", activeTimetableVersionId);
+
+    if (error) {
+      timetableMessage.textContent =
+        "Unterrichtseinheit konnte nicht gelöscht werden.";
+      return;
+    }
+
+    timetableMessage.textContent =
+      "Unterrichtseinheit wurde gelöscht.";
+
+    await loadTimetableGrid();
+  }
+
+});
