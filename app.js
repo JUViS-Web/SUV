@@ -1,3 +1,4 @@
+alert("app.js wird geladen");
 // SUV – Supabase-Verbindung
 
 const { createClient } = supabase;
