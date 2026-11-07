@@ -6,6 +6,7 @@ window.onerror = function(message, source, lineno, colno) {
     "\nSpalte: " + colno
   );
 };
+
 // SUV – Supabase-Verbindung
 
 const { createClient } = supabase;
