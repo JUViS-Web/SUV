@@ -1789,3 +1789,181 @@ document.getElementById("lessonTimeCancelEdit")
 // Zeitmodell initialisieren
 
 loadLessonTimes();
+
+
+// SUV – Zeitmodell: Pausenverwaltung
+
+const breakTimeForm = document.getElementById("breakTimeForm");
+const breakTimeList = document.getElementById("breakTimeList");
+const breakTimeMessage = document.getElementById("breakTimeMessage");
+
+
+// Pausen laden
+
+async function loadBreakTimes() {
+  const { data, error } = await suvDb
+    .from("break_times")
+    .select("*")
+    .order("start_time");
+
+  if (error) {
+    breakTimeMessage.textContent = error.message;
+    return;
+  }
+
+  breakTimeList.innerHTML = "";
+
+  if (!data.length) {
+    breakTimeList.textContent = "Noch keine Pausen vorhanden.";
+    return;
+  }
+
+  data.forEach(breakTime => {
+    const card = document.createElement("div");
+    card.className = "class-card";
+
+    const heading = document.createElement("h4");
+    heading.textContent = breakTime.name;
+
+    const time = document.createElement("p");
+    time.textContent =
+      breakTime.start_time.slice(0, 5) +
+      " – " +
+      breakTime.end_time.slice(0, 5) +
+      " Uhr";
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.textContent = "Bearbeiten";
+
+    editButton.addEventListener("click", () => {
+      document.getElementById("breakTimeId").value = breakTime.id;
+      document.getElementById("breakName").value = breakTime.name;
+      document.getElementById("breakStart").value =
+        breakTime.start_time.slice(0, 5);
+      document.getElementById("breakEnd").value =
+        breakTime.end_time.slice(0, 5);
+
+      document.getElementById("breakTimeSaveButton").textContent =
+        "Änderungen speichern";
+
+      document.getElementById("breakTimeCancelEdit").style.display =
+        "inline-block";
+
+      breakTimeMessage.textContent = "Pause wird bearbeitet.";
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "Löschen";
+
+    deleteButton.addEventListener("click", async () => {
+      if (!confirm(
+        "Soll die Pause " + breakTime.name +
+        " wirklich gelöscht werden?"
+      )) {
+        return;
+      }
+
+      const { error } = await suvDb
+        .from("break_times")
+        .delete()
+        .eq("id", breakTime.id);
+
+      if (error) {
+        breakTimeMessage.textContent = error.message;
+        return;
+      }
+
+      breakTimeMessage.textContent = "Pause erfolgreich gelöscht.";
+      await loadBreakTimes();
+    });
+
+    card.append(heading, time, editButton, deleteButton);
+    breakTimeList.appendChild(card);
+  });
+}
+
+
+// Pause speichern oder aktualisieren
+
+if (breakTimeForm) {
+  breakTimeForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const breakId =
+      document.getElementById("breakTimeId").value;
+
+    const startTime =
+      document.getElementById("breakStart").value;
+
+    const endTime =
+      document.getElementById("breakEnd").value;
+
+    if (endTime <= startTime) {
+      breakTimeMessage.textContent =
+        "Das Ende muss nach dem Beginn liegen.";
+      return;
+    }
+
+    const breakData = {
+      name: document.getElementById("breakName").value.trim(),
+      start_time: startTime,
+      end_time: endTime
+    };
+
+    let result;
+
+    if (breakId) {
+      result = await suvDb
+        .from("break_times")
+        .update(breakData)
+        .eq("id", breakId);
+    } else {
+      result = await suvDb
+        .from("break_times")
+        .insert(breakData);
+    }
+
+    if (result.error) {
+      breakTimeMessage.textContent = result.error.message;
+      return;
+    }
+
+    breakTimeMessage.textContent = breakId
+      ? "Pause erfolgreich aktualisiert."
+      : "Pause erfolgreich gespeichert.";
+
+    resetBreakTimeForm();
+    await loadBreakTimes();
+  });
+}
+
+
+// Formular zurücksetzen
+
+function resetBreakTimeForm() {
+  breakTimeForm.reset();
+
+  document.getElementById("breakTimeId").value = "";
+
+  document.getElementById("breakTimeSaveButton").textContent =
+    "Pause speichern";
+
+  document.getElementById("breakTimeCancelEdit").style.display =
+    "none";
+}
+
+
+// Bearbeitung abbrechen
+
+document.getElementById("breakTimeCancelEdit")
+  .addEventListener("click", () => {
+    resetBreakTimeForm();
+    breakTimeMessage.textContent = "";
+  });
+
+
+// Pausenverwaltung initialisieren
+
+loadBreakTimes();
