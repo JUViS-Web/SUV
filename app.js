@@ -1098,10 +1098,10 @@ async function loadClasses() {
       "Schülerzahl: " + schoolClass.student_count;
 
     const editButton = document.createElement("button");
-    editButton.type = "button";
-    editButton.textContent = "Bearbeiten";
+editButton.type = "button";
+editButton.textContent = "Bearbeiten";
 
-    editButton.addEventListener("click", () => {
+editButton.addEventListener("click", () => {
   editClass(schoolClass);
 });
 
@@ -1110,11 +1110,11 @@ deleteButton.type = "button";
 deleteButton.textContent = "Löschen";
 
 deleteButton.addEventListener("click", async () => {
-  const confirmed = confirm(
+  if (!confirm(
     "Soll die Klasse " + schoolClass.name + " wirklich gelöscht werden?"
-  );
-
-  if (!confirmed) return;
+  )) {
+    return;
+  }
 
   const { error } = await suvDb
     .from("classes")
@@ -1127,12 +1127,11 @@ deleteButton.addEventListener("click", async () => {
   }
 
   classMessage.textContent = "Klasse erfolgreich gelöscht.";
-
   await loadClasses();
 });
 
 card.append(heading, grade, students, editButton, deleteButton);
-    classList.appendChild(card);
+classList.appendChild(card);
   });
 }
 
