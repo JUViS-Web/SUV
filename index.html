@@ -429,11 +429,66 @@
   </div>
 
         <div id="classes" class="page">
-          <div class="panel">
-            <h3>Klassen</h3>
-            <p>Hier entsteht die Klassenverwaltung.</p>
-          </div>
-        </div>
+
+  <div class="panel">
+    <h3>Klassenverwaltung</h3>
+    <p>Schulklassen verwalten und dem aktuellen Schuljahr zuordnen.</p>
+
+    <form id="classForm">
+      <input type="hidden" id="classId">
+
+      <div>
+        <label for="className">Klassenbezeichnung</label>
+        <input
+          type="text"
+          id="className"
+          placeholder="z. B. 7a"
+          required
+        >
+      </div>
+
+      <div>
+        <label for="classGrade">Jahrgangsstufe</label>
+        <select id="classGrade" required>
+          <option value="">Jahrgangsstufe auswählen</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="classStudentCount">Anzahl der Schülerinnen und Schüler</label>
+        <input
+          type="number"
+          id="classStudentCount"
+          min="0"
+          value="0"
+          required
+        >
+      </div>
+
+      <div class="teacher-form-actions">
+        <button type="submit" id="classSaveButton">
+          Klasse speichern
+        </button>
+
+        <button
+          type="button"
+          id="classCancelEdit"
+          style="display: none;"
+        >
+          Abbrechen
+        </button>
+      </div>
+
+      <div id="classMessage"></div>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3>Erfasste Klassen</h3>
+    <div id="classList">Klassen werden geladen ...</div>
+  </div>
+
+</div>
 
         <div id="times" class="page">
           <div class="panel">
