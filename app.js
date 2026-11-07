@@ -3053,7 +3053,42 @@ async function loadTimetableFormOptions() {
 
     timetableTeacher.appendChild(option);
   });
+  
+// Lehrkräfte passend zum ausgewählten Fach anzeigen
 
+timetableSubject.addEventListener("change", () => {
+
+  const selectedClassSubject = classSubjects.find(
+    item => item.id === timetableSubject.value
+  );
+
+  timetableTeacher.innerHTML =
+    '<option value="">Lehrkraft auswählen</option>';
+
+  if (!selectedClassSubject) return;
+
+  const assignedTeachers =
+    selectedClassSubject.class_subject_teachers || [];
+
+  assignedTeachers.forEach(item => {
+
+    const teacher = item.teachers;
+
+    if (!teacher) return;
+
+    const option = document.createElement("option");
+
+    option.value = teacher.id;
+
+    option.textContent =
+      teacher.first_name + " " + teacher.last_name +
+      (teacher.short_code ? " (" + teacher.short_code + ")" : "");
+
+    timetableTeacher.appendChild(option);
+
+  });
+
+});
 
   // Aktive Räume laden
 
