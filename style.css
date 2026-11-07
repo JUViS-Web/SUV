@@ -1092,3 +1092,83 @@ body {
   padding: 10px 18px;
   border-radius: 9px;
 }
+
+
+/* SUV – Pausenverwaltung */
+
+#breakTimeForm {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+  margin-bottom: 20px;
+}
+
+#breakTimeForm > div:not(.teacher-form-actions) {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+#breakTimeForm label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color, inherit);
+}
+
+#breakTimeForm input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 9px;
+  background: var(--input-bg, #ffffff);
+  color: var(--text-color, #222222);
+  font: inherit;
+  font-size: 15px;
+}
+
+#breakTimeForm input:focus {
+  outline: none;
+  border-color: #c62828;
+  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.12);
+}
+
+#breakTimeForm .teacher-form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#breakTimeForm button {
+  min-height: 42px;
+  padding: 10px 18px;
+  border-radius: 9px;
+}
+
+#breakTimeList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+#breakTimeList .class-card {
+  margin: 0;
+}
+
+#breakTimeMessage {
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+@media (max-width: 650px) {
+  #breakTimeForm {
+    grid-template-columns: 1fr;
+  }
+
+  #breakTimeForm .teacher-form-actions {
+    grid-column: auto;
+  }
+}
