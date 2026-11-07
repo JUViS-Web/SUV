@@ -1053,6 +1053,34 @@ selectedSUVSchoolYearId = data.id;
   await loadClasses();
 }
 
+// Schuljahre für die Klassenverwaltung laden
+
+async function loadClassSchoolYears() {
+  const { data, error } = await suvDb
+    .from("school_years")
+    .select("id, name, is_active")
+    .order("start_date", { ascending: false });
+
+  if (error) {
+    classSchoolYearSelect.innerHTML =
+      '<option value="">Fehler beim Laden</option>';
+
+    classMessage.textContent = error.message;
+    return;
+  }
+
+  classSchoolYearSelect.innerHTML = "";
+
+  data.forEach(schoolYear => {
+    const option = document.createElement("option");
+
+    option.value = schoolYear.id;
+    option.textContent = schoolYear.name +
+      (schoolYear.is_active ? " (Aktuell)" : "");
+
+    classSchoolYearSelect.appendChild(option);
+  });
+}
 
 // Klassen laden
 
