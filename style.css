@@ -1048,3 +1048,47 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+/* SUV – Eingabefelder Zeitmodell */
+
+#lessonTimeForm > div:not(.teacher-form-actions) {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+#lessonTimeForm label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color, inherit);
+}
+
+#lessonTimeForm input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 9px;
+  background: var(--input-bg, #ffffff);
+  color: var(--text-color, #222222);
+  font: inherit;
+  font-size: 15px;
+}
+
+#lessonTimeForm input:focus {
+  outline: none;
+  border-color: #c62828;
+  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.12);
+}
+
+#lessonTimeForm .teacher-form-actions {
+  margin-top: 8px;
+}
+
+#lessonTimeForm button {
+  min-height: 42px;
+  padding: 10px 18px;
+  border-radius: 9px;
+}
