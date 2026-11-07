@@ -941,11 +941,6 @@ if (roomForm) {
     document.getElementById("roomCapacity").value
   ),
 
-  equipment: document.getElementById("roomEquipment").value
-    .split(",")
-    .map(item => item.trim())
-    .filter(item => item.length > 0),
-
   is_active:
     document.getElementById("roomActive").value === "true"
 };
