@@ -2262,6 +2262,302 @@ async function loadDistributionClasses(schoolYearId) {
   });
 }
 
+// Unterrichtsverteilung einer Klasse laden
+
+async function loadDistributionEntries() {
+
+  distributionList.innerHTML =
+    "<p>Unterrichtsverteilung wird geladen ...</p>";
+
+  const { data, error } = await suvDb
+    .from("class_subjects")
+    .select(`
+      id,
+      weekly_periods,
+      notes,
+      subjects (
+        id,
+        name,
+        short_code
+      ),
+      class_subject_teachers (
+        teacher_id,
+        teachers (
+          first_name,
+          last_name,
+          short_code
+        )
+      )
+    `)
+    .eq("class_id", selectedDistributionClassId)
+    .order("created_at");
+
+  if (error) {
+    distributionList.textContent =
+      "Unterrichtsverteilung konnte nicht geladen werden: " +
+      error.message;
+    return;
+  }
+
+  distributionEntries = data || [];
+
+  distributionList.innerHTML = "";
+
+  if (distributionEntries.length === 0) {
+    distributionList.innerHTML =
+      "<p>Für diese Klasse gibt es noch keine Unterrichtszuordnungen.</p>";
+    return;
+  }
+
+  const table = document.createElement("table");
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Fach</th>
+        <th>Wochenstunden</th>
+        <th>Lehrkräfte</th>
+        <th>Anmerkungen</th>
+        <th>Aktionen</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+
+  const tbody = table.querySelector("tbody");
+
+  distributionEntries.forEach(entry => {
+
+    const row = document.createElement("tr");
+
+    const teacherNames =
+      (entry.class_subject_teachers || [])
+        .map(item => {
+          const teacher = item.teachers;
+
+          return teacher
+            ? teacher.first_name + " " + teacher.last_name
+            : "";
+        })
+        .filter(Boolean)
+        .join(", ");
+
+    row.innerHTML = `
+      <td>${entry.subjects?.name || "Unbekannt"}</td>
+      <td>${entry.weekly_periods}</td>
+      <td>${teacherNames || "Keine Lehrkraft zugeordnet"}</td>
+      <td>${entry.notes || "–"}</td>
+      <td>
+        <button type="button"
+          data-distribution-edit="${entry.id}">
+          Bearbeiten
+        </button>
+        <button type="button"
+          data-distribution-delete="${entry.id}">
+          Löschen
+        </button>
+      </td>
+    `;
+
+    tbody.appendChild(row);
+
+  });
+
+  distributionList.appendChild(table);
+}
+
+// Fächer und Lehrkräfte laden
+
+async function loadDistributionOptions() {
+
+  distributionSubject.innerHTML =
+    '<option value="">Fach auswählen</option>';
+
+  distributionTeachers.innerHTML = "";
+
+  const { data: subjects, error: subjectsError } = await suvDb
+    .from("subjects")
+    .select("id, name, short_code")
+    .order("name");
+
+  if (subjectsError) {
+    distributionMessage.textContent =
+      "Fächer konnten nicht geladen werden.";
+    return;
+  }
+
+  subjects.forEach(subject => {
+
+    const option = document.createElement("option");
+
+    option.value = subject.id;
+    option.textContent =
+      subject.name + " (" + subject.short_code + ")";
+
+    distributionSubject.appendChild(option);
+
+  });
+
+  const { data: teachers, error: teachersError } = await suvDb
+    .from("teachers")
+    .select("id, first_name, last_name, short_code")
+    .eq("is_active", true)
+    .order("last_name");
+
+  if (teachersError) {
+    distributionMessage.textContent =
+      "Lehrkräfte konnten nicht geladen werden.";
+    return;
+  }
+
+  teachers.forEach(teacher => {
+
+    const option = document.createElement("option");
+
+    option.value = teacher.id;
+    option.textContent =
+      teacher.last_name + ", " + teacher.first_name +
+      " (" + teacher.short_code + ")";
+
+    distributionTeachers.appendChild(option);
+
+  });
+}
+
+// Unterrichtsverteilung speichern
+
+distributionForm.addEventListener("submit", async (event) => {
+
+  event.preventDefault();
+
+  if (!selectedDistributionClassId) {
+    distributionMessage.textContent =
+      "Bitte zuerst eine Klasse auswählen.";
+    return;
+  }
+
+  const subjectId = distributionSubject.value;
+  const weeklyPeriods = Number(distributionWeeklyPeriods.value);
+
+  const teacherIds = Array.from(
+    distributionTeachers.selectedOptions
+  ).map(option => option.value);
+
+  const notes = distributionNotes.value.trim();
+
+  if (!subjectId || weeklyPeriods < 1) {
+    distributionMessage.textContent =
+      "Bitte Fach und gültige Wochenstunden angeben.";
+    return;
+  }
+
+  distributionSaveButton.disabled = true;
+  distributionSaveButton.textContent = "Wird gespeichert ...";
+
+  // Fachzuordnung speichern
+  const { data: classSubject, error: subjectError } = await suvDb
+    .from("class_subjects")
+    .insert({
+      class_id: selectedDistributionClassId,
+      subject_id: subjectId,
+      weekly_periods: weeklyPeriods,
+      notes: notes || null
+    })
+    .select("id")
+    .single();
+
+  if (subjectError) {
+    distributionMessage.textContent =
+      "Zuordnung konnte nicht gespeichert werden: " +
+      subjectError.message;
+
+    distributionSaveButton.disabled = false;
+    distributionSaveButton.textContent = "Zuordnung speichern";
+    return;
+  }
+
+  // Lehrkräfte zuordnen
+  if (teacherIds.length > 0) {
+
+    const teacherRows = teacherIds.map(teacherId => ({
+      class_subject_id: classSubject.id,
+      teacher_id: teacherId
+    }));
+
+    const { error: teacherError } = await suvDb
+      .from("class_subject_teachers")
+      .insert(teacherRows);
+
+    if (teacherError) {
+      distributionMessage.textContent =
+        "Fach wurde gespeichert, aber die Lehrkräfte konnten nicht zugeordnet werden: " +
+        teacherError.message;
+
+      distributionSaveButton.disabled = false;
+      distributionSaveButton.textContent = "Zuordnung speichern";
+      await loadDistributionEntries();
+      return;
+    }
+  }
+
+  distributionMessage.textContent =
+    "Unterrichtsverteilung erfolgreich gespeichert.";
+
+  distributionForm.reset();
+
+  await loadDistributionEntries();
+
+  distributionSaveButton.disabled = false;
+  distributionSaveButton.textContent = "Zuordnung speichern";
+
+});
+
+// Schuljahr-Auswahl
+distributionSchoolYear.addEventListener("change", async () => {
+
+  selectedDistributionSchoolYearId =
+    distributionSchoolYear.value;
+
+  selectedDistributionClassId = null;
+
+  distributionClass.innerHTML =
+    '<option value="">Klasse auswählen</option>';
+
+  distributionList.innerHTML =
+    "<p>Bitte zuerst eine Klasse auswählen.</p>";
+
+  distributionMessage.textContent = "";
+
+  if (selectedDistributionSchoolYearId) {
+    await loadDistributionClasses(
+      selectedDistributionSchoolYearId
+    );
+  }
+});
+
+
+// Klassen-Auswahl
+distributionClass.addEventListener("change", async () => {
+
+  selectedDistributionClassId =
+    distributionClass.value;
+
+  distributionMessage.textContent = "";
+
+  if (selectedDistributionClassId) {
+    await loadDistributionEntries();
+  } else {
+    distributionList.innerHTML =
+      "<p>Bitte zuerst eine Klasse auswählen.</p>";
+  }
+
+});
+
+
+// Initialisierung
+loadDistributionOptions();
+loadDistributionSchoolYears();
+
 // Klassenauswahl
 
 timetableClass.addEventListener("change", async () => {
