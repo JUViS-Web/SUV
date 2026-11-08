@@ -3206,6 +3206,13 @@ timetableClass.addEventListener("change", async () => {
   }
 
   await loadTimetableFormOptions();
+
+  // Vorhandene Parallelgruppen laden
+await loadParallelGroups();
+
+// Zugehörige Parallelgruppe wiederherstellen
+timetableParallelGroup.value =
+  entry.parallel_group_id || "";
 });
 
 
