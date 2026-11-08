@@ -3254,7 +3254,12 @@ if (
     return;
   }
   
-  // Speichern oder aktualisieren
+  
+  // Erste Lehrkraft für die bisherige Datenbankspalte übernehmen
+
+  entryData.teacher_id = selectedTeacherIds[0];
+
+  // Unterrichtseinheit speichern oder aktualisieren
 
   let result;
 
@@ -3262,11 +3267,15 @@ if (
     result = await suvDb
       .from("timetable_entries")
       .update(entryData)
-      .eq("id", entryId);
+      .eq("id", entryId)
+      .select("id")
+      .single();
   } else {
     result = await suvDb
       .from("timetable_entries")
-      .insert(entryData);
+      .insert(entryData)
+      .select("id")
+      .single();
   }
 
   if (result.error) {
@@ -3274,6 +3283,39 @@ if (
       "Unterrichtseinheit konnte nicht gespeichert werden.";
     return;
   }
+
+  const savedEntryId = result.data.id;
+
+  // Bisherige Lehrkraft-Zuordnungen entfernen
+
+  const { error: deleteTeachersError } = await suvDb
+    .from("timetable_entry_teachers")
+    .delete()
+    .eq("timetable_entry_id", savedEntryId);
+
+  if (deleteTeachersError) {
+    timetableMessage.textContent =
+      "Lehrkraft-Zuordnungen konnten nicht aktualisiert werden.";
+    return;
+  }
+
+  // Neue Lehrkraft-Zuordnungen speichern
+
+  const teacherAssignments = selectedTeacherIds.map(teacherId => ({
+    timetable_entry_id: savedEntryId,
+    teacher_id: teacherId
+  }));
+
+  const { error: insertTeachersError } = await suvDb
+    .from("timetable_entry_teachers")
+    .insert(teacherAssignments);
+
+  if (insertTeachersError) {
+    timetableMessage.textContent =
+      "Lehrkräfte konnten nicht zugeordnet werden.";
+    return;
+  }
+
 
   timetableMessage.textContent =
     "Unterrichtseinheit erfolgreich gespeichert.";
