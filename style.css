@@ -1245,7 +1245,7 @@ body {
 
 .timetable-table {
   width: 100%;
-  min-width: 2500px;
+  min-width: 1500px;
   border-collapse: separate;
   border-spacing: 2px;
   table-layout: fixed;
@@ -1656,3 +1656,50 @@ form {
 
     return;
   }
+
+        
+/* Korrektur: kompakte Parallelunterrichtskarten */
+
+.timetable-filled {
+  min-width: 260px;
+  box-sizing: border-box;
+  vertical-align: top !important;
+}
+
+.timetable-entry {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  margin: 0;
+  padding: 6px;
+  gap: 3px;
+}
+
+.timetable-entry strong,
+.timetable-entry span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Kompakte Aktionsschaltflächen */
+
+.timetable-entry .timetable-edit-button,
+.timetable-entry .timetable-delete-button {
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  margin: 3px 2px 0 0;
+  font-size: 0;
+  text-align: center;
+}
+
+.timetable-entry .timetable-edit-button::after {
+  content: "✎";
+  font-size: 14px;
+}
+
+.timetable-entry .timetable-delete-button::after {
+  content: "×";
+  font-size: 17px;
+}
