@@ -3248,6 +3248,16 @@ if (
   
   const entryId = timetableEntryId.value;
 
+  // Parallelgruppe festlegen
+
+  let parallelGroupId = null;
+
+  if (timetableParallelGroup.value === "new") {
+    parallelGroupId = crypto.randomUUID();
+  } else if (timetableParallelGroup.value !== "") {
+    parallelGroupId = timetableParallelGroup.value;
+  }
+  
   const entryData = {
   timetable_version_id: activeTimetableVersionId,
   class_subject_id: timetableSubject.value,
