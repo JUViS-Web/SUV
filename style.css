@@ -1245,7 +1245,7 @@ body {
 
 .timetable-table {
   width: 100%;
-  min-width: 1500px;
+  min-width: 2500px;
   border-collapse: separate;
   border-spacing: 2px;
   table-layout: fixed;
