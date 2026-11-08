@@ -1512,3 +1512,147 @@ form {
   flex-direction: column;
   gap: 14px;
 }
+
+
+
+  // Weitere Unterrichtskurse anzeigen
+
+  if (moreButton) {
+
+    const weekday = Number(moreButton.dataset.weekday);
+    const periodNumber = Number(moreButton.dataset.periodNumber);
+
+    const allEntries = timetableEntries.filter(entry =>
+      entry.weekday === weekday &&
+      entry.period_number === periodNumber
+    );
+
+    // Hintergrund des Fensters
+    const overlay = document.createElement("div");
+    overlay.className = "timetable-more-overlay";
+
+    // Fenster
+    const modal = document.createElement("div");
+    modal.className = "timetable-more-modal";
+
+    // Kopfbereich
+    const header = document.createElement("div");
+    header.className = "timetable-more-header";
+
+    const heading = document.createElement("h2");
+    heading.textContent = "Unterrichtskurse";
+
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.textContent = "×";
+    closeButton.className = "timetable-more-close";
+
+    closeButton.addEventListener("click", () => {
+      overlay.remove();
+    });
+
+    header.appendChild(heading);
+    header.appendChild(closeButton);
+
+    modal.appendChild(header);
+
+    // Alle Unterrichtskurse anzeigen
+    const courseList = document.createElement("div");
+    courseList.className = "timetable-more-list";
+
+    allEntries.forEach(entry => {
+
+      const subject =
+        entry.class_subjects?.subjects;
+
+      const assignedTeachers =
+        entry.timetable_entry_teachers || [];
+
+      const teacherNames = assignedTeachers
+        .map(item => {
+          const teacher = item.teachers;
+
+          if (!teacher) return null;
+
+          return teacher.first_name + " " + teacher.last_name;
+        })
+        .filter(Boolean)
+        .join(", ");
+
+      const course = document.createElement("div");
+      course.className = "timetable-more-course";
+
+      const subjectName = document.createElement("strong");
+      subjectName.textContent =
+        subject?.short_code || subject?.name || "Fach";
+
+      const teacherName = document.createElement("span");
+      teacherName.textContent =
+        teacherNames || "Keine Lehrkraft";
+
+      const roomName = document.createElement("span");
+      roomName.textContent =
+        entry.rooms?.name || "Kein Raum";
+
+      const actions = document.createElement("div");
+      actions.className = "timetable-more-actions";
+
+      const editCourseButton = document.createElement("button");
+      editCourseButton.type = "button";
+      editCourseButton.textContent = "Bearbeiten";
+      editCourseButton.className = "timetable-edit-button";
+
+      editCourseButton.addEventListener("click", () => {
+        overlay.remove();
+
+        const originalButton = Array.from(
+          timetableGrid.querySelectorAll(".timetable-edit-button")
+        ).find(button =>
+          button.dataset.entryId === entry.id
+        );
+
+        if (originalButton) originalButton.click();
+      });
+
+      const deleteCourseButton = document.createElement("button");
+      deleteCourseButton.type = "button";
+      deleteCourseButton.textContent = "Löschen";
+      deleteCourseButton.className = "timetable-delete-button";
+
+      deleteCourseButton.addEventListener("click", () => {
+        overlay.remove();
+
+        const originalButton = Array.from(
+          timetableGrid.querySelectorAll(".timetable-delete-button")
+        ).find(button =>
+          button.dataset.entryId === entry.id
+        );
+
+        if (originalButton) originalButton.click();
+      });
+
+      actions.appendChild(editCourseButton);
+      actions.appendChild(deleteCourseButton);
+
+      course.appendChild(subjectName);
+      course.appendChild(teacherName);
+      course.appendChild(roomName);
+      course.appendChild(actions);
+
+      courseList.appendChild(course);
+    });
+
+    modal.appendChild(courseList);
+    overlay.appendChild(modal);
+
+    // Klick außerhalb des Fensters schließt es
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) {
+        overlay.remove();
+      }
+    });
+
+    document.body.appendChild(overlay);
+
+    return;
+  }
