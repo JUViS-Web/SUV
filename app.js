@@ -2126,6 +2126,12 @@ const timetableCancelEdit =
 
 async function loadParallelGroups() {
   alert("loadParallelGroups wird aufgerufen");
+  alert(
+  "Klasse: " + selectedTimetableClassId +
+  "\nTag: " + timetableDay.value +
+  "\nStunde: " + timetableLesson.value +
+  "\nStundenplan-Version: " + activeTimetableVersionId
+);
   timetableParallelGroup.innerHTML = `
     <option value="">Normaler Unterricht</option>
     <option value="new">Neue Parallelgruppe erstellen</option>
