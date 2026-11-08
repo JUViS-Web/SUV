@@ -2124,7 +2124,7 @@ const timetableCancelEdit =
 
 // Vorhandene Parallelgruppen laden
 
-async function loadParallelGroups() {
+aasync function loadParallelGroups() {
   timetableParallelGroup.innerHTML = `
     <option value="">Normaler Unterricht</option>
     <option value="new">Neue Parallelgruppe erstellen</option>
@@ -2133,7 +2133,8 @@ async function loadParallelGroups() {
   if (
     !selectedTimetableClassId ||
     !timetableDay.value ||
-    !timetableLesson.value
+    !timetableLesson.value ||
+    !activeTimetableVersionId
   ) {
     return;
   }
@@ -2154,33 +2155,21 @@ async function loadParallelGroups() {
   }
 
   const groupIds = [
-    ...new Set(data.map(item => item.parallel_group_id))
+    ...new Set(
+      (data || []).map(item => item.parallel_group_id)
+    )
   ];
 
-  groupIds.forEach(groupId => {
+  groupIds.forEach((groupId, index) => {
     const option = document.createElement("option");
+
     option.value = groupId;
-    option.textContent = "Bestehende Parallelgruppe";
+    option.textContent =
+      "Parallelgruppe " + (index + 1);
+
     timetableParallelGroup.appendChild(option);
   });
 }
-
-// Parallelgruppen bei Änderungen neu laden
-
-timetableDay.addEventListener("change", loadParallelGroups);
-
-timetableLesson.addEventListener("change", loadParallelGroups);
-
-timetableClass.addEventListener("change", loadParallelGroups);
-
-// Aktuelle Stundenplan-Auswahl
-
-let activeTimetableVersionId = null;
-let selectedTimetableClassId = null;
-let selectedTimetableSchoolYearId = null;
-let timetableEntries = [];
-let activeTimetableVersionStatus = null;
-
 // Schuljahre für die Stundenplanung laden
 
 async function loadTimetableSchoolYears() {
