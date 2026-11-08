@@ -3746,7 +3746,8 @@ timetableGrid.addEventListener("click", async (event) => {
     timetableLesson.value = entry.period_number;
 
     await loadTimetableFormOptions();
-
+    await loadParallelGroups();
+    timetableParallelGroup.value = entry.parallel_group_id || "";
     
 timetableSubject.value = entry.class_subject_id;
 
