@@ -118,7 +118,7 @@ const loginScreen = document.getElementById("loginScreen");
 const loginMessage = document.getElementById("loginMessage");
 
 console.log("SUV: Login-Formular gefunden", loginForm);
-loginForm.addEventListener("submit", async (event) => {
+loginForm.onsubmit = async (event) => {
   loginMessage.textContent = "TEST: Anmelde-Handler wurde gestartet.";
   console.log("SUV: Anmelde-Event wurde ausgelöst");
   console.log("SUV: Submit-Handler gestartet");
@@ -193,7 +193,7 @@ loginForm.addEventListener("submit", async (event) => {
     loginButton.disabled = false;
     loginButton.textContent = "Anmelden";
   }
-});
+};
 
 /// SUV – Anmeldung und Benutzerrolle wiederherstellen
 
