@@ -2149,10 +2149,13 @@ async function loadParallelGroups() {
     .not("parallel_group_id", "is", null);
 
   if (error) {
-    timetableMessage.textContent =
-      "Parallelgruppen konnten nicht geladen werden.";
-    return;
-  }
+  timetableMessage.textContent =
+    "Fehler beim Laden: " + error.message;
+  return;
+}
+
+timetableMessage.textContent =
+  "Gefundene Parallelgruppen: " + (data || []).length;
 
   const groupIds = [
     ...new Set(
