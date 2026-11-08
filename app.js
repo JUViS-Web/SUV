@@ -26,7 +26,28 @@ document.body.insertAdjacentHTML(
   "afterbegin",
   '<div style="position:fixed;top:10px;left:10px;background:red;color:white;padding:12px;z-index:999999">TEST: Supabase initialisiert</div>'
 );
-alert("TEST: Supabase wurde initialisiert.");
+alert("TEST 1: app.js gestartet");
+
+window.onerror = function(message, source, lineno, colno) {
+  alert(
+    "JavaScript-Fehler:\n" +
+    message +
+    "\nZeile: " + lineno
+  );
+};
+
+alert("TEST 2: JavaScript funktioniert");
+
+const { createClient } = supabase;
+
+alert("TEST 3: Supabase-Bibliothek gefunden");
+
+const suvDb = createClient(
+  window.SUV_CONFIG.SUPABASE_URL,
+  window.SUV_CONFIG.SUPABASE_KEY
+);
+
+alert("TEST 4: Supabase initialisiert");
 // SUV – Navigation mit Rollenprüfung
 
 document.querySelectorAll(".nav-item").forEach(button => {
