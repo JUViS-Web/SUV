@@ -1703,3 +1703,55 @@ form {
   content: "×";
   font-size: 17px;
 }
+
+
+        /* Popup für weitere Unterrichtskurse */
+
+.timetable-more-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+  box-sizing: border-box;
+
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(3px);
+}
+
+.timetable-more-modal {
+  position: relative;
+  width: min(1100px, 95vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  padding: 20px;
+  background: #f3f5f8;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.timetable-more-list {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 12px;
+}
+
+.timetable-more-course {
+  flex: 0 0 160px;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #d5dbe5;
+}
