@@ -2770,6 +2770,10 @@ distributionList.addEventListener("click", async (event) => {
     "[data-distribution-delete]"
   );
 
+  const moreButton = event.target.closest(
+  ".timetable-more-button"
+);
+
   // Eintrag bearbeiten
   if (editButton) {
     const entryId = editButton.dataset.distributionEdit;
