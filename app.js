@@ -2189,6 +2189,13 @@ timetableMessage.textContent =
     timetableParallelGroup.appendChild(option);
   });
 }
+
+// Parallelgruppen bei Änderungen neu laden
+
+timetableDay.addEventListener("change", loadParallelGroups);
+
+timetableLesson.addEventListener("change", loadParallelGroups);
+
 // Schuljahre für die Stundenplanung laden
 
 async function loadTimetableSchoolYears() {
