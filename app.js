@@ -2856,8 +2856,8 @@ async function loadTimetableGrid() {
   // Unterrichtseinheiten laden
 
   const { data: entries, error: entriesError } = await suvDb
-   
-.select(`
+  .from("timetable_entries")
+  .select(`
   id,
   weekday,
   period_number,
