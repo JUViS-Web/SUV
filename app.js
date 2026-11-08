@@ -3271,6 +3271,74 @@ if (
 // Mehrfachbelegung einer Klasse ist erlaubt.
 // Die Parallelgruppen-ID kennzeichnet zusammengehörige Kurse.
 
+// Belegte Unterrichtseinheiten zum gleichen Zeitpunkt laden
+
+let conflictQuery = suvDb
+  .from("timetable_entries")
+  .select(`
+    id,
+    teacher_id,
+    room_id,
+    timetable_entry_teachers (
+      teacher_id
+    )
+  `)
+  .eq("timetable_version_id", activeTimetableVersionId)
+  .eq("weekday", day)
+  .eq("period_number", lesson);
+
+if (entryId) {
+  conflictQuery = conflictQuery.neq("id", entryId);
+}
+
+const { data: conflictingEntries, error: conflictError } =
+  await conflictQuery;
+
+if (conflictError) {
+  timetableMessage.textContent =
+    "Belegungskonflikte konnten nicht geprüft werden.";
+  return;
+}
+
+// Bereits belegte Lehrkräfte ermitteln
+
+const occupiedTeacherIds = new Set();
+
+conflictingEntries.forEach(entry => {
+  if (entry.teacher_id) {
+    occupiedTeacherIds.add(entry.teacher_id);
+  }
+
+  (entry.timetable_entry_teachers || []).forEach(item => {
+    occupiedTeacherIds.add(item.teacher_id);
+  });
+});
+
+// Lehrkraftkonflikt prüfen
+
+const teacherConflict = selectedTeacherIds.some(
+  teacherId => occupiedTeacherIds.has(teacherId)
+);
+
+if (teacherConflict) {
+  timetableMessage.textContent =
+    "Mindestens eine ausgewählte Lehrkraft hat zu diesem Zeitpunkt bereits Unterricht.";
+  return;
+}
+
+// Raumkonflikt prüfen
+
+const roomConflict = entryData.room_id &&
+  conflictingEntries.some(
+    entry => entry.room_id === entryData.room_id
+  );
+
+if (roomConflict) {
+  timetableMessage.textContent =
+    "Dieser Raum ist zu diesem Zeitpunkt bereits belegt.";
+  return;
+}
+
   // Wochenstunden des Fachs prüfen
 
   const { data: subjectData, error: subjectDataError } =
