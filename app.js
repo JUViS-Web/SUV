@@ -2122,6 +2122,48 @@ const timetableSaveButton =
 const timetableCancelEdit =
   document.getElementById("timetableCancelEdit");
 
+// Vorhandene Parallelgruppen laden
+
+async function loadParallelGroups() {
+  timetableParallelGroup.innerHTML = `
+    <option value="">Normaler Unterricht</option>
+    <option value="new">Neue Parallelgruppe erstellen</option>
+  `;
+
+  if (
+    !selectedTimetableClassId ||
+    !timetableDay.value ||
+    !timetableLesson.value
+  ) {
+    return;
+  }
+
+  const { data, error } = await suvDb
+    .from("timetable_entries")
+    .select("parallel_group_id")
+    .eq("timetable_version_id", activeTimetableVersionId)
+    .eq("class_id", selectedTimetableClassId)
+    .eq("weekday", Number(timetableDay.value))
+    .eq("period_number", Number(timetableLesson.value))
+    .not("parallel_group_id", "is", null);
+
+  if (error) {
+    timetableMessage.textContent =
+      "Parallelgruppen konnten nicht geladen werden.";
+    return;
+  }
+
+  const groupIds = [
+    ...new Set(data.map(item => item.parallel_group_id))
+  ];
+
+  groupIds.forEach(groupId => {
+    const option = document.createElement("option");
+    option.value = groupId;
+    option.textContent = "Bestehende Parallelgruppe";
+    timetableParallelGroup.appendChild(option);
+  });
+}
 
 // Aktuelle Stundenplan-Auswahl
 
