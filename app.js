@@ -3268,34 +3268,8 @@ if (
   parallel_group_id: parallelGroupId
 };
 
-  // Doppelte Belegung der Klasse prüfen
-
-  let duplicateQuery = suvDb
-    .from("timetable_entries")
-    .select("id")
-    .eq("timetable_version_id", activeTimetableVersionId)
-    .eq("class_id", selectedTimetableClassId)
-    .eq("weekday", day)
-    .eq("period_number", lesson);
-
-  if (entryId) {
-    duplicateQuery = duplicateQuery.neq("id", entryId);
-  }
-
-  const { data: duplicates, error: duplicateError } =
-    await duplicateQuery;
-
-  if (duplicateError) {
-    timetableMessage.textContent =
-      "Belegung konnte nicht geprüft werden.";
-    return;
-  }
-
-  if (duplicates.length > 0) {
-    timetableMessage.textContent =
-      "Diese Klasse hat zu diesem Zeitpunkt bereits Unterricht.";
-    return;
-  }
+// Mehrfachbelegung einer Klasse ist erlaubt.
+// Die Parallelgruppen-ID kennzeichnet zusammengehörige Kurse.
 
   // Wochenstunden des Fachs prüfen
 
