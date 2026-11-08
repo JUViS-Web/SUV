@@ -3075,35 +3075,7 @@ async function loadTimetableGrid() {
 
 }
 
-  const roomName = document.createElement("span");
-  roomName.textContent =
-    room?.name || "Kein Raum";
-
-  const editButton = document.createElement("button");
-  editButton.type = "button";
-  editButton.textContent = "Bearbeiten";
-  editButton.className = "timetable-edit-button";
-  editButton.dataset.entryId = entry.id;
-
-  const deleteButton = document.createElement("button");
-  deleteButton.type = "button";
-  deleteButton.textContent = "Löschen";
-  deleteButton.className = "timetable-delete-button";
-  deleteButton.dataset.entryId = entry.id;
-
-  cell.appendChild(subjectName);
-  cell.appendChild(teacherName);
-  cell.appendChild(roomName);
-  cell.appendChild(editButton);
-  cell.appendChild(deleteButton);
-
-  cell.className = "timetable-filled";
-} else {
-  cell.textContent = "–";
-  cell.className = "timetable-empty";
-}
-
-      row.appendChild(cell);
+    row.appendChild(cell);
       
               });
 
