@@ -873,6 +873,19 @@ alert("HTML-Test: Skripte werden ausgeführt");
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script src="app.js?v=20261108-2"></script>
+  <script>
+const suvScript = document.querySelector(
+  'script[src*="app.js"]'
+);
+
+suvScript.addEventListener("load", () => {
+  alert("TEST: app.js wurde geladen");
+});
+
+suvScript.addEventListener("error", () => {
+  alert("FEHLER: app.js konnte nicht geladen werden");
+});
+</script>
 </body>
 </html>
 
