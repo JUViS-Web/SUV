@@ -17,6 +17,7 @@ const suvDb = createClient(
 );
 
 console.log("SUV: Supabase-Verbindung initialisiert.");
+alert("TEST: Supabase wurde initialisiert.");
 // SUV – Navigation mit Rollenprüfung
 
 document.querySelectorAll(".nav-item").forEach(button => {
