@@ -3287,10 +3287,10 @@ if (
   }
 
   let weeklyQuery = suvDb
-    .from("timetable_entries")
-    .select("id")
-    .eq("timetable_version_id", activeTimetableVersionId)
-    .eq("class_subject_id", timetableSubject.value);
+  .from("timetable_entries")
+  .select("id, parallel_group_id")
+  .eq("timetable_version_id", activeTimetableVersionId)
+  .eq("class_subject_id", timetableSubject.value);
 
   if (entryId) {
     weeklyQuery = weeklyQuery.neq("id", entryId);
