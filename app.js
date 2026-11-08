@@ -41,8 +41,6 @@ window.onerror = function(message, source, lineno, colno) {
 
 alert("TEST 2: JavaScript funktioniert");
 
-const { createClient } = supabase;
-
 alert("TEST 3: Supabase-Bibliothek gefunden");
 
 const suvDb = createClient(
