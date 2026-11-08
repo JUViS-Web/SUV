@@ -2140,6 +2140,7 @@ async function loadParallelGroups() {
     return;
   }
 
+  alert("Datenbankabfrage wird gestartet");
   const { data, error } = await suvDb
     .from("timetable_entries")
     .select("parallel_group_id")
@@ -2148,6 +2149,7 @@ async function loadParallelGroups() {
     .eq("weekday", Number(timetableDay.value))
     .eq("period_number", Number(timetableLesson.value))
     .not("parallel_group_id", "is", null);
+  alert("Datenbankabfrage abgeschlossen");
 
   if (error) {
   timetableMessage.textContent =
