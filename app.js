@@ -2110,6 +2110,9 @@ const timetableSubject =
 const timetableTeachers =
   document.getElementById("timetableTeachers");
 
+const timetableParallelGroup =
+  document.getElementById("timetableParallelGroup");
+
 const timetableRoom =
   document.getElementById("timetableRoom");
 
