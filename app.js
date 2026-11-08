@@ -3177,14 +3177,13 @@ if (
   const entryId = timetableEntryId.value;
 
   const entryData = {
-    timetable_version_id: activeTimetableVersionId,
-    class_subject_id: timetableSubject.value,
-    teacher_id: timetableTeacher.value,
-    room_id: timetableRoom.value || null,
-    class_id: selectedTimetableClassId,
-    weekday: day,
-    period_number: lesson
-  };
+  timetable_version_id: activeTimetableVersionId,
+  class_subject_id: timetableSubject.value,
+  room_id: timetableRoom.value || null,
+  class_id: selectedTimetableClassId,
+  weekday: day,
+  period_number: lesson
+};
 
   // Doppelte Belegung der Klasse prüfen
 
