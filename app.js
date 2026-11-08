@@ -3475,6 +3475,8 @@ function resetTimetableEntryForm() {
 
   timetableEntryId.value = "";
 
+  timetableParallelGroup.value = "";
+
   timetableSaveButton.textContent =
     "Unterrichtseinheit speichern";
 
