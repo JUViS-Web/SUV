@@ -2837,6 +2837,7 @@ async function loadTimetableGrid() {
       "Unterrichtstage konnten nicht geladen werden.";
     return;
   }
+  timetableGrid.textContent = "TEST 1: Unterrichtstage geladen";
 
   // Unterrichtsstunden laden
 
@@ -2850,6 +2851,7 @@ async function loadTimetableGrid() {
       "Unterrichtsstunden konnten nicht geladen werden.";
     return;
   }
+  timetableGrid.textContent = "TEST 2: Unterrichtsstunden geladen";
 
   // Unterrichtseinheiten laden
 
@@ -2887,6 +2889,7 @@ async function loadTimetableGrid() {
       "Unterrichtseinheiten konnten nicht geladen werden.";
     return;
   }
+  timetableGrid.textContent = "TEST 3: Unterrichtseinheiten geladen";
 
   timetableEntries = entries || [];
 
