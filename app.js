@@ -2161,6 +2161,10 @@ timetableMessage.textContent =
   "Gefundene Parallelgruppen: " + (data || []).length
 );
 
+  alert(
+  "Datenbankergebnis: " +
+  JSON.stringify(data)
+);
   const groupIds = [
     ...new Set(
       (data || []).map(item => item.parallel_group_id)
