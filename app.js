@@ -3315,7 +3315,7 @@ const countedLessons = new Set(
     return;
   }
 
-  if (existingLessons.length >= subjectData.weekly_periods) {
+  if (countedLessons.size >= subjectData.weekly_periods) {
     timetableMessage.textContent =
       "Die festgelegten Wochenstunden für dieses Fach sind bereits vollständig verplant.";
     return;
