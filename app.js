@@ -3187,23 +3187,19 @@ timetableSubject.addEventListener("change", () => {
 }
 
 
-// Auswahlfelder bei Klassenwechsel aktualisieren
+/// Auswahlfelder bei Klassenwechsel aktualisieren
 
 timetableClass.addEventListener("change", async () => {
+  selectedTimetableClassId = timetableClass.value;
+
   if (!selectedTimetableClassId) {
     return;
   }
 
   await loadTimetableFormOptions();
 
-  // Vorhandene Parallelgruppen laden
-await loadParallelGroups();
-
-// Zugehörige Parallelgruppe wiederherstellen
-timetableParallelGroup.value =
-  entry.parallel_group_id || "";
+  await loadParallelGroups();
 });
-
 
 // Unterrichtseinheit speichern
 
