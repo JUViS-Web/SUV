@@ -126,6 +126,7 @@ testSUVConnection();
 const loginForm = document.getElementById("loginForm");
 const loginScreen = document.getElementById("loginScreen");
 const loginMessage = document.getElementById("loginMessage");
+alert("SUV-Test: Login-Code wird ausgeführt.");
 
 console.log("SUV: Login-Formular gefunden", loginForm);
 loginForm.onsubmit = async (event) => {
