@@ -143,6 +143,7 @@ loginForm.onsubmit = async (event) => {
   loginMessage.textContent = "";
 
   try {
+   alert("SUV-Test: Anmelde-Handler wird registriert.");
     const { data, error } = await suvDb.auth.signInWithPassword({
       email,
       password
