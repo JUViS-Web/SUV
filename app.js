@@ -3387,9 +3387,36 @@ timetableGrid.addEventListener("click", async (event) => {
 
     await loadTimetableFormOptions();
 
-    timetableSubject.value = entry.class_subject_id;
-    timetableTeacher.value = entry.teacher_id;
-    timetableRoom.value = entry.room_id || "";
+    
+timetableSubject.value = entry.class_subject_id;
+
+// Lehrkräfte-Auswahl für das Fach aktualisieren
+timetableSubject.dispatchEvent(new Event("change"));
+
+// Zugeordnete Lehrkräfte laden
+const { data: assignedTeachers, error: assignedTeachersError } =
+  await suvDb
+    .from("timetable_entry_teachers")
+    .select("teacher_id")
+    .eq("timetable_entry_id", entry.id);
+
+if (assignedTeachersError) {
+  timetableMessage.textContent =
+    "Zugeordnete Lehrkräfte konnten nicht geladen werden.";
+  return;
+}
+
+// Bisher ausgewählte Lehrkräfte wiederherstellen
+const assignedTeacherIds = new Set(
+  (assignedTeachers || []).map(item => item.teacher_id)
+);
+
+Array.from(timetableTeachers.options).forEach(option => {
+  option.selected = assignedTeacherIds.has(option.value);
+});
+
+timetableRoom.value = entry.room_id || "";
+
 
     timetableSaveButton.textContent =
       "Änderungen speichern";
