@@ -2821,27 +2821,31 @@ async function loadTimetableGrid() {
   // Unterrichtseinheiten laden
 
   const { data: entries, error: entriesError } = await suvDb
-    .from("timetable_entries")
-    .select(`
-      id,
-      weekday,
-      period_number,
-      class_subjects (
-        subjects (
-          name,
-          short_code,
-          color
-        )
-      ),
-      teachers (
-        first_name,
-        last_name,
-        short_code
-      ),
-      rooms (
-        name
-      )
-    `)
+   
+.select(`
+  id,
+  weekday,
+  period_number,
+  class_subjects (
+    subjects (
+      name,
+      short_code,
+      color
+    )
+  ),
+  timetable_entry_teachers (
+    teacher_id,
+    teachers (
+      first_name,
+      last_name,
+      short_code
+    )
+  ),
+  rooms (
+    name
+  )
+`)
+
     .eq("timetable_version_id", activeTimetableVersionId)
     .eq("class_id", selectedTimetableClassId);
 
