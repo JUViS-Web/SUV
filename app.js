@@ -3567,6 +3567,7 @@ alert("Test 0: app.js wird ausgeführt");
 
 alert("Test A: Vor dem Listener");
 timetableGrid.addEventListener("click", async (event) => {
+  alert("Klick-Listener funktioniert");
 
   const editButton = event.target.closest(
     ".timetable-edit-button"
