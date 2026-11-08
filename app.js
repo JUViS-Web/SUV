@@ -2156,6 +2156,9 @@ async function loadParallelGroups() {
 
 timetableMessage.textContent =
   "Gefundene Parallelgruppen: " + (data || []).length;
+  alert(
+  "Gefundene Parallelgruppen: " + (data || []).length
+);
 
   const groupIds = [
     ...new Set(
