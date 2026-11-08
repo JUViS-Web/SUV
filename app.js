@@ -3221,11 +3221,7 @@ if (
     "Bitte alle Pflichtfelder ausfüllen und mindestens eine Lehrkraft auswählen.";
   return;
 }
-    timetableMessage.textContent =
-      "Bitte alle Pflichtfelder ausfüllen.";
-    return;
-  }
-
+  
   const entryId = timetableEntryId.value;
 
   const entryData = {
