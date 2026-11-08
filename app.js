@@ -3260,10 +3260,10 @@ if (
   room_id: timetableRoom.value || null,
   class_id: selectedTimetableClassId,
   weekday: day,
-  period_number: lesson
+  period_number: lesson,
   parallel_group_id: parallelGroupId
 };
-
+  
 // Mehrfachbelegung einer Klasse ist erlaubt.
 // Die Parallelgruppen-ID kennzeichnet zusammengehörige Kurse.
 
