@@ -3004,35 +3004,76 @@ async function loadTimetableGrid() {
   item.period_number === lesson.lesson_number
 );
 
-      if (entry) {
-  const subject =
-    entry.class_subjects?.subjects;
+      if (matchingEntries.length > 0) {
 
-  const assignedTeachers =
-    entry.timetable_entry_teachers || [];
+  matchingEntries.forEach(entry => {
 
-  const room = entry.rooms;
+    const subject =
+      entry.class_subjects?.subjects;
 
-  const subjectName = document.createElement("strong");
-  subjectName.textContent =
-    subject?.short_code || subject?.name || "Fach";
+    const assignedTeachers =
+      entry.timetable_entry_teachers || [];
 
-  const teacherName = document.createElement("span");
+    const room = entry.rooms;
 
-  if (assignedTeachers.length > 0) {
-    teacherName.textContent = assignedTeachers
-      .map(item => {
-        const teacher = item.teachers;
+    const subjectName = document.createElement("strong");
+    subjectName.textContent =
+      subject?.short_code || subject?.name || "Fach";
 
-        if (!teacher) return null;
+    const teacherName = document.createElement("span");
 
-        return teacher.first_name + " " + teacher.last_name;
-      })
-      .filter(Boolean)
-      .join(", ");
-  } else {
-    teacherName.textContent = "Keine Lehrkraft";
-  }
+    if (assignedTeachers.length > 0) {
+      teacherName.textContent = assignedTeachers
+        .map(item => {
+          const teacher = item.teachers;
+
+          if (!teacher) return null;
+
+          return teacher.first_name + " " + teacher.last_name;
+        })
+        .filter(Boolean)
+        .join(", ");
+    } else {
+      teacherName.textContent = "Keine Lehrkraft";
+    }
+
+    const roomName = document.createElement("span");
+    roomName.textContent =
+      room?.name || "Kein Raum";
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.textContent = "Bearbeiten";
+    editButton.className = "timetable-edit-button";
+    editButton.dataset.entryId = entry.id;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "Löschen";
+    deleteButton.className = "timetable-delete-button";
+    deleteButton.dataset.entryId = entry.id;
+
+    const entryContainer = document.createElement("div");
+    entryContainer.className = "timetable-entry";
+
+    entryContainer.appendChild(subjectName);
+    entryContainer.appendChild(teacherName);
+    entryContainer.appendChild(roomName);
+    entryContainer.appendChild(editButton);
+    entryContainer.appendChild(deleteButton);
+
+    cell.appendChild(entryContainer);
+
+  });
+
+  cell.className = "timetable-filled";
+
+} else {
+
+  cell.textContent = "–";
+  cell.className = "timetable-empty";
+
+}
 
   const roomName = document.createElement("span");
   roomName.textContent =
