@@ -3373,6 +3373,7 @@ timetableCancelEdit.addEventListener("click", () => {
     "Bearbeitung abgebrochen.";
 });
 
+alert("Test 0: app.js wird ausgeführt");
 
                  // Unterrichtseinheit bearbeiten und löschen
 
