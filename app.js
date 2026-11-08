@@ -3406,10 +3406,14 @@ const countedLessons = new Set(
   }
 
   if (result.error) {
-    timetableMessage.textContent =
-      "Unterrichtseinheit konnte nicht gespeichert werden.";
-    return;
-  }
+  timetableMessage.textContent =
+    "Speicherfehler: " +
+    result.error.message +
+    " | Code: " +
+    result.error.code;
+
+  return;
+}
 
   const savedEntryId = result.data.id;
 
