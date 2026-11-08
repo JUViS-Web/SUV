@@ -3265,6 +3265,7 @@ if (
   class_id: selectedTimetableClassId,
   weekday: day,
   period_number: lesson
+  parallel_group_id: parallelGroupId
 };
 
   // Doppelte Belegung der Klasse prüfen
