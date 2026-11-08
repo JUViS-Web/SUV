@@ -43,11 +43,6 @@ alert("TEST 2: JavaScript funktioniert");
 
 alert("TEST 3: Supabase-Bibliothek gefunden");
 
-const suvDb = createClient(
-  window.SUV_CONFIG.SUPABASE_URL,
-  window.SUV_CONFIG.SUPABASE_KEY
-);
-
 alert("TEST 4: Supabase initialisiert");
 // SUV – Navigation mit Rollenprüfung
 
