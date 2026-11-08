@@ -2904,7 +2904,10 @@ async function loadTimetableGrid() {
   const subject =
     entry.class_subjects?.subjects;
 
-  const teacher = entry.teachers;
+  c
+  const assignedTeachers =
+    entry.timetable_entry_teachers || [];
+
   const room = entry.rooms;
 
   const subjectName = document.createElement("strong");
@@ -2912,9 +2915,21 @@ async function loadTimetableGrid() {
     subject?.short_code || subject?.name || "Fach";
 
   const teacherName = document.createElement("span");
-  teacherName.textContent = teacher
-    ? teacher.first_name + " " + teacher.last_name
-    : "Keine Lehrkraft";
+
+  if (assignedTeachers.length > 0) {
+    teacherName.textContent = assignedTeachers
+      .map(item => {
+        const teacher = item.teachers;
+
+        if (!teacher) return null;
+
+        return teacher.first_name + " " + teacher.last_name;
+      })
+      .filter(Boolean)
+      .join(", ");
+  } else {
+    teacherName.textContent = "Keine Lehrkraft";
+  }
 
   const roomName = document.createElement("span");
   roomName.textContent =
