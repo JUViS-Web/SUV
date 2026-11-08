@@ -2999,10 +2999,10 @@ async function loadTimetableGrid() {
     days.forEach(day => {
       const cell = document.createElement("td");
 
-      const entry = timetableEntries.find(item =>
-        item.weekday === day.day_number &&
-        item.period_number === lesson.lesson_number
-      );
+      const matchingEntries = timetableEntries.filter(item =>
+  item.weekday === day.day_number &&
+  item.period_number === lesson.lesson_number
+);
 
       if (entry) {
   const subject =
