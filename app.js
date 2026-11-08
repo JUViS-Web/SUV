@@ -15,11 +15,14 @@ document.body.insertAdjacentHTML(
 // SUV – Supabase-Verbindung
 
 const { createClient } = supabase;
+alert("TEST 1: Supabase-Bibliothek verfügbar");
 
 const suvDb = createClient(
   window.SUV_CONFIG.SUPABASE_URL,
   window.SUV_CONFIG.SUPABASE_KEY
 );
+
+alert("TEST 2: Supabase-Client erstellt");
 
 console.log("SUV: Supabase-Verbindung initialisiert.");
 document.body.insertAdjacentHTML(
