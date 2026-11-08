@@ -2125,6 +2125,7 @@ const timetableCancelEdit =
 // Vorhandene Parallelgruppen laden
 
 async function loadParallelGroups() {
+  alert("loadParallelGroups wird aufgerufen");
   timetableParallelGroup.innerHTML = `
     <option value="">Normaler Unterricht</option>
     <option value="new">Neue Parallelgruppe erstellen</option>
