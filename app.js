@@ -2937,7 +2937,6 @@ async function loadTimetableGrid() {
   const subject =
     entry.class_subjects?.subjects;
 
-  c
   const assignedTeachers =
     entry.timetable_entry_teachers || [];
 
