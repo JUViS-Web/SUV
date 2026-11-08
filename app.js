@@ -3004,9 +3004,26 @@ async function loadTimetableGrid() {
   item.period_number === lesson.lesson_number
 );
 
-      if (matchingEntries.length > 0) {
+      
+if (matchingEntries.length > 0) {
 
-  matchingEntries.forEach(entry => {
+  // Höchstens drei Unterrichtskurse direkt anzeigen
+  const visibleEntries = matchingEntries.slice(0, 3);
+
+  // Anzahl der weiteren Kurse
+  const hiddenCount = matchingEntries.length - 3;
+
+  // Anzahl der Spalten festlegen
+  const columnCount =
+    visibleEntries.length + (hiddenCount > 0 ? 1 : 0);
+
+  cell.style.display = "grid";
+  cell.style.gridTemplateColumns =
+    `repeat(${columnCount}, minmax(0, 1fr))`;
+  cell.style.gap = "3px";
+
+  // Sichtbare Unterrichtskurse erstellen
+  visibleEntries.forEach(entry => {
 
     const subject =
       entry.class_subjects?.subjects;
@@ -3066,6 +3083,21 @@ async function loadTimetableGrid() {
 
   });
 
+  // Weitere Kurse als +N anzeigen
+  if (hiddenCount > 0) {
+
+    const moreButton = document.createElement("button");
+
+    moreButton.type = "button";
+    moreButton.className = "timetable-more-button";
+    moreButton.textContent = "+" + hiddenCount;
+
+    moreButton.dataset.weekday = day.day_number;
+    moreButton.dataset.periodNumber = lesson.lesson_number;
+
+    cell.appendChild(moreButton);
+  }
+
   cell.className = "timetable-filled";
 
 } else {
@@ -3074,6 +3106,7 @@ async function loadTimetableGrid() {
   cell.className = "timetable-empty";
 
 }
+
 
     row.appendChild(cell);
       
