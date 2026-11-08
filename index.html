@@ -880,6 +880,17 @@ alert("TEST A: Vor dem Laden von app.js");
 
 <script src="config.js"></script>
 
+<script>
+window.addEventListener("error", function(event) {
+  alert(
+    "Fehler in app.js:\n" +
+    event.message +
+    "\nZeile: " +
+    event.lineno
+  );
+});
+</script>
+  
 <script
   src="app.js?v=20261108-3"
   onload="alert('TEST B: app.js erfolgreich geladen')"
