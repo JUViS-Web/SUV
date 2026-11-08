@@ -2931,6 +2931,8 @@ async function loadTimetableGrid() {
   .from("timetable_entries")
   .select(`
   id,
+  class_subject_id,
+  room_id,
   weekday,
   period_number,
   class_subjects (
