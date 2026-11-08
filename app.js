@@ -118,6 +118,7 @@ const loginScreen = document.getElementById("loginScreen");
 const loginMessage = document.getElementById("loginMessage");
 
 loginForm.addEventListener("submit", async (event) => {
+  console.log("SUV: Anmelde-Event wurde ausgelöst");
   event.preventDefault();
 
   const email = document.getElementById("loginEmail").value.trim();
