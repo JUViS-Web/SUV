@@ -2165,6 +2165,14 @@ async function loadParallelGroups() {
   });
 }
 
+// Parallelgruppen bei Änderungen neu laden
+
+timetableDay.addEventListener("change", loadParallelGroups);
+
+timetableLesson.addEventListener("change", loadParallelGroups);
+
+timetableClass.addEventListener("change", loadParallelGroups);
+
 // Aktuelle Stundenplan-Auswahl
 
 let activeTimetableVersionId = null;
