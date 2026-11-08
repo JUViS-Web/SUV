@@ -3299,6 +3299,16 @@ if (
   const { data: existingLessons, error: weeklyError } =
     await weeklyQuery;
 
+// Parallele Kurse nur einmal als Wochenstunde zählen
+
+const countedLessons = new Set(
+  existingLessons.map(item =>
+    item.parallel_group_id
+      ? "parallel-" + item.parallel_group_id
+      : "entry-" + item.id
+  )
+);
+
   if (weeklyError) {
     timetableMessage.textContent =
       "Wochenstunden konnten nicht überprüft werden.";
