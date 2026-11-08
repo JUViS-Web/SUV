@@ -3574,6 +3574,10 @@ timetableGrid.addEventListener("click", async (event) => {
     ".timetable-delete-button"
   );
 
+  const moreButton = event.target.closest(
+  ".timetable-more-button"
+);
+
 
   // Weitere Unterrichtskurse anzeigen
 
