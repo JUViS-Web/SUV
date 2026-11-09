@@ -4167,10 +4167,9 @@ document.addEventListener("pointerup", event => {
     document.getElementById("timetableDay").value =
       weekday;
 
-    console.log(
-  "Formular-Wochentag:",
-  document.getElementById("timetableDay").value
-);
+    document.getElementById("timetableMessage").textContent +=
+  " | Formular-Wochentag: " +
+  document.getElementById("timetableDay").value;
 
     document.getElementById("timetableLesson").value =
       periodNumber;
