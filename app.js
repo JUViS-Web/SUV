@@ -4155,6 +4155,8 @@ document.addEventListener("pointerup", event => {
     const weekday =
       dropTarget.dataset.weekday;
 
+    console.log("Drop-Wochentag:", weekday);
+
     const periodNumber =
       dropTarget.dataset.periodNumber;
 
@@ -4163,6 +4165,11 @@ document.addEventListener("pointerup", event => {
 
     document.getElementById("timetableDay").value =
       weekday;
+
+    console.log(
+  "Formular-Wochentag:",
+  document.getElementById("timetableDay").value
+);
 
     document.getElementById("timetableLesson").value =
       periodNumber;
