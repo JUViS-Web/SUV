@@ -4148,6 +4148,15 @@ document.addEventListener("pointerup", event => {
     ".timetable-drop-target"
   );
 
+if (dropTarget) {
+  alert(
+    "Erkannte Zelle:\n" +
+    "Wochentag: " + dropTarget.dataset.weekday +
+    "\nStunde: " + dropTarget.dataset.periodNumber +
+    "\nZellentext: " + dropTarget.innerText
+  );
+}
+  
   draggedLesson.classList.remove("dragging");
 
   document.querySelectorAll(".timetable-drop-target")
