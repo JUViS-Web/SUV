@@ -3256,6 +3256,10 @@ if (matchingEntries.length > 0) {
     const entryContainer = document.createElement("div");
     entryContainer.className = "timetable-entry";
 
+// Fachfarbe aus den Stammdaten übernehmen
+entryContainer.style.borderLeftColor =
+  subject?.color || "#b91c1c";
+    
     entryContainer.appendChild(subjectName);
     entryContainer.appendChild(teacherName);
     entryContainer.appendChild(roomName);
