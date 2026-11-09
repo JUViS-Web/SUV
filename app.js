@@ -3061,10 +3061,11 @@ async function loadTimetableGrid() {
   // Unterrichtstage laden
 
   const { data: days, error: daysError } = await suvDb
-    .from("school_days")
-    .select("day_number, day_name")
-    .eq("is_active", true)
-    .order("day_number");
+  .from("school_days")
+  .select("day_number, day_name, is_active")
+  .order("day_number");
+
+console.log("Geladene Unterrichtstage:", days);
 
   if (daysError) {
     timetableGrid.textContent =
