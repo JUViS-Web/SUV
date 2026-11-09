@@ -2946,7 +2946,9 @@ async function loadTimetableGrid() {
   room_id,
   weekday,
   period_number,
+  parallel_group_id,
   class_subjects (
+    weekly_periods,
     subjects (
       name,
       short_code,
