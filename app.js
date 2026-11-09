@@ -3284,6 +3284,7 @@ if (matchingEntries.length > 0) {
 
 }
 
+      cell.classList.add("timetable-drop-target");
 
     row.appendChild(cell);
       
