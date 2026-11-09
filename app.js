@@ -2897,6 +2897,150 @@ timetableClass.addEventListener("change", async () => {
 });
 
 
+// Offene Unterrichtsstunden berechnen und anzeigen
+
+async function loadUnplacedLessons() {
+
+  const container = document.getElementById(
+    "timetableUnplacedLessons"
+  );
+
+  if (!container || !selectedTimetableClassId) {
+    return;
+  }
+
+  container.innerHTML =
+    "<p>Offene Unterrichtsstunden werden geladen ...</p>";
+
+  // Unterrichtszuordnungen der Klasse laden
+
+  const { data: classSubjects, error } = await suvDb
+    .from("class_subjects")
+    .select(`
+      id,
+      weekly_periods,
+      subjects (
+        name,
+        short_code
+      ),
+      class_subject_teachers (
+        teacher_id,
+        teachers (
+          first_name,
+          last_name,
+          short_code
+        )
+      )
+    `)
+    .eq("class_id", selectedTimetableClassId);
+
+  if (error) {
+    container.textContent =
+      "Unterrichtszuordnungen konnten nicht geladen werden.";
+    return;
+  }
+
+  container.innerHTML = "";
+
+  let totalOpenLessons = 0;
+
+  classSubjects.forEach(item => {
+
+    // Bereits verplante Stunden ermitteln
+
+    const existingEntries = timetableEntries.filter(
+      entry => entry.class_subject_id === item.id
+    );
+
+    // Parallele Unterrichtseinheiten nur einmal zählen
+
+    const countedLessons = new Set(
+      existingEntries.map(entry =>
+        entry.parallel_group_id
+          ? "parallel-" + entry.parallel_group_id
+          : "entry-" + entry.id
+      )
+    );
+
+    const openCount = Math.max(
+      0,
+      item.weekly_periods - countedLessons.size
+    );
+
+    if (openCount === 0) {
+      return;
+    }
+
+    totalOpenLessons += openCount;
+
+    const subject = item.subjects;
+
+    const assignedTeachers =
+      item.class_subject_teachers || [];
+
+    const teacherNames = assignedTeachers
+      .map(link => {
+        const teacher = link.teachers;
+
+        if (!teacher) return null;
+
+        return teacher.first_name + " " + teacher.last_name;
+      })
+      .filter(Boolean)
+      .join(", ");
+
+    // Karte für die Unterrichtszuordnung
+
+    const card = document.createElement("div");
+    card.className = "unplaced-subject-card";
+
+    const title = document.createElement("strong");
+
+    title.textContent =
+      subject?.short_code || subject?.name || "Fach";
+
+    const details = document.createElement("p");
+
+    details.textContent =
+      teacherNames || "Keine Lehrkraft zugeordnet";
+
+    const count = document.createElement("p");
+
+    count.textContent =
+      openCount + " offene Unterrichtsstunde" +
+      (openCount === 1 ? "" : "n");
+
+    card.appendChild(title);
+    card.appendChild(details);
+    card.appendChild(count);
+
+    // Einzelne offene Unterrichtsstunden anzeigen
+
+    for (let i = 0; i < openCount; i++) {
+
+      const lessonCard = document.createElement("div");
+
+      lessonCard.className = "unplaced-lesson";
+      lessonCard.textContent =
+        (subject?.short_code || subject?.name || "Fach") +
+        " – Stunde " + (i + 1);
+
+      lessonCard.dataset.classSubjectId = item.id;
+
+      card.appendChild(lessonCard);
+    }
+
+    container.appendChild(card);
+
+  });
+
+  if (totalOpenLessons === 0) {
+    container.textContent =
+      "Alle Wochenstunden dieser Klasse sind verplant.";
+  }
+}
+
+
 // Wochenstundenplan laden
 
 async function loadTimetableGrid() {
