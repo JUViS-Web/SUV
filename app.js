@@ -3171,10 +3171,8 @@ async function loadTimetableGrid() {
 
 // Drop-Ziel für Drag & Drop vorbereiten
 
-cell.classList.add("timetable-drop-target");
-
-cell.dataset.weekday = day.day_number;
-cell.dataset.periodNumber = lesson.lesson_number;
+cell.dataset.weekday = String(day.day_number);
+cell.dataset.periodNumber = String(lesson.lesson_number);
 
       const matchingEntries = timetableEntries.filter(item =>
   item.weekday === day.day_number &&
