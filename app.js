@@ -2905,9 +2905,16 @@ async function loadUnplacedLessons() {
     "timetableUnplacedLessons"
   );
 
-  if (!container || !selectedTimetableClassId) {
-    return;
-  }
+  if (!container) {
+  console.error("Element timetableUnplacedLessons wurde nicht gefunden.");
+  return;
+}
+
+if (!selectedTimetableClassId) {
+  container.textContent =
+    "FEHLER: Keine Klassen-ID übergeben.";
+  return;
+}
 
   container.innerHTML =
     "<p>Offene Unterrichtsstunden werden geladen ...</p>";
