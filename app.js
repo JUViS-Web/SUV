@@ -3449,12 +3449,18 @@ if (roomConflict) {
   }
 
   const { data: existingLessons, error: weeklyError } =
-    await weeklyQuery;
+  await weeklyQuery;
+
+if (weeklyError) {
+  timetableMessage.textContent =
+    "Wochenstunden konnten nicht überprüft werden.";
+  return;
+}
 
 // Parallele Kurse nur einmal als Wochenstunde zählen
 
 const countedLessons = new Set(
-  existingLessons.map(item =>
+  (existingLessons || []).map(item =>
     item.parallel_group_id
       ? "parallel-" + item.parallel_group_id
       : "entry-" + item.id
