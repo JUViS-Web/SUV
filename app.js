@@ -4155,6 +4155,8 @@ document.addEventListener("pointerup", event => {
     const weekday =
       dropTarget.dataset.weekday;
 
+alert("Erkanntes Stundenplanfeld – Wochentag: " + weekday);
+    
     document.getElementById("timetableMessage").textContent =
   "Drop-Wochentag: " + weekday;
 
