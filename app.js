@@ -2392,10 +2392,11 @@ async function loadDistributionEntries() {
       class_subject_teachers (
         teacher_id,
         teachers (
-          first_name,
-          last_name,
-          short_code
-        )
+  id,
+  first_name,
+  last_name,
+  short_code
+)
       )
     `)
     .eq("class_id", selectedDistributionClassId)
