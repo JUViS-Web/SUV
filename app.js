@@ -2597,34 +2597,18 @@ distributionForm.addEventListener("submit", async (event) => {
   const notes = distributionNotes.value.trim();
 
   if (!subjectId || weeklyPeriods < 1) {
-    distributionMessage.textContent =
-      "Bitte Fach und gültige Wochenstunden angeben.";
-    return;
-  }
+  distributionMessage.textContent =
+    "Bitte Fach und gültige Wochenstunden angeben.";
+  return;
+}
 
+if (teacherIds.length === 0) {
+  distributionMessage.textContent =
+    "Bitte mindestens eine Lehrkraft auswählen.";
+  return;
+}
   distributionSaveButton.disabled = true;
   distributionSaveButton.textContent = "Wird gespeichert ...";
-
-// Bearbeitung abbrechen
-distributionCancelEdit.addEventListener("click", () => {
-
-  distributionForm.reset();
-
-  distributionEntryId.value = "";
-
-  distributionSaveButton.textContent =
-    "Zuordnung speichern";
-
-  distributionCancelEdit.hidden = true;
-
-  Array.from(distributionTeachers.options).forEach(option => {
-    option.selected = false;
-  });
-
-  distributionMessage.textContent =
-    "Bearbeitung abgebrochen.";
-
-});
   
   // Fachzuordnung speichern
   let classSubject;
@@ -2732,6 +2716,27 @@ await loadDistributionEntries();
 
   distributionSaveButton.disabled = false;
   distributionSaveButton.textContent = "Zuordnung speichern";
+
+});
+
+// Bearbeitung abbrechen
+distributionCancelEdit.addEventListener("click", () => {
+
+  distributionForm.reset();
+
+  distributionEntryId.value = "";
+
+  distributionSaveButton.textContent =
+    "Zuordnung speichern";
+
+  distributionCancelEdit.hidden = true;
+
+  Array.from(distributionTeachers.options).forEach(option => {
+    option.selected = false;
+  });
+
+  distributionMessage.textContent =
+    "Bearbeitung abgebrochen.";
 
 });
 
