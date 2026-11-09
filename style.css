@@ -1812,3 +1812,24 @@ form {
 .unplaced-lesson:active {
   cursor: grabbing;
 }
+
+
+        
+/* Drag-and-drop: Zielzellen */
+
+.timetable-drop-target {
+  transition: background-color 0.15s, outline 0.15s;
+}
+
+.timetable-drop-target.drag-over {
+  background-color: #dbeafe !important;
+  outline: 2px dashed #2563eb;
+  outline-offset: -3px;
+}
+
+/* Unterrichtsstunde während des Ziehens */
+
+.unplaced-lesson.dragging {
+  opacity: 0.45;
+  border: 2px dashed #2563eb;
+}
