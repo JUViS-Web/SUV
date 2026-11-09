@@ -2439,17 +2439,22 @@ async function loadDistributionEntries() {
 
     const row = document.createElement("tr");
 
-    const teacherNames =
-      (entry.class_subject_teachers || [])
-        .map(item => {
-          const teacher = item.teachers;
+    const assignedTeachers =
+  (entry.class_subject_teachers || [])
+    .map(item => item.teachers)
+    .filter(Boolean);
 
-          return teacher
-            ? teacher.first_name + " " + teacher.last_name
-            : "";
-        })
-        .filter(Boolean)
-        .join(", ");
+const teacherNames = assignedTeachers
+  .map(teacher =>
+    teacher.first_name + " " + teacher.last_name
+  )
+  .join(", ");
+
+const teacherCount = assignedTeachers.length;
+
+const teacherDisplay = teacherCount > 0
+  ? `${teacherNames} (${teacherCount} Lehrkraft${teacherCount === 1 ? "" : "kräfte"})`
+  : "Keine Lehrkraft zugeordnet";
 
     row.innerHTML = `
       <td>${entry.subjects?.name || "Unbekannt"}</td>
