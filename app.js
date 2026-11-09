@@ -2459,7 +2459,7 @@ const teacherDisplay = teacherCount > 0
     row.innerHTML = `
       <td>${entry.subjects?.name || "Unbekannt"}</td>
       <td>${entry.weekly_periods}</td>
-      <td>${teacherNames || "Keine Lehrkraft zugeordnet"}</td>
+      <td>${teacherDisplay}</td>
       <td>${entry.notes || "–"}</td>
       <td>
         <button type="button"
