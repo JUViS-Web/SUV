@@ -4155,7 +4155,8 @@ document.addEventListener("pointerup", event => {
     const weekday =
       dropTarget.dataset.weekday;
 
-    console.log("Drop-Wochentag:", weekday);
+    document.getElementById("timetableMessage").textContent =
+  "Drop-Wochentag: " + weekday;
 
     const periodNumber =
       dropTarget.dataset.periodNumber;
