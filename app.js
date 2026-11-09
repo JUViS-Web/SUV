@@ -3216,7 +3216,6 @@ async function loadTimetableFormOptions() {
 
 timetableSubject.addEventListener("change", () => {
 
-  // Mehrfachauswahl zurücksetzen
   timetableTeachers.innerHTML = "";
 
   const selectedClassSubject = classSubjects.find(
@@ -3236,17 +3235,21 @@ timetableSubject.addEventListener("change", () => {
 
     const option = document.createElement("option");
 
-    option.value = teacher.id;
+    option.value = item.teacher_id;
 
     option.textContent =
       teacher.first_name + " " + teacher.last_name +
       (teacher.short_code ? " (" + teacher.short_code + ")" : "");
+
+    // Jede zugeordnete Lehrkraft automatisch auswählen
+    option.selected = true;
 
     timetableTeachers.appendChild(option);
 
   });
 
 });
+  
   // Aktive Räume laden
 
   const { data: rooms, error: roomsError } = await suvDb
