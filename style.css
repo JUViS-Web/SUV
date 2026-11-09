@@ -1755,3 +1755,60 @@ form {
   border-radius: 6px;
   border: 1px solid #d5dbe5;
 }
+
+
+        
+/* Offene Unterrichtsstunden */
+
+#timetableUnplacedLessons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.unplaced-subject-card {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 12px;
+  padding: 14px;
+  min-width: 220px;
+  max-width: 320px;
+  flex: 1 1 240px;
+}
+
+.unplaced-subject-card strong {
+  display: block;
+  font-size: 17px;
+  margin-bottom: 8px;
+}
+
+.unplaced-subject-card p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: var(--text-secondary, #6b7280);
+}
+
+.unplaced-lesson {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-top: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.unplaced-lesson:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.unplaced-lesson:active {
+  cursor: grabbing;
+}
