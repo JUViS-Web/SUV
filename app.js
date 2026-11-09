@@ -3282,6 +3282,8 @@ if (matchingEntries.length > 0) {
 
       timetableGrid.innerHTML = "";
       timetableGrid.appendChild(table);
+
+  await loadUnplacedLessons();
   }
 
 // Eingabefelder der Stundenplanung befüllen
