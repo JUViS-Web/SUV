@@ -4149,11 +4149,15 @@ document.addEventListener("pointerup", event => {
   );
 
 if (dropTarget) {
+  const rect = dropTarget.getBoundingClientRect();
+
   alert(
     "Erkannte Zelle:\n" +
     "Wochentag: " + dropTarget.dataset.weekday +
     "\nStunde: " + dropTarget.dataset.periodNumber +
-    "\nZellentext: " + dropTarget.innerText
+    "\nFinger X: " + event.clientX +
+    "\nZelle links: " + Math.round(rect.left) +
+    "\nZelle rechts: " + Math.round(rect.right)
   );
 }
   
