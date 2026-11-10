@@ -1316,87 +1316,113 @@ async function loadClasses() {
     const card = document.createElement("div");
     card.className = "class-card";
 
-    const heading = document.createElement("h4");
-    heading.textContent = schoolClass.name;
+    const header = document.createElement("div");
+header.className = "class-card-header";
 
-    const grade = document.createElement("p");
-    grade.textContent =
-      "Jahrgangsstufe: " +
-      (schoolClass.grade_levels?.name || "Unbekannt");
+const heading = document.createElement("h4");
+heading.textContent = schoolClass.name;
 
-    const students = document.createElement("p");
-    students.textContent =
-      "Schülerzahl: " + schoolClass.student_count;
+const gradeBadge = document.createElement("span");
+gradeBadge.className = "class-grade-badge";
+gradeBadge.textContent =
+  "Jahrgang " + (schoolClass.grade_levels?.name || "?");
 
-    const classTeachers = document.createElement("p");
+header.append(heading, gradeBadge);
+
+const stats = document.createElement("div");
+stats.className = "class-card-stats";
+
+const studentStat = document.createElement("div");
+studentStat.className = "class-card-stat";
+
+const studentNumber = document.createElement("strong");
+studentNumber.textContent = schoolClass.student_count ?? 0;
+
+const studentLabel = document.createElement("span");
+studentLabel.textContent = "Schülerinnen und Schüler";
+
+studentStat.append(studentNumber, studentLabel);
+stats.appendChild(studentStat);
+
+const teacherSection = document.createElement("div");
+teacherSection.className = "class-card-teachers";
+
+const teacherTitle = document.createElement("strong");
+teacherTitle.textContent = "Klassenlehrkräfte";
+
+const teacherList = document.createElement("div");
+teacherList.className = "class-card-teacher-list";
 
 const teacherNames = (schoolClass.class_teachers || [])
   .map(item => {
     const teacher = item.teachers;
-
     if (!teacher) return null;
-
     return teacher.first_name + " " + teacher.last_name;
   })
   .filter(Boolean);
 
-classTeachers.textContent =
-  "Klassenlehrkräfte: " +
-  (teacherNames.length
-    ? teacherNames.join(", ")
-    : "Noch nicht zugeordnet");
+if (teacherNames.length) {
+  teacherNames.forEach(name => {
+    const chip = document.createElement("span");
+    chip.className = "class-card-teacher-chip";
+    chip.textContent = name;
+    teacherList.appendChild(chip);
+  });
+} else {
+  const empty = document.createElement("span");
+  empty.className = "class-card-no-teacher";
+  empty.textContent = "Noch nicht zugeordnet";
+  teacherList.appendChild(empty);
+}
 
-    const editButton = document.createElement("button");
-    editButton.type = "button";
-    editButton.textContent = "Bearbeiten";
+teacherSection.append(teacherTitle, teacherList);
 
-    editButton.addEventListener("click", () => {
-      editClass(schoolClass);
-    });
+const editButton = document.createElement("button");
+editButton.type = "button";
+editButton.textContent = "Bearbeiten";
 
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.textContent = "Löschen";
+editButton.addEventListener("click", () => {
+  editClass(schoolClass);
+});
 
-    deleteButton.addEventListener("click", async () => {
+const deleteButton = document.createElement("button");
+deleteButton.type = "button";
+deleteButton.textContent = "Löschen";
 
-      if (selectedSUVSchoolYearId !== activeSUVSchoolYearId) {
-        classMessage.textContent =
-          "Klassen vergangener Schuljahre können nicht gelöscht werden.";
-        return;
-      }
+deleteButton.addEventListener("click", async () => {
+  if (selectedSUVSchoolYearId !== activeSUVSchoolYearId) {
+    classMessage.textContent =
+      "Klassen vergangener Schuljahre können nicht gelöscht werden.";
+    return;
+  }
 
-      if (!confirm(
-        "Soll die Klasse " + schoolClass.name +
-        " wirklich gelöscht werden?"
-      )) {
-        return;
-      }
+  if (!confirm(
+    "Soll die Klasse " + schoolClass.name +
+    " wirklich gelöscht werden?"
+  )) {
+    return;
+  }
 
-      const { error } = await suvDb
-        .from("classes")
-        .delete()
-        .eq("id", schoolClass.id);
+  const { error } = await suvDb
+    .from("classes")
+    .delete()
+    .eq("id", schoolClass.id);
 
-      if (error) {
-        classMessage.textContent = error.message;
-        return;
-      }
+  if (error) {
+    classMessage.textContent = error.message;
+    return;
+  }
 
-      classMessage.textContent = "Klasse erfolgreich gelöscht.";
-      await loadClasses();
-    });
+  classMessage.textContent = "Klasse erfolgreich gelöscht.";
+  await loadClasses();
+});
 
-    card.append(
-  heading,
-  grade,
-  students,
-  classTeachers,
-  editButton,
-  deleteButton
-);
+const actions = document.createElement("div");
+actions.className = "class-card-actions";
+actions.append(editButton, deleteButton);
 
-    classList.appendChild(card);
+card.append(header, stats, teacherSection, actions);
+classList.appendChild(card);
   });
 }
 
