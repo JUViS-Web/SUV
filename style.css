@@ -1833,3 +1833,105 @@ form {
   opacity: 0.45;
   border: 2px dashed #2563eb;
 }
+
+
+        
+/* Klassenlehrkräfte-Auswahl */
+
+#classTeachersSelection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.class-teacher-selected {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: var(--card-bg, #f8fafc);
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 8px;
+}
+
+.class-teacher-selected strong {
+  width: 100%;
+  font-size: 13px;
+}
+
+.class-teacher-selected p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary, #6b7280);
+}
+
+.class-teacher-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 9px;
+  background: #e0f2fe;
+  color: #075985;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.class-teacher-chip button {
+  width: auto;
+  min-width: 20px;
+  padding: 0 3px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.class-teacher-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.class-teacher-results {
+  display: flex;
+  flex-direction: column;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 8px;
+  background: var(--card-bg, #ffffff);
+}
+
+.class-teacher-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.class-teacher-option:last-child {
+  border-bottom: none;
+}
+
+.class-teacher-option input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  min-width: 17px;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  accent-color: #2563eb;
+}
+
+.class-teacher-option:hover {
+  background: var(--hover-bg, #f1f5f9);
+}
