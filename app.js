@@ -1522,12 +1522,14 @@ if (classForm) {
 
     const classId = document.getElementById("classId").value;
 
-    const selectedTeacherIds = Array.from(
-      document.querySelectorAll(
-        'input[name="classTeacherIds"]:checked'
-      )
-    ).map(checkbox => checkbox.value);
+    const teacherContainer =
+  document.getElementById("classTeachersSelection");
 
+const selectedTeacherIds =
+  teacherContainer?._getSelectedTeacherIds
+    ? teacherContainer._getSelectedTeacherIds()
+    : [];
+    
     if (selectedTeacherIds.length > 3) {
       classMessage.textContent =
         "Es können maximal drei Klassenlehrkräfte zugeordnet werden.";
