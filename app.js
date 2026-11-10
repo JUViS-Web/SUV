@@ -1281,12 +1281,13 @@ classTeachers.textContent =
     });
 
     card.append(
-      heading,
-      grade,
-      students,
-      editButton,
-      deleteButton
-    );
+  heading,
+  grade,
+  students,
+  classTeachers,
+  editButton,
+  deleteButton
+);
 
     classList.appendChild(card);
   });
