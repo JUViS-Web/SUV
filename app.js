@@ -1447,14 +1447,14 @@ async function editClass(schoolClass) {
   }
 
   const selectedTeacherIds = (data || [])
-    .map(item => String(item.teacher_id));
+  .map(item => item.teacher_id);
 
-  document
-    .querySelectorAll('input[name="classTeacherIds"]')
-    .forEach(checkbox => {
-      checkbox.checked =
-        selectedTeacherIds.includes(checkbox.value);
-    });
+const teacherContainer =
+  document.getElementById("classTeachersSelection");
+
+if (teacherContainer?._setSelectedTeacherIds) {
+  teacherContainer._setSelectedTeacherIds(selectedTeacherIds);
+}
 
   classMessage.textContent = "Klasse wird bearbeitet.";
 }
