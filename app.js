@@ -1173,6 +1173,24 @@ async function loadClasses() {
     students.textContent =
       "Schülerzahl: " + schoolClass.student_count;
 
+    const classTeachers = document.createElement("p");
+
+const teacherNames = (schoolClass.class_teachers || [])
+  .map(item => {
+    const teacher = item.teachers;
+
+    if (!teacher) return null;
+
+    return teacher.first_name + " " + teacher.last_name;
+  })
+  .filter(Boolean);
+
+classTeachers.textContent =
+  "Klassenlehrkräfte: " +
+  (teacherNames.length
+    ? teacherNames.join(", ")
+    : "Noch nicht zugeordnet");
+
     const editButton = document.createElement("button");
     editButton.type = "button";
     editButton.textContent = "Bearbeiten";
