@@ -7,11 +7,6 @@ window.onerror = function(message, source, lineno, colno) {
   );
 };
 
-document.body.insertAdjacentHTML(
-  "afterbegin",
-  '<div style="position:fixed;top:10px;left:10px;background:red;color:white;padding:12px;z-index:999999">TEST: JavaScript läuft</div>'
-);
-
 // SUV – Supabase-Verbindung
 
 const { createClient } = supabase;
