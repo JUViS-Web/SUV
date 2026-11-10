@@ -2142,3 +2142,58 @@ form {
     margin-top: 18px;
   }
 }
+
+
+        
+/* SUV – Klassenformular: Layout verbindlich festlegen */
+
+#classForm {
+  display: block !important;
+  width: 100% !important;
+}
+
+#classForm .class-form-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 22px !important;
+  width: 100% !important;
+  align-items: start !important;
+}
+
+#classForm .class-form-field {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  grid-column: auto !important;
+  grid-row: auto !important;
+}
+
+#classForm .class-form-field input,
+#classForm .class-form-field select {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+#classForm .class-teacher-field {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+}
+
+#classForm .teacher-form-actions,
+#classForm #classMessage {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+  #classForm .class-form-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #classForm .class-teacher-field {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+}
