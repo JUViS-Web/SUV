@@ -1170,6 +1170,7 @@ async function loadClassTeacherOptions() {
 
 
 async function loadClasses() {
+  await loadClassTeacherOptions();
   const { data, error } = await suvDb
     .from("classes")
     .select(`
