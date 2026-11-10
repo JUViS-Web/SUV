@@ -20,10 +20,7 @@ const suvDb = createClient(
 alert("TEST 2: Supabase-Client erstellt");
 
 console.log("SUV: Supabase-Verbindung initialisiert.");
-document.body.insertAdjacentHTML(
-  "afterbegin",
-  '<div style="position:fixed;top:10px;left:10px;background:red;color:white;padding:12px;z-index:999999">TEST: Supabase initialisiert</div>'
-);
+
 alert("TEST 1: app.js gestartet");
 
 window.onerror = function(message, source, lineno, colno) {
