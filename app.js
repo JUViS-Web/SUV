@@ -1123,12 +1123,13 @@ async function loadClassSchoolYears() {
 // Klassen laden
 
 
+
 async function loadClassTeacherOptions() {
   const container = document.getElementById("classTeachersSelection");
 
   if (!container) return;
 
-  container.innerHTML = "<p>Lehrkräfte werden geladen ...</p>";
+  container.innerHTML = "";
 
   const { data, error } = await suvDb
     .from("teachers")
@@ -1142,31 +1143,145 @@ async function loadClassTeacherOptions() {
     return;
   }
 
-  container.innerHTML = "";
-
   if (!data || data.length === 0) {
     container.textContent = "Keine aktiven Lehrkräfte vorhanden.";
     return;
   }
 
-  data.forEach(teacher => {
-    const label = document.createElement("label");
+  const selectedIds = new Set();
 
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.name = "classTeacherIds";
-    checkbox.value = teacher.id;
+  const selectedArea = document.createElement("div");
+  selectedArea.className = "class-teacher-selected";
 
-    label.appendChild(checkbox);
-    label.appendChild(
-      document.createTextNode(
-        " " + teacher.first_name + " " + teacher.last_name
-      )
-    );
+  const search = document.createElement("input");
+  search.type = "search";
+  search.placeholder = "Lehrkraft suchen ...";
+  search.className = "class-teacher-search";
 
-    container.appendChild(label);
-  });
+  const results = document.createElement("div");
+  results.className = "class-teacher-results";
+
+  container.append(selectedArea, search, results);
+
+  function renderSelected() {
+    selectedArea.innerHTML = "";
+
+    const heading = document.createElement("strong");
+    heading.textContent =
+      "Ausgewählt (" + selectedIds.size + "/3)";
+    selectedArea.appendChild(heading);
+
+    if (selectedIds.size === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = "Noch keine Lehrkräfte ausgewählt.";
+      selectedArea.appendChild(empty);
+      return;
+    }
+
+    data
+      .filter(teacher => selectedIds.has(String(teacher.id)))
+      .forEach(teacher => {
+        const chip = document.createElement("span");
+        chip.className = "class-teacher-chip";
+
+        const name = document.createElement("span");
+        name.textContent =
+          teacher.first_name + " " + teacher.last_name;
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "×";
+        remove.title = "Zuordnung entfernen";
+
+        remove.addEventListener("click", () => {
+          selectedIds.delete(String(teacher.id));
+          renderSelected();
+          renderResults();
+        });
+
+        chip.append(name, remove);
+        selectedArea.appendChild(chip);
+      });
+  }
+
+  function renderResults() {
+    results.innerHTML = "";
+
+    const searchTerm = search.value.trim().toLowerCase();
+
+    const filteredTeachers = data.filter(teacher => {
+      const fullName =
+        (teacher.first_name + " " + teacher.last_name).toLowerCase();
+
+      return fullName.includes(searchTerm);
+    });
+
+    if (filteredTeachers.length === 0) {
+      results.textContent = "Keine passenden Lehrkräfte gefunden.";
+      return;
+    }
+
+    filteredTeachers.forEach(teacher => {
+      const label = document.createElement("label");
+      label.className = "class-teacher-option";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.name = "classTeacherIds";
+      checkbox.value = teacher.id;
+      checkbox.checked = selectedIds.has(String(teacher.id));
+
+      checkbox.addEventListener("change", () => {
+        const teacherId = String(teacher.id);
+
+        if (checkbox.checked) {
+          if (selectedIds.size >= 3) {
+            checkbox.checked = false;
+            classMessage.textContent =
+              "Es können maximal drei Klassenlehrkräfte ausgewählt werden.";
+            return;
+          }
+
+          selectedIds.add(teacherId);
+        } else {
+          selectedIds.delete(teacherId);
+        }
+
+        classMessage.textContent = "";
+        renderSelected();
+        renderResults();
+      });
+
+      const name = document.createElement("span");
+      name.textContent =
+        teacher.first_name + " " + teacher.last_name;
+
+      label.append(checkbox, name);
+      results.appendChild(label);
+    });
+  }
+
+  search.addEventListener("input", renderResults);
+
+  container._setSelectedTeacherIds = ids => {
+    selectedIds.clear();
+
+    (ids || []).forEach(id => {
+      selectedIds.add(String(id));
+    });
+
+    renderSelected();
+    renderResults();
+  };
+
+  container._getSelectedTeacherIds = () => {
+    return Array.from(selectedIds);
+  };
+
+  renderSelected();
+  renderResults();
 }
+
 
 
 async function loadClasses() {
