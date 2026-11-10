@@ -2049,3 +2049,96 @@ form {
   word-break: normal;
   font-size: 14px;
 }
+
+
+        
+/* Klassenverwaltung – Formularlayout */
+
+#classForm {
+  width: 100%;
+}
+
+.class-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  align-items: start;
+  width: 100%;
+}
+
+.class-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+
+.class-form-field > label {
+  display: block;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+  color: #26364e;
+}
+
+.class-form-field input,
+.class-form-field select {
+  width: 100%;
+  min-width: 0;
+  min-height: 45px;
+  box-sizing: border-box;
+  padding: 10px 13px;
+  border: 1px solid #d5deeb;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #26364e;
+  font-size: 14px;
+}
+
+.class-form-field input:focus,
+.class-form-field select:focus {
+  outline: none;
+  border-color: #c62828;
+  box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.10);
+  background: #fff;
+}
+
+.class-form-hint {
+  margin: -2px 0 0;
+  color: #778196;
+  font-size: 13px;
+}
+
+.class-teacher-field {
+  grid-column: 2;
+  grid-row: 2 / span 2;
+}
+
+.teacher-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+#classMessage {
+  margin-top: 12px;
+}
+
+/* Schmale Bildschirme */
+
+@media (max-width: 700px) {
+  .class-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 17px;
+  }
+
+  .class-teacher-field {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .teacher-form-actions {
+    margin-top: 18px;
+  }
+}
