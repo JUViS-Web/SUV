@@ -1388,6 +1388,7 @@ initClassManagement();
 
 // Klasse speichern oder aktualisieren
 
+
 if (classForm) {
   classForm.addEventListener("submit", async event => {
     event.preventDefault();
@@ -1405,6 +1406,18 @@ if (classForm) {
 
     const classId = document.getElementById("classId").value;
 
+    const selectedTeacherIds = Array.from(
+      document.querySelectorAll(
+        'input[name="classTeacherIds"]:checked'
+      )
+    ).map(checkbox => checkbox.value);
+
+    if (selectedTeacherIds.length > 3) {
+      classMessage.textContent =
+        "Es können maximal drei Klassenlehrkräfte zugeordnet werden.";
+      return;
+    }
+
     const classData = {
       school_year_id: activeSUVSchoolYearId,
       grade_level_id: classGrade.value,
@@ -1414,27 +1427,73 @@ if (classForm) {
       )
     };
 
-    let result;
+    let savedClassId;
 
     if (classId) {
-      result = await suvDb
+      const { error } = await suvDb
         .from("classes")
         .update(classData)
         .eq("id", classId);
+
+      if (error) {
+        classMessage.textContent = error.message;
+        return;
+      }
+
+      savedClassId = classId;
+
     } else {
-      result = await suvDb
+      const { data, error } = await suvDb
         .from("classes")
-        .insert(classData);
+        .insert(classData)
+        .select("id")
+        .single();
+
+      if (error) {
+        classMessage.textContent = error.message;
+        return;
+      }
+
+      savedClassId = data.id;
     }
 
-    if (result.error) {
-      classMessage.textContent = result.error.message;
+    // Bisherige Klassenlehrkräfte entfernen
+
+    const { error: deleteError } = await suvDb
+      .from("class_teachers")
+      .delete()
+      .eq("class_id", savedClassId);
+
+    if (deleteError) {
+      classMessage.textContent =
+        "Klasse gespeichert, aber alte Lehrkräfte konnten nicht entfernt werden: " +
+        deleteError.message;
       return;
     }
 
+    // Neue Klassenlehrkräfte speichern
+
+    if (selectedTeacherIds.length > 0) {
+      const teacherAssignments = selectedTeacherIds.map(teacherId => ({
+        class_id: savedClassId,
+        teacher_id: teacherId
+      }));
+
+      const { error: teacherError } = await suvDb
+        .from("class_teachers")
+        .insert(teacherAssignments);
+
+      if (teacherError) {
+        classMessage.textContent =
+          "Klasse gespeichert, aber Klassenlehrkräfte konnten nicht gespeichert werden: " +
+          teacherError.message;
+        return;
+      }
+    }
+
     classMessage.textContent = classId
-      ? "Klasse erfolgreich aktualisiert."
-      : "Klasse erfolgreich gespeichert.";
+      ? "Klasse und Klassenlehrkräfte erfolgreich aktualisiert."
+      : "Klasse und Klassenlehrkräfte erfolgreich gespeichert.";
 
     classForm.reset();
 
@@ -1450,6 +1509,7 @@ if (classForm) {
     await loadClasses();
   });
 }
+
 
 
 // Bearbeitung abbrechen
