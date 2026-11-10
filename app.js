@@ -1514,6 +1514,7 @@ if (classForm) {
 
 // Bearbeitung abbrechen
 
+
 const classCancelEdit =
   document.getElementById("classCancelEdit");
 
@@ -1524,6 +1525,12 @@ if (classCancelEdit) {
     document.getElementById("classId").value = "";
     document.getElementById("classStudentCount").value = 0;
 
+    document
+      .querySelectorAll('input[name="classTeacherIds"]')
+      .forEach(checkbox => {
+        checkbox.checked = false;
+      });
+
     document.getElementById("classSaveButton").textContent =
       "Klasse speichern";
 
@@ -1532,6 +1539,7 @@ if (classCancelEdit) {
     classMessage.textContent = "";
   });
 }
+
 
 // SUV – Schuljahresverwaltung
 
