@@ -1126,15 +1126,22 @@ async function loadClasses() {
   const { data, error } = await suvDb
     .from("classes")
     .select(`
-      id,
-      name,
-      grade_level_id,
-      student_count,
-      grade_levels (
-        name,
-        sort_order
-      )
-    `)
+  id,
+  name,
+  grade_level_id,
+  student_count,
+  grade_levels (
+    name,
+    sort_order
+  ),
+  class_teachers (
+    teacher_id,
+    teachers (
+      first_name,
+      last_name
+    )
+  )
+`)
     .eq("school_year_id", selectedSUVSchoolYearId)
     .order("name");
 
