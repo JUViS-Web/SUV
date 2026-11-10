@@ -1935,3 +1935,76 @@ form {
 .class-teacher-option:hover {
   background: var(--hover-bg, #f1f5f9);
 }
+
+
+        
+/* Klassenlehrkräfte – korrigiertes Layout */
+
+#classTeachersSelection {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.class-teacher-selected {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.class-teacher-search {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.class-teacher-results {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+#classTeachersSelection .class-teacher-option {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  justify-content: start;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  text-align: left;
+}
+
+#classTeachersSelection .class-teacher-option input[type="checkbox"] {
+  display: block;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  max-width: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: none;
+  box-sizing: border-box;
+  accent-color: #2563eb;
+}
+
+#classTeachersSelection .class-teacher-option span {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  text-align: left;
+  overflow-wrap: break-word;
+  word-break: normal;
+  font-size: 14px;
+}
