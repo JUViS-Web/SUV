@@ -1295,7 +1295,8 @@ classTeachers.textContent =
 
 // Klasse bearbeiten
 
-function editClass(schoolClass) {
+
+async function editClass(schoolClass) {
 
   if (selectedSUVSchoolYearId !== activeSUVSchoolYearId) {
     classMessage.textContent =
@@ -1316,8 +1317,32 @@ function editClass(schoolClass) {
   document.getElementById("classCancelEdit").style.display =
     "inline-block";
 
+  await loadClassTeacherOptions();
+
+  const { data, error } = await suvDb
+    .from("class_teachers")
+    .select("teacher_id")
+    .eq("class_id", schoolClass.id);
+
+  if (error) {
+    classMessage.textContent =
+      "Fehler beim Laden der Klassenlehrkräfte: " + error.message;
+    return;
+  }
+
+  const selectedTeacherIds = (data || [])
+    .map(item => String(item.teacher_id));
+
+  document
+    .querySelectorAll('input[name="classTeacherIds"]')
+    .forEach(checkbox => {
+      checkbox.checked =
+        selectedTeacherIds.includes(checkbox.value);
+    });
+
   classMessage.textContent = "Klasse wird bearbeitet.";
 }
+
 
 
 // Bearbeitungsrechte aktualisieren
