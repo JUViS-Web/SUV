@@ -1122,6 +1122,53 @@ async function loadClassSchoolYears() {
 
 // Klassen laden
 
+
+async function loadClassTeacherOptions() {
+  const container = document.getElementById("classTeachersSelection");
+
+  if (!container) return;
+
+  container.innerHTML = "<p>Lehrkräfte werden geladen ...</p>";
+
+  const { data, error } = await suvDb
+    .from("teachers")
+    .select("id, first_name, last_name")
+    .eq("is_active", true)
+    .order("last_name");
+
+  if (error) {
+    container.textContent =
+      "Fehler beim Laden: " + error.message;
+    return;
+  }
+
+  container.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    container.textContent = "Keine aktiven Lehrkräfte vorhanden.";
+    return;
+  }
+
+  data.forEach(teacher => {
+    const label = document.createElement("label");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "classTeacherIds";
+    checkbox.value = teacher.id;
+
+    label.appendChild(checkbox);
+    label.appendChild(
+      document.createTextNode(
+        " " + teacher.first_name + " " + teacher.last_name
+      )
+    );
+
+    container.appendChild(label);
+  });
+}
+
+
 async function loadClasses() {
   const { data, error } = await suvDb
     .from("classes")
