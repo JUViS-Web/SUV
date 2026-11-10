@@ -2127,7 +2127,7 @@ form {
 
 /* Schmale Bildschirme */
 
-@media (max-width: 700px) {
+@media (max-width: 600px) {
   .class-form-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 17px;
