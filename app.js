@@ -3144,6 +3144,195 @@ gradeCourseGrade.addEventListener("change", async () => {
   gradeCourseGroupMessage.textContent = "";
 });
 
+
+// Bestehende jahrgangsweite Kursangebote laden
+
+async function loadGradeCourseGroups(schoolYearId) {
+
+  gradeCourseGroupList.innerHTML =
+    "Kursangebote werden geladen ...";
+
+  if (!schoolYearId) {
+    gradeCourseGroupList.textContent =
+      "Bitte zuerst ein Schuljahr auswählen.";
+    return;
+  }
+
+  const { data: groups, error: groupsError } = await suvDb
+    .from("grade_course_groups")
+    .select("id, grade_level_id, subject_id, weekly_periods, notes")
+    .eq("school_year_id", schoolYearId)
+    .order("created_at", { ascending: false });
+
+  if (groupsError) {
+    gradeCourseGroupList.textContent =
+      "Kursangebote konnten nicht geladen werden: " +
+      groupsError.message;
+    return;
+  }
+
+  if (!groups || groups.length === 0) {
+    gradeCourseGroupList.textContent =
+      "Für dieses Schuljahr gibt es noch keine jahrgangsweiten Kursangebote.";
+    return;
+  }
+
+  const groupIds = groups.map(group => group.id);
+
+  const gradeIds = [...new Set(
+    groups.map(group => group.grade_level_id)
+  )];
+
+  const subjectIds = [...new Set(
+    groups.map(group => group.subject_id)
+  )];
+
+  const { data: grades, error: gradesError } = await suvDb
+    .from("grade_levels")
+    .select("id, name")
+    .in("id", gradeIds);
+
+  if (gradesError) {
+    gradeCourseGroupList.textContent =
+      "Jahrgänge konnten nicht geladen werden: " +
+      gradesError.message;
+    return;
+  }
+
+  const { data: subjects, error: subjectsError } = await suvDb
+    .from("subjects")
+    .select("id, name")
+    .in("id", subjectIds);
+
+  if (subjectsError) {
+    gradeCourseGroupList.textContent =
+      "Fächer konnten nicht geladen werden: " +
+      subjectsError.message;
+    return;
+  }
+
+  const { data: groupClasses, error: classesError } = await suvDb
+    .from("grade_course_group_classes")
+    .select("grade_course_group_id, class_id")
+    .in("grade_course_group_id", groupIds);
+
+  if (classesError) {
+    gradeCourseGroupList.textContent =
+      "Klassenzuordnungen konnten nicht geladen werden: " +
+      classesError.message;
+    return;
+  }
+
+  const classIds = [...new Set(
+    groupClasses.map(entry => entry.class_id)
+  )];
+
+  let classes = [];
+
+  if (classIds.length > 0) {
+
+    const { data, error } = await suvDb
+      .from("classes")
+      .select("id, name")
+      .in("id", classIds);
+
+    if (error) {
+      gradeCourseGroupList.textContent =
+        "Klassen konnten nicht geladen werden: " +
+        error.message;
+      return;
+    }
+
+    classes = data || [];
+  }
+
+  const { data: courses, error: coursesError } = await suvDb
+    .from("grade_courses")
+    .select("id, grade_course_group_id, course_number, course_name")
+    .in("grade_course_group_id", groupIds)
+    .order("course_number");
+
+  if (coursesError) {
+    gradeCourseGroupList.textContent =
+      "Parallelkurse konnten nicht geladen werden: " +
+      coursesError.message;
+    return;
+  }
+
+  gradeCourseGroupList.innerHTML = "";
+
+  groups.forEach(group => {
+
+    const card = document.createElement("div");
+    card.className = "distribution-card";
+
+    const grade = grades.find(item =>
+      item.id === group.grade_level_id
+    );
+
+    const subject = subjects.find(item =>
+      item.id === group.subject_id
+    );
+
+    const groupClassNames = groupClasses
+      .filter(item =>
+        item.grade_course_group_id === group.id
+      )
+      .map(item => {
+        const schoolClass = classes.find(cls =>
+          cls.id === item.class_id
+        );
+
+        return schoolClass ? schoolClass.name : null;
+      })
+      .filter(Boolean);
+
+    const groupCourses = courses.filter(course =>
+      course.grade_course_group_id === group.id
+    );
+
+    const heading = document.createElement("h4");
+    heading.textContent =
+      (grade ? grade.name : "Unbekannter Jahrgang") +
+      " – " +
+      (subject ? subject.name : "Unbekanntes Fach");
+
+    const details = document.createElement("p");
+    details.textContent =
+      "Klassen: " + groupClassNames.join(", ") +
+      " | Wochenstunden: " + group.weekly_periods;
+
+    const courseHeading = document.createElement("p");
+    courseHeading.textContent =
+      "Parallelkurse: " + groupCourses.length;
+
+    const courseList = document.createElement("ul");
+
+    groupCourses.forEach(course => {
+      const item = document.createElement("li");
+      item.textContent = course.course_name;
+      courseList.appendChild(item);
+    });
+
+    card.append(
+      heading,
+      details,
+      courseHeading,
+      courseList
+    );
+
+    if (group.notes) {
+      const notes = document.createElement("p");
+      notes.textContent = "Anmerkungen: " + group.notes;
+      card.appendChild(notes);
+    }
+
+    gradeCourseGroupList.appendChild(card);
+
+  });
+
+}
+
 // Zustände
 let selectedDistributionClassId = null;
 let selectedDistributionSchoolYearId = null;
