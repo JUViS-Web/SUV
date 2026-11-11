@@ -3540,9 +3540,9 @@ editButton.addEventListener("click", async () => {
     "Bearbeitungsmodus: Änderungen vornehmen und speichern.";
 
     gradeCourseGroupForm.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
+  behavior: "smooth",
+  block: "start"
+});
 
 });
 
