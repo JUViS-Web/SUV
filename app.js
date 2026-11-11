@@ -3328,7 +3328,68 @@ async function loadGradeCourseGroups(schoolYearId) {
       card.appendChild(notes);
     }
 
-    gradeCourseGroupList.appendChild(card);
+    // Kursangebot löschen
+
+const deleteButton = document.createElement("button");
+deleteButton.textContent = "Kursangebot löschen";
+deleteButton.className = "delete-button";
+
+deleteButton.addEventListener("click", async () => {
+
+  const confirmed = confirm(
+    "Möchtest du dieses Kursangebot wirklich löschen?"
+  );
+
+  if (!confirmed) return;
+
+  deleteButton.disabled = true;
+  deleteButton.textContent = "Wird gelöscht ...";
+
+  try {
+
+    const { error: coursesError } = await suvDb
+      .from("grade_courses")
+      .delete()
+      .eq("grade_course_group_id", group.id);
+
+    if (coursesError) throw coursesError;
+
+    const { error: periodsError } = await suvDb
+      .from("grade_course_group_periods")
+      .delete()
+      .eq("grade_course_group_id", group.id);
+
+    if (periodsError) throw periodsError;
+
+    const { error: classesError } = await suvDb
+      .from("grade_course_group_classes")
+      .delete()
+      .eq("grade_course_group_id", group.id);
+
+    if (classesError) throw classesError;
+
+    const { error: groupError } = await suvDb
+      .from("grade_course_groups")
+      .delete()
+      .eq("id", group.id);
+
+    if (groupError) throw groupError;
+
+    await loadGradeCourseGroups(schoolYearId);
+
+  } catch (error) {
+
+    alert("Kursangebot konnte nicht gelöscht werden: " + error.message);
+    deleteButton.disabled = false;
+    deleteButton.textContent = "Kursangebot löschen";
+
+  }
+
+});
+
+card.appendChild(deleteButton);
+
+gradeCourseGroupList.appendChild(card);
 
   });
 
