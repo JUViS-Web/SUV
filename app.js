@@ -2663,8 +2663,8 @@ async function loadDistributionClasses(schoolYearId) {
     });
   }
 
-  // Jahrgänge für die jahrgangsweite Kursverteilung laden
-  await loadGradeCourseGrades(schoolYearId);
+  // Bestehende Kursangebote laden
+await loadGradeCourseGroups(schoolYearId);
 }
 
 
