@@ -7,7 +7,7 @@ window.onerror = function(message, source, lineno, colno) {
   );
 };
 
-// SUV – Supabase-Verbindung
+// SUV – Supabase-Verbindung - Aktialisiert
 
 const { createClient } = supabase;
 alert("TEST 1: Supabase-Bibliothek verfügbar");
