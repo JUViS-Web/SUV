@@ -3542,6 +3542,7 @@ editButton.addEventListener("click", async () => {
   gradeCourseGroupForm.scrollIntoView({
     behavior: "smooth",
     block: "start"
+    card.appendChild(editButton);
   });
 
 });
