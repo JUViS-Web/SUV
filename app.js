@@ -3770,6 +3770,27 @@ distributionForm.addEventListener("submit", async (event) => {
 
   const notes = distributionNotes.value.trim();
 
+const blockPattern = distributionBlockPattern.value.trim();
+
+const blockSizes = blockPattern
+  .split("+")
+  .map(value => Number(value.trim()));
+
+const validBlockPattern =
+  blockPattern !== "" &&
+  blockSizes.every(value =>
+    Number.isInteger(value) && value > 0
+  ) &&
+  blockSizes.reduce((sum, value) => sum + value, 0) === weeklyPeriods;
+
+if (!validBlockPattern) {
+  distributionMessage.textContent =
+    "Die Unterrichtsblöcke müssen positive ganze Zahlen enthalten und zusammen genau " +
+    weeklyPeriods + " Wochenstunden ergeben. Beispiel: 2 + 2.";
+
+  return;
+}
+  
   if (!subjectId || weeklyPeriods < 1) {
   distributionMessage.textContent =
     "Bitte Fach und gültige Wochenstunden angeben.";
