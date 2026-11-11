@@ -2919,6 +2919,164 @@ async function loadDistributionOptions() {
   });
 }
 
+
+// Jahrgangsweites Kursangebot erstellen
+
+gradeCourseGroupForm.addEventListener("submit", async (event) => {
+
+  event.preventDefault();
+
+  gradeCourseGroupMessage.textContent = "";
+
+  const schoolYearId = distributionSchoolYear.value;
+  const gradeId = gradeCourseGrade.value;
+  const subjectId = gradeCourseSubject.value;
+  const weeklyPeriods = Number(gradeCourseWeeklyPeriods.value);
+  const courseCount = Number(gradeCourseCount.value);
+
+  const selectedClassIds = Array.from(
+    gradeCourseClasses.selectedOptions
+  ).map(option => option.value);
+
+  if (!schoolYearId || !gradeId || !subjectId) {
+    gradeCourseGroupMessage.textContent =
+      "Bitte Schuljahr, Jahrgang und Fach auswählen.";
+    return;
+  }
+
+  if (selectedClassIds.length < 2) {
+    gradeCourseGroupMessage.textContent =
+      "Bitte mindestens zwei Klassen auswählen.";
+    return;
+  }
+
+  if (weeklyPeriods < 1 || courseCount < 2) {
+    gradeCourseGroupMessage.textContent =
+      "Bitte gültige Wochenstunden und mindestens zwei Kurse angeben.";
+    return;
+  }
+
+  gradeCourseGroupSaveButton.disabled = true;
+  gradeCourseGroupMessage.textContent =
+    "Kursangebot wird erstellt ...";
+
+  try {
+
+    // Prüfen, ob für diesen Jahrgang und dieses Fach
+    // bereits ein Kursangebot existiert
+
+    const { data: existingGroup, error: checkError } = await suvDb
+      .from("grade_course_groups")
+      .select("id")
+      .eq("school_year_id", schoolYearId)
+      .eq("grade_level_id", gradeId)
+      .eq("subject_id", subjectId)
+      .maybeSingle();
+
+    if (checkError) {
+      throw checkError;
+    }
+
+    if (existingGroup) {
+      throw new Error(
+        "Für diesen Jahrgang und dieses Fach existiert bereits ein Kursangebot."
+      );
+    }
+
+    // Kursgruppe erstellen
+
+    const { data: newGroup, error: groupError } = await suvDb
+      .from("grade_course_groups")
+      .insert({
+        school_year_id: schoolYearId,
+        grade_level_id: gradeId,
+        subject_id: subjectId,
+        weekly_periods: weeklyPeriods,
+        notes: gradeCourseNotes.value.trim() || null
+      })
+      .select("id")
+      .single();
+
+    if (groupError) {
+      throw groupError;
+    }
+
+    // Beteiligte Klassen speichern
+
+    const classEntries = selectedClassIds.map(classId => ({
+      grade_course_group_id: newGroup.id,
+      class_id: classId
+    }));
+
+    const { error: classesError } = await suvDb
+      .from("grade_course_group_classes")
+      .insert(classEntries);
+
+    if (classesError) {
+      await suvDb
+        .from("grade_course_groups")
+        .delete()
+        .eq("id", newGroup.id);
+
+      throw classesError;
+    }
+
+    // Parallelkurse erstellen
+
+    const subjectName = gradeCourseSubject
+      .selectedOptions[0].textContent
+      .split(" (")[0];
+
+    const courseEntries = [];
+
+    for (let i = 1; i <= courseCount; i++) {
+      courseEntries.push({
+        grade_course_group_id: newGroup.id,
+        course_number: i,
+        course_name: subjectName + " " + i
+      });
+    }
+
+    const { error: coursesError } = await suvDb
+      .from("grade_courses")
+      .insert(courseEntries);
+
+    if (coursesError) {
+
+      await suvDb
+        .from("grade_course_group_classes")
+        .delete()
+        .eq("grade_course_group_id", newGroup.id);
+
+      await suvDb
+        .from("grade_course_groups")
+        .delete()
+        .eq("id", newGroup.id);
+
+      throw coursesError;
+    }
+
+    gradeCourseGroupMessage.textContent =
+      courseCount + " Parallelkurse wurden erfolgreich erstellt.";
+
+    gradeCourseGroupForm.reset();
+
+    gradeCourseCount.value = 5;
+    gradeCourseClasses.innerHTML = "";
+
+  } catch (error) {
+
+    gradeCourseGroupMessage.textContent =
+      "Fehler: " + error.message;
+
+  } finally {
+
+    gradeCourseGroupSaveButton.disabled = false;
+
+  }
+
+});
+
 // DOM-Elemente
 const distributionSchoolYear =
   document.getElementById("distributionSchoolYear");
