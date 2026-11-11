@@ -4023,6 +4023,23 @@ distributionList.addEventListener("click", async (event) => {
 
     if (!entry) return;
 
+    const { data: savedBlocks, error: blocksError } = await suvDb
+      .from("lesson_block_requirements")
+      .select("periods_count")
+      .eq("class_subject_id", entry.id)
+      .order("block_number");
+
+    if (blocksError) {
+      distributionMessage.textContent =
+        "Unterrichtsblöcke konnten nicht geladen werden: " +
+        blocksError.message;
+      return;
+    }
+
+    distributionBlockPattern.value = (savedBlocks || [])
+      .map(block => block.periods_count)
+      .join(" + ");
+    
     distributionEntryId.value = entry.id;
     distributionSubject.value = entry.subjects?.id || "";
     distributionWeeklyPeriods.value = entry.weekly_periods;
