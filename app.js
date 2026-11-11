@@ -3085,7 +3085,8 @@ gradeCourseGroupForm.addEventListener("submit", async (event) => {
 
     gradeCourseGroupMessage.textContent =
       courseCount + " Parallelkurse wurden erfolgreich erstellt.";
-
+await loadGradeCourseGroups(schoolYearId);
+    
     gradeCourseGroupForm.reset();
 
     gradeCourseCount.value = 5;
