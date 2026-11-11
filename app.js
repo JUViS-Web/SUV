@@ -2947,6 +2947,9 @@ const gradeCourseGroupMessage =
 const gradeCourseGroupList =
   document.getElementById("gradeCourseGroupList");
 
+// Aktuell bearbeitetes jahrgangsweites Kursangebot
+let editingGradeCourseGroupId = null;
+
 // Jahrgangsweites Kursangebot erstellen
 
 gradeCourseGroupForm.addEventListener("submit", async (event) => {
