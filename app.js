@@ -3513,14 +3513,50 @@ async function loadGradeCourseGroups(schoolYearId) {
         roomSelect.appendChild(option);
       });
 
-      item.append(
-        document.createElement("br"),
-        courseTitle,
-        document.createElement("br"),
-        teacherSelect,
-        document.createElement("br"),
-        roomSelect
-      );
+      
+      // Lehrkraft speichern
+
+      teacherSelect.addEventListener("change", async () => {
+
+        teacherSelect.disabled = true;
+
+        const { error } = await suvDb
+          .from("grade_courses")
+          .update({
+            teacher_id: teacherSelect.value || null
+          })
+          .eq("id", course.id);
+
+        teacherSelect.disabled = false;
+
+        if (error) {
+          alert("Lehrkraft konnte nicht gespeichert werden: " + error.message);
+          return;
+        }
+
+      });
+
+      // Unterrichtsraum speichern
+
+      roomSelect.addEventListener("change", async () => {
+
+        roomSelect.disabled = true;
+
+        const { error } = await suvDb
+          .from("grade_courses")
+          .update({
+            room_id: roomSelect.value || null
+          })
+          .eq("id", course.id);
+
+        roomSelect.disabled = false;
+
+        if (error) {
+          alert("Raum konnte nicht gespeichert werden: " + error.message);
+          return;
+        }
+
+      });
 
       courseList.appendChild(item);
     });
