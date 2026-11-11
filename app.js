@@ -2878,6 +2878,74 @@ async function loadDistributionOptions() {
   });
 }
 
+// DOM-Elemente
+const distributionSchoolYear =
+  document.getElementById("distributionSchoolYear");
+
+const distributionClass =
+  document.getElementById("distributionClass");
+
+const distributionMessage =
+  document.getElementById("distributionMessage");
+
+const distributionForm =
+  document.getElementById("distributionForm");
+
+const distributionEntryId =
+  document.getElementById("distributionEntryId");
+
+const distributionSubject =
+  document.getElementById("distributionSubject");
+
+const distributionWeeklyPeriods =
+  document.getElementById("distributionWeeklyPeriods");
+
+const distributionTeachers =
+  document.getElementById("distributionTeachers");
+
+const distributionNotes =
+  document.getElementById("distributionNotes");
+
+const distributionList =
+  document.getElementById("distributionList");
+
+const distributionSaveButton =
+  document.getElementById("distributionSaveButton");
+
+const distributionCancelEdit =
+  document.getElementById("distributionCancelEdit");
+
+// DOM-Elemente der jahrgangsweiten Kursverteilung
+
+const gradeCourseGroupForm =
+  document.getElementById("gradeCourseGroupForm");
+
+const gradeCourseGrade =
+  document.getElementById("gradeCourseGrade");
+
+const gradeCourseClasses =
+  document.getElementById("gradeCourseClasses");
+
+const gradeCourseSubject =
+  document.getElementById("gradeCourseSubject");
+
+const gradeCourseWeeklyPeriods =
+  document.getElementById("gradeCourseWeeklyPeriods");
+
+const gradeCourseCount =
+  document.getElementById("gradeCourseCount");
+
+const gradeCourseNotes =
+  document.getElementById("gradeCourseNotes");
+
+const gradeCourseGroupSaveButton =
+  document.getElementById("gradeCourseGroupSaveButton");
+
+const gradeCourseGroupMessage =
+  document.getElementById("gradeCourseGroupMessage");
+
+const gradeCourseGroupList =
+  document.getElementById("gradeCourseGroupList");
 
 // Jahrgangsweites Kursangebot erstellen
 
@@ -3035,75 +3103,6 @@ gradeCourseGroupForm.addEventListener("submit", async (event) => {
   }
 
 });
-
-// DOM-Elemente
-const distributionSchoolYear =
-  document.getElementById("distributionSchoolYear");
-
-const distributionClass =
-  document.getElementById("distributionClass");
-
-const distributionMessage =
-  document.getElementById("distributionMessage");
-
-const distributionForm =
-  document.getElementById("distributionForm");
-
-const distributionEntryId =
-  document.getElementById("distributionEntryId");
-
-const distributionSubject =
-  document.getElementById("distributionSubject");
-
-const distributionWeeklyPeriods =
-  document.getElementById("distributionWeeklyPeriods");
-
-const distributionTeachers =
-  document.getElementById("distributionTeachers");
-
-const distributionNotes =
-  document.getElementById("distributionNotes");
-
-const distributionList =
-  document.getElementById("distributionList");
-
-const distributionSaveButton =
-  document.getElementById("distributionSaveButton");
-
-const distributionCancelEdit =
-  document.getElementById("distributionCancelEdit");
-
-// DOM-Elemente der jahrgangsweiten Kursverteilung
-
-const gradeCourseGroupForm =
-  document.getElementById("gradeCourseGroupForm");
-
-const gradeCourseGrade =
-  document.getElementById("gradeCourseGrade");
-
-const gradeCourseClasses =
-  document.getElementById("gradeCourseClasses");
-
-const gradeCourseSubject =
-  document.getElementById("gradeCourseSubject");
-
-const gradeCourseWeeklyPeriods =
-  document.getElementById("gradeCourseWeeklyPeriods");
-
-const gradeCourseCount =
-  document.getElementById("gradeCourseCount");
-
-const gradeCourseNotes =
-  document.getElementById("gradeCourseNotes");
-
-const gradeCourseGroupSaveButton =
-  document.getElementById("gradeCourseGroupSaveButton");
-
-const gradeCourseGroupMessage =
-  document.getElementById("gradeCourseGroupMessage");
-
-const gradeCourseGroupList =
-  document.getElementById("gradeCourseGroupList");
 
 // Klassen passend zum Jahrgang laden
 
