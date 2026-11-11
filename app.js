@@ -3855,6 +3855,45 @@ if (distributionEntryId.value) {
     return;
   }
 
+  // Alte Unterrichtsblöcke entfernen
+
+  const { error: deleteBlocksError } = await suvDb
+    .from("lesson_block_requirements")
+    .delete()
+    .eq("class_subject_id", classSubject.id);
+
+  if (deleteBlocksError) {
+    distributionMessage.textContent =
+      "Fach wurde gespeichert, aber alte Unterrichtsblöcke konnten nicht entfernt werden: " +
+      deleteBlocksError.message;
+
+    distributionSaveButton.disabled = false;
+    distributionSaveButton.textContent = "Zuordnung speichern";
+    return;
+  }
+
+  // Neue Unterrichtsblöcke speichern
+
+  const blockRows = blockSizes.map((periodsCount, index) => ({
+    class_subject_id: classSubject.id,
+    block_number: index + 1,
+    periods_count: periodsCount
+  }));
+
+  const { error: insertBlocksError } = await suvDb
+    .from("lesson_block_requirements")
+    .insert(blockRows);
+
+  if (insertBlocksError) {
+    distributionMessage.textContent =
+      "Fach wurde gespeichert, aber die Unterrichtsblöcke konnten nicht gespeichert werden: " +
+      insertBlocksError.message;
+
+    distributionSaveButton.disabled = false;
+    distributionSaveButton.textContent = "Zuordnung speichern";
+    return;
+  }
+  
   // Lehrkräfte zuordnen
   const { error: deleteTeachersError } = await suvDb
   .from("class_subject_teachers")
