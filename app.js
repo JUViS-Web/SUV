@@ -3393,6 +3393,36 @@ async function loadGradeCourseGroups(schoolYearId) {
     return;
   }
 
+  
+  // Verfügbare Lehrkräfte laden
+
+  const { data: teachers, error: teachersError } = await suvDb
+    .from("teachers")
+    .select("id, first_name, last_name, short_code")
+    .eq("is_active", true)
+    .order("last_name");
+
+  if (teachersError) {
+    gradeCourseGroupList.textContent =
+      "Lehrkräfte konnten nicht geladen werden: " +
+      teachersError.message;
+    return;
+  }
+
+  // Verfügbare Unterrichtsräume laden
+
+  const { data: rooms, error: roomsError } = await suvDb
+    .from("rooms")
+    .select("id, name")
+    .order("name");
+
+  if (roomsError) {
+    gradeCourseGroupList.textContent =
+      "Räume konnten nicht geladen werden: " +
+      roomsError.message;
+    return;
+  }
+
   gradeCourseGroupList.innerHTML = "";
 
   groups.forEach(group => {
