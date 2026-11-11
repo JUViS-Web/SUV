@@ -2878,6 +2878,38 @@ const distributionSaveButton =
 const distributionCancelEdit =
   document.getElementById("distributionCancelEdit");
 
+// DOM-Elemente der jahrgangsweiten Kursverteilung
+
+const gradeCourseGroupForm =
+  document.getElementById("gradeCourseGroupForm");
+
+const gradeCourseGrade =
+  document.getElementById("gradeCourseGrade");
+
+const gradeCourseClasses =
+  document.getElementById("gradeCourseClasses");
+
+const gradeCourseSubject =
+  document.getElementById("gradeCourseSubject");
+
+const gradeCourseWeeklyPeriods =
+  document.getElementById("gradeCourseWeeklyPeriods");
+
+const gradeCourseCount =
+  document.getElementById("gradeCourseCount");
+
+const gradeCourseNotes =
+  document.getElementById("gradeCourseNotes");
+
+const gradeCourseGroupSaveButton =
+  document.getElementById("gradeCourseGroupSaveButton");
+
+const gradeCourseGroupMessage =
+  document.getElementById("gradeCourseGroupMessage");
+
+const gradeCourseGroupList =
+  document.getElementById("gradeCourseGroupList");
+
 // Zustände
 let selectedDistributionClassId = null;
 let selectedDistributionSchoolYearId = null;
