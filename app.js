@@ -3558,9 +3558,16 @@ async function loadGradeCourseGroups(schoolYearId) {
 
       });
 
-      courseList.appendChild(item);
 
-            courseList.appendChild(item);
+      item.append(
+        courseTitle,
+        document.createElement("br"),
+        teacherSelect,
+        document.createElement("br"),
+        roomSelect
+      );
+      
+      courseList.appendChild(item);
     });
 
 
