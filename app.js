@@ -2698,47 +2698,6 @@ async function loadGradeCourseGrades(schoolYearId) {
   });
 }
 
-
-// Klassen passend zum Jahrgang laden
-
-gradeCourseGrade.addEventListener("change", async () => {
-
-  gradeCourseClasses.innerHTML = "";
-
-  const gradeId = gradeCourseGrade.value;
-  const schoolYearId = distributionSchoolYear.value;
-
-  if (!gradeId || !schoolYearId) return;
-
-  const { data, error } = await suvDb
-    .from("classes")
-    .select("id, name")
-    .eq("school_year_id", schoolYearId)
-    .eq("grade_level_id", gradeId)
-    .order("name");
-
-  if (error) {
-    gradeCourseGroupMessage.textContent =
-      "Klassen konnten nicht geladen werden: " + error.message;
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    gradeCourseGroupMessage.textContent =
-      "Für diesen Jahrgang gibt es noch keine Klassen.";
-    return;
-  }
-
-  data.forEach(schoolClass => {
-    const option = document.createElement("option");
-    option.value = schoolClass.id;
-    option.textContent = schoolClass.name;
-    gradeCourseClasses.appendChild(option);
-  });
-
-  gradeCourseGroupMessage.textContent = "";
-});
-
 // Unterrichtsverteilung einer Klasse laden
 
 async function loadDistributionEntries() {
@@ -3145,6 +3104,46 @@ const gradeCourseGroupMessage =
 
 const gradeCourseGroupList =
   document.getElementById("gradeCourseGroupList");
+
+// Klassen passend zum Jahrgang laden
+
+gradeCourseGrade.addEventListener("change", async () => {
+
+  gradeCourseClasses.innerHTML = "";
+
+  const gradeId = gradeCourseGrade.value;
+  const schoolYearId = distributionSchoolYear.value;
+
+  if (!gradeId || !schoolYearId) return;
+
+  const { data, error } = await suvDb
+    .from("classes")
+    .select("id, name")
+    .eq("school_year_id", schoolYearId)
+    .eq("grade_level_id", gradeId)
+    .order("name");
+
+  if (error) {
+    gradeCourseGroupMessage.textContent =
+      "Klassen konnten nicht geladen werden: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    gradeCourseGroupMessage.textContent =
+      "Für diesen Jahrgang gibt es noch keine Klassen.";
+    return;
+  }
+
+  data.forEach(schoolClass => {
+    const option = document.createElement("option");
+    option.value = schoolClass.id;
+    option.textContent = schoolClass.name;
+    gradeCourseClasses.appendChild(option);
+  });
+
+  gradeCourseGroupMessage.textContent = "";
+});
 
 // Zustände
 let selectedDistributionClassId = null;
