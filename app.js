@@ -2903,6 +2903,9 @@ const distributionSubject =
 const distributionWeeklyPeriods =
   document.getElementById("distributionWeeklyPeriods");
 
+const distributionBlocks = 
+  document.getElementById("distributionBlocks");
+
 const distributionTeachers =
   document.getElementById("distributionTeachers");
 
