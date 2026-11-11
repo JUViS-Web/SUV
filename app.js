@@ -2851,9 +2851,13 @@ const teacherDisplay = teacherCount > 0
 
 // Fächer und Lehrkräfte laden
 
+
 async function loadDistributionOptions() {
 
   distributionSubject.innerHTML =
+    '<option value="">Fach auswählen</option>';
+
+  gradeCourseSubject.innerHTML =
     '<option value="">Fach auswählen</option>';
 
   distributionTeachers.innerHTML = "";
@@ -2878,6 +2882,14 @@ async function loadDistributionOptions() {
       subject.name + " (" + subject.short_code + ")";
 
     distributionSubject.appendChild(option);
+
+    const gradeOption = document.createElement("option");
+
+    gradeOption.value = subject.id;
+    gradeOption.textContent =
+      subject.name + " (" + subject.short_code + ")";
+
+    gradeCourseSubject.appendChild(gradeOption);
 
   });
 
