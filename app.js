@@ -3331,6 +3331,91 @@ async function loadGradeCourseGroups(schoolYearId) {
       card.appendChild(notes);
     }
 
+
+// Kursangebot bearbeiten
+
+const editButton = document.createElement("button");
+editButton.textContent = "Bearbeiten";
+editButton.className = "edit-button";
+
+editButton.addEventListener("click", async () => {
+
+  editingGradeCourseGroupId = group.id;
+
+  gradeCourseGrade.value = group.grade_level_id;
+  gradeCourseSubject.value = group.subject_id;
+  gradeCourseWeeklyPeriods.value = group.weekly_periods;
+  gradeCourseNotes.value = group.notes || "";
+
+  // Zugehörige Klassen laden
+
+  const { data: assignedClasses, error } = await suvDb
+    .from("grade_course_group_classes")
+    .select("class_id")
+    .eq("grade_course_group_id", group.id);
+
+  if (error) {
+    alert("Klassen konnten nicht geladen werden: " + error.message);
+    return;
+  }
+
+  // Klassen des Jahrgangs laden
+
+  const { data: availableClasses, error: classError } = await suvDb
+    .from("classes")
+    .select("id, name")
+    .eq("school_year_id", distributionSchoolYear.value)
+    .eq("grade_level_id", group.grade_level_id)
+    .order("name");
+
+  if (classError) {
+    alert("Klassen konnten nicht geladen werden: " + classError.message);
+    return;
+  }
+
+  gradeCourseClasses.innerHTML = "";
+
+  availableClasses.forEach(schoolClass => {
+
+    const option = document.createElement("option");
+    option.value = schoolClass.id;
+    option.textContent = schoolClass.name;
+
+    option.selected = assignedClasses.some(
+      item => item.class_id === schoolClass.id
+    );
+
+    gradeCourseClasses.appendChild(option);
+
+  });
+
+  // Anzahl der vorhandenen Parallelkurse laden
+
+  const { data: existingCourses, error: courseError } = await suvDb
+    .from("grade_courses")
+    .select("id, course_number")
+    .eq("grade_course_group_id", group.id);
+
+  if (courseError) {
+    alert("Parallelkurse konnten nicht geladen werden: " + courseError.message);
+    return;
+  }
+
+  gradeCourseCount.value = existingCourses.length;
+
+  gradeCourseGroupSaveButton.textContent =
+    "Änderungen speichern";
+
+  gradeCourseGroupMessage.textContent =
+    "Bearbeitungsmodus: Änderungen vornehmen und speichern.";
+
+  gradeCourseGroupForm.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+});
+    
     // Kursangebot löschen
 
 const deleteButton = document.createElement("button");
