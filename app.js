@@ -3539,13 +3539,14 @@ editButton.addEventListener("click", async () => {
   gradeCourseGroupMessage.textContent =
     "Bearbeitungsmodus: Änderungen vornehmen und speichern.";
 
-  gradeCourseGroupForm.scrollIntoView({
+    gradeCourseGroupForm.scrollIntoView({
     behavior: "smooth",
     block: "start"
-    card.appendChild(editButton);
   });
 
 });
+
+card.appendChild(editButton);
     
     // Kursangebot löschen
 
