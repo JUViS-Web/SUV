@@ -2641,37 +2641,103 @@ async function loadDistributionClasses(schoolYearId) {
 
   const { data, error } = await suvDb
     .from("classes")
-    .select(`
-      id,
-      name,
-      school_year_id
-    `)
+    .select("id, name, school_year_id")
     .eq("school_year_id", schoolYearId)
     .order("name");
 
   if (error) {
     distributionMessage.textContent =
-      "Klassen konnten nicht geladen werden.";
+      "Klassen konnten nicht geladen werden: " + error.message;
     return;
   }
 
   if (!data || data.length === 0) {
     distributionMessage.textContent =
       "Für dieses Schuljahr sind keine Klassen angelegt.";
+  } else {
+    data.forEach(schoolClass => {
+      const option = document.createElement("option");
+      option.value = schoolClass.id;
+      option.textContent = schoolClass.name;
+      distributionClass.appendChild(option);
+    });
+  }
+
+  // Jahrgänge für die jahrgangsweite Kursverteilung laden
+  await loadGradeCourseGrades(schoolYearId);
+}
+
+
+// Jahrgänge laden
+
+async function loadGradeCourseGrades(schoolYearId) {
+
+  gradeCourseGrade.innerHTML =
+    '<option value="">Jahrgang auswählen</option>';
+
+  gradeCourseClasses.innerHTML = "";
+
+  if (!schoolYearId) return;
+
+  const { data, error } = await suvDb
+    .from("grade_levels")
+    .select("id, name, sort_order")
+    .order("sort_order");
+
+  if (error) {
+    gradeCourseGroupMessage.textContent =
+      "Jahrgänge konnten nicht geladen werden: " + error.message;
+    return;
+  }
+
+  data.forEach(grade => {
+    const option = document.createElement("option");
+    option.value = grade.id;
+    option.textContent = grade.name;
+    gradeCourseGrade.appendChild(option);
+  });
+}
+
+
+// Klassen passend zum Jahrgang laden
+
+gradeCourseGrade.addEventListener("change", async () => {
+
+  gradeCourseClasses.innerHTML = "";
+
+  const gradeId = gradeCourseGrade.value;
+  const schoolYearId = distributionSchoolYear.value;
+
+  if (!gradeId || !schoolYearId) return;
+
+  const { data, error } = await suvDb
+    .from("classes")
+    .select("id, name")
+    .eq("school_year_id", schoolYearId)
+    .eq("grade_level_id", gradeId)
+    .order("name");
+
+  if (error) {
+    gradeCourseGroupMessage.textContent =
+      "Klassen konnten nicht geladen werden: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    gradeCourseGroupMessage.textContent =
+      "Für diesen Jahrgang gibt es noch keine Klassen.";
     return;
   }
 
   data.forEach(schoolClass => {
-
     const option = document.createElement("option");
-
     option.value = schoolClass.id;
     option.textContent = schoolClass.name;
-
-    distributionClass.appendChild(option);
-
+    gradeCourseClasses.appendChild(option);
   });
-}
+
+  gradeCourseGroupMessage.textContent = "";
+});
 
 // Unterrichtsverteilung einer Klasse laden
 
