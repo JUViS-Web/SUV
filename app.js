@@ -3472,11 +3472,59 @@ async function loadGradeCourseGroups(schoolYearId) {
 
     const courseList = document.createElement("ul");
 
+    
     groupCourses.forEach(course => {
+
       const item = document.createElement("li");
-      item.textContent = course.course_name;
+
+      const courseTitle = document.createElement("strong");
+      courseTitle.textContent = course.course_name;
+
+      const teacherSelect = document.createElement("select");
+
+      const teacherPlaceholder = document.createElement("option");
+      teacherPlaceholder.value = "";
+      teacherPlaceholder.textContent = "Lehrkraft auswählen";
+      teacherSelect.appendChild(teacherPlaceholder);
+
+      teachers.forEach(teacher => {
+        const option = document.createElement("option");
+        option.value = teacher.id;
+        option.textContent =
+          teacher.last_name + ", " + teacher.first_name +
+          (teacher.short_code ? " (" + teacher.short_code + ")" : "");
+
+        option.selected = teacher.id === course.teacher_id;
+        teacherSelect.appendChild(option);
+      });
+
+      const roomSelect = document.createElement("select");
+
+      const roomPlaceholder = document.createElement("option");
+      roomPlaceholder.value = "";
+      roomPlaceholder.textContent = "Raum auswählen";
+      roomSelect.appendChild(roomPlaceholder);
+
+      rooms.forEach(room => {
+        const option = document.createElement("option");
+        option.value = room.id;
+        option.textContent = room.name;
+        option.selected = room.id === course.room_id;
+        roomSelect.appendChild(option);
+      });
+
+      item.append(
+        document.createElement("br"),
+        courseTitle,
+        document.createElement("br"),
+        teacherSelect,
+        document.createElement("br"),
+        roomSelect
+      );
+
       courseList.appendChild(item);
     });
+
 
     card.append(
       heading,
