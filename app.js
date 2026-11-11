@@ -3382,7 +3382,7 @@ async function loadGradeCourseGroups(schoolYearId) {
 
   const { data: courses, error: coursesError } = await suvDb
     .from("grade_courses")
-    .select("id, grade_course_group_id, course_number, course_name")
+        .select("id, grade_course_group_id, course_number, course_name, teacher_id, room_id")
     .in("grade_course_group_id", groupIds)
     .order("course_number");
 
