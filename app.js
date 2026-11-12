@@ -4913,6 +4913,60 @@ timetableSubject.addEventListener("change", () => {
   });
 }
 
+// Unterrichtsblöcke einer Jahrgangskursgruppe laden
+
+async function loadGradeCourseBlocks() {
+  timetableGradeCourseBlock.innerHTML =
+    '<option value="">Block auswählen</option>';
+
+  timetableGradeCourseBlock.disabled = true;
+
+  const groupId = timetableGradeCourseGroup.value;
+
+  if (!groupId) {
+    return;
+  }
+
+  const { data: blocks, error } = await suvDb
+    .from("lesson_block_requirements")
+    .select("id, block_number, periods_count")
+    .eq("grade_course_group_id", groupId)
+    .order("block_number");
+
+  if (error) {
+    timetableMessage.textContent =
+      "Unterrichtsblöcke konnten nicht geladen werden: " +
+      error.message;
+    return;
+  }
+
+  if (!blocks || blocks.length === 0) {
+    timetableGradeCourseBlock.innerHTML =
+      '<option value="">Keine Blöcke hinterlegt</option>';
+    return;
+  }
+
+  blocks.forEach(block => {
+    const option = document.createElement("option");
+
+    option.value = block.id;
+    option.textContent =
+      "Block " + block.block_number +
+      " – " + block.periods_count +
+      (block.periods_count === 1 ? " Stunde" : " Stunden");
+
+    timetableGradeCourseBlock.appendChild(option);
+  });
+
+  timetableGradeCourseBlock.disabled = false;
+}
+
+// Blöcke bei Auswahl einer Kursgruppe neu laden
+
+timetableGradeCourseGroup.addEventListener(
+  "change",
+  loadGradeCourseBlocks
+);
 
 /// Auswahlfelder bei Klassenwechsel aktualisieren
 
