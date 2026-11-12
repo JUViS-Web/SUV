@@ -5027,11 +5027,6 @@ if (
     "Bitte entweder eine Jahrgangskursgruppe mit Unterrichtsblock oder ein vollständiges normales Unterrichtsfach mit Lehrkraft und Raum auswählen.";
   return;
 } 
-) {
-  timetableMessage.textContent =
-    "Bitte entweder eine Jahrgangskursgruppe oder ein vollständiges normales Unterrichtsfach mit Lehrkraft und Raum auswählen.";
-  return;
-}
 
   // Jahrgangsweite Kursgruppe gemeinsam einplanen
 
