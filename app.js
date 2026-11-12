@@ -5009,6 +5009,9 @@ timetableEntryForm.addEventListener("submit", async (event) => {
 const selectedGradeCourseGroupId =
   timetableGradeCourseGroup.value;
 
+const selectedGradeCourseBlockId =
+  timetableGradeCourseBlock.value;
+  
 if (
   !day ||
   day < 1 ||
@@ -5016,8 +5019,14 @@ if (
   !lesson ||
   (!timetableSubject.value && !selectedGradeCourseGroupId) ||
   (timetableSubject.value && selectedGradeCourseGroupId) ||
+  (selectedGradeCourseGroupId && !selectedGradeCourseBlockId) ||
   (!selectedGradeCourseGroupId &&
     (selectedTeacherIds.length === 0 || !timetableRoom.value))
+) {
+  timetableMessage.textContent =
+    "Bitte entweder eine Jahrgangskursgruppe mit Unterrichtsblock oder ein vollständiges normales Unterrichtsfach mit Lehrkraft und Raum auswählen.";
+  return;
+} 
 ) {
   timetableMessage.textContent =
     "Bitte entweder eine Jahrgangskursgruppe oder ein vollständiges normales Unterrichtsfach mit Lehrkraft und Raum auswählen.";
