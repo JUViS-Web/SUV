@@ -2412,6 +2412,9 @@ const timetableSubject =
 const timetableGradeCourseGroup =
   document.getElementById("timetableGradeCourseGroup");
 
+const timetableGradeCourseBlock =
+  document.getElementById("timetableGradeCourseBlock");
+
 const timetableTeachers =
   document.getElementById("timetableTeachers");
 
