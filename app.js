@@ -4949,16 +4949,20 @@ timetableEntryForm.addEventListener("submit", async (event) => {
   timetableTeachers.selectedOptions
 ).map(option => option.value);
 
+const selectedGradeCourseGroupId =
+  timetableGradeCourseGroup.value;
+
 if (
   !day ||
   day < 1 ||
   day > 5 ||
   !lesson ||
-  !timetableSubject.value ||
-  selectedTeacherIds.length === 0
+  (!timetableSubject.value && !selectedGradeCourseGroupId) ||
+  (timetableSubject.value && selectedGradeCourseGroupId) ||
+  (!selectedGradeCourseGroupId && selectedTeacherIds.length === 0)
 ) {
   timetableMessage.textContent =
-    "Bitte alle Pflichtfelder ausfüllen und mindestens eine Lehrkraft auswählen.";
+    "Bitte entweder ein normales Fach oder eine Jahrgangskursgruppe auswählen. Bei normalem Unterricht muss außerdem mindestens eine Lehrkraft ausgewählt werden.";
   return;
 }
   
