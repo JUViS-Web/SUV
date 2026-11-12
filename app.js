@@ -2409,6 +2409,9 @@ const timetableLesson =
 const timetableSubject =
   document.getElementById("timetableSubject");
 
+const timetableGradeCourseGroup =
+  document.getElementById("timetableGradeCourseGroup");
+
 const timetableTeachers =
   document.getElementById("timetableTeachers");
 
