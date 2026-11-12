@@ -4505,15 +4505,6 @@ timetableEntries = (entries || []).filter(entry => {
   );
 });
 
-  if (entriesError) {
-    timetableGrid.textContent =
-      "Unterrichtseinheiten konnten nicht geladen werden.";
-    return;
-  }
-  timetableGrid.textContent = "TEST 3: Unterrichtseinheiten geladen";
-
-  timetableEntries = entries || [];
-
   // Tabellenraster erstellen
 
   const table = document.createElement("table");
