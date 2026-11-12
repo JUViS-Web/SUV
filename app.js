@@ -4574,38 +4574,52 @@ if (matchingEntries.length > 0) {
   // Sichtbare Unterrichtskurse erstellen
   visibleEntries.forEach(entry => {
 
-    const subject =
-      entry.class_subjects?.subjects;
+    
+const gradeCourse = entry.grade_courses;
 
-    const assignedTeachers =
-      entry.timetable_entry_teachers || [];
+const subject =
+  entry.class_subjects?.subjects ||
+  gradeCourse?.grade_course_groups?.subjects;
 
-    const room = entry.rooms;
+const assignedTeachers =
+  entry.timetable_entry_teachers || [];
 
-    const subjectName = document.createElement("strong");
-    subjectName.textContent =
-      subject?.short_code || subject?.name || "Fach";
+const courseTeacher = gradeCourse?.teachers;
 
-    const teacherName = document.createElement("span");
+const room =
+  entry.rooms || gradeCourse?.rooms;
 
-    if (assignedTeachers.length > 0) {
-      teacherName.textContent = assignedTeachers
-        .map(item => {
-          const teacher = item.teachers;
+const subjectName = document.createElement("strong");
+subjectName.textContent =
+  gradeCourse?.course_name ||
+  subject?.short_code ||
+  subject?.name ||
+  "Fach";
 
-          if (!teacher) return null;
+const teacherName = document.createElement("span");
 
-          return teacher.first_name + " " + teacher.last_name;
-        })
-        .filter(Boolean)
-        .join(", ");
-    } else {
-      teacherName.textContent = "Keine Lehrkraft";
-    }
+if (courseTeacher) {
+  teacherName.textContent =
+    courseTeacher.first_name + " " +
+    courseTeacher.last_name;
+} else if (assignedTeachers.length > 0) {
+  teacherName.textContent = assignedTeachers
+    .map(item => {
+      const teacher = item.teachers;
 
-    const roomName = document.createElement("span");
-    roomName.textContent =
-      room?.name || "Kein Raum";
+      if (!teacher) return null;
+
+      return teacher.first_name + " " + teacher.last_name;
+    })
+    .filter(Boolean)
+    .join(", ");
+} else {
+  teacherName.textContent = "Keine Lehrkraft";
+}
+
+const roomName = document.createElement("span");
+roomName.textContent =
+  room?.name || "Kein Raum";
 
     const editButton = document.createElement("button");
     editButton.type = "button";
