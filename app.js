@@ -3214,6 +3214,27 @@ if (insertBlocksError) throw insertBlocksError;
       throw groupError;
     }
 
+// Unterrichtsblöcke speichern
+
+const blockRows = blockSizes.map((periodsCount, index) => ({
+  grade_course_group_id: newGroup.id,
+  block_number: index + 1,
+  periods_count: periodsCount
+}));
+
+const { error: blockError } = await suvDb
+  .from("lesson_block_requirements")
+  .insert(blockRows);
+
+if (blockError) {
+  await suvDb
+    .from("grade_course_groups")
+    .delete()
+    .eq("id", newGroup.id);
+
+  throw blockError;
+}
+    
     // Beteiligte Klassen speichern
 
     const classEntries = selectedClassIds.map(classId => ({
