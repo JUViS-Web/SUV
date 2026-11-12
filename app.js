@@ -4959,13 +4959,13 @@ if (
   !lesson ||
   (!timetableSubject.value && !selectedGradeCourseGroupId) ||
   (timetableSubject.value && selectedGradeCourseGroupId) ||
-  (!selectedGradeCourseGroupId && selectedTeacherIds.length === 0)
+  (!selectedGradeCourseGroupId &&
+    (selectedTeacherIds.length === 0 || !timetableRoom.value))
 ) {
   timetableMessage.textContent =
-    "Bitte entweder ein normales Fach oder eine Jahrgangskursgruppe auswählen. Bei normalem Unterricht muss außerdem mindestens eine Lehrkraft ausgewählt werden.";
+    "Bitte entweder eine Jahrgangskursgruppe oder ein vollständiges normales Unterrichtsfach mit Lehrkraft und Raum auswählen.";
   return;
 }
-
 
   // Jahrgangsweite Kursgruppe gemeinsam einplanen
 
