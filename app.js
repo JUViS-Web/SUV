@@ -5061,6 +5061,23 @@ if (
       return;
     }
 
+// Ausgewählten Unterrichtsblock laden
+
+const { data: selectedBlock, error: blockError } = await suvDb
+  .from("lesson_block_requirements")
+  .select("id, block_number, periods_count")
+  .eq("id", selectedGradeCourseBlockId)
+  .eq("grade_course_group_id", selectedGradeCourseGroupId)
+  .single();
+
+if (blockError || !selectedBlock) {
+  timetableMessage.textContent =
+    "Der ausgewählte Unterrichtsblock konnte nicht geladen werden.";
+  return;
+}
+
+const blockLength = selectedBlock.periods_count;
+    
     const { data: version, error: versionError } = await suvDb
       .from("timetable_versions")
       .select("school_year_id")
