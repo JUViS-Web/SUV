@@ -2976,6 +2976,27 @@ gradeCourseGroupForm.addEventListener("submit", async (event) => {
   const weeklyPeriods = Number(gradeCourseWeeklyPeriods.value);
   const courseCount = Number(gradeCourseCount.value);
 
+const blockPattern = gradeCourseBlockPattern.value.trim();
+
+const blockSizes = blockPattern
+  .split("+")
+  .map(value => Number(value.trim()));
+
+const validBlockPattern =
+  blockPattern !== "" &&
+  blockSizes.every(value =>
+    Number.isInteger(value) && value > 0
+  ) &&
+  blockSizes.reduce((sum, value) => sum + value, 0) === weeklyPeriods;
+
+if (!validBlockPattern) {
+  gradeCourseGroupMessage.textContent =
+    "Die Unterrichtsblöcke müssen positive ganze Zahlen enthalten und zusammen genau " +
+    weeklyPeriods + " Wochenstunden ergeben. Beispiel: 2 + 2.";
+
+  return;
+}
+  
   const selectedClassIds = Array.from(
     gradeCourseClasses.selectedOptions
   ).map(option => option.value);
