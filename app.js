@@ -4428,38 +4428,82 @@ alert(
 
   // Unterrichtseinheiten laden
 
-  const { data: entries, error: entriesError } = await suvDb
+  
+const { data: entries, error: entriesError } = await suvDb
   .from("timetable_entries")
   .select(`
-  id,
-  class_subject_id,
-  room_id,
-  weekday,
-  period_number,
-  parallel_group_id,
-  class_subjects (
-    weekly_periods,
-    subjects (
-      name,
-      short_code,
-      color
+    id,
+    class_id,
+    class_subject_id,
+    grade_course_id,
+    room_id,
+    weekday,
+    period_number,
+    parallel_group_id,
+    class_subjects (
+      weekly_periods,
+      subjects (
+        name,
+        short_code,
+        color
+      )
+    ),
+    grade_courses (
+      course_name,
+      teachers (
+        first_name,
+        last_name,
+        short_code
+      ),
+      rooms (
+        name
+      ),
+      grade_course_groups (
+        subjects (
+          name,
+          short_code,
+          color
+        ),
+        grade_course_group_classes (
+          class_id
+        )
+      )
+    ),
+    timetable_entry_teachers (
+      teacher_id,
+      teachers (
+        first_name,
+        last_name,
+        short_code
+      )
+    ),
+    rooms (
+      name
     )
-  ),
-  timetable_entry_teachers (
-    teacher_id,
-    teachers (
-      first_name,
-      last_name,
-      short_code
-    )
-  ),
-  rooms (
-    name
-  )
-`)
+  `)
+  .eq("timetable_version_id", activeTimetableVersionId);
 
-    .eq("timetable_version_id", activeTimetableVersionId)
-    .eq("class_id", selectedTimetableClassId);
+if (entriesError) {
+  timetableGrid.textContent =
+    "Unterrichtseinheiten konnten nicht geladen werden.";
+  return;
+}
+
+timetableGrid.textContent = "TEST 3: Unterrichtseinheiten geladen";
+
+timetableEntries = (entries || []).filter(entry => {
+  if (entry.class_id === selectedTimetableClassId) {
+    return true;
+  }
+
+  const participatingClasses =
+    entry.grade_courses?.grade_course_groups
+      ?.grade_course_group_classes || [];
+
+  return participatingClasses.some(item =>
+    item.class_id === selectedTimetableClassId
+  );
+});
 
   if (entriesError) {
     timetableGrid.textContent =
