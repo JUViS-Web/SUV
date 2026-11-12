@@ -3672,6 +3672,24 @@ editButton.addEventListener("click", async () => {
   gradeCourseGrade.value = group.grade_level_id;
   gradeCourseSubject.value = group.subject_id;
   gradeCourseWeeklyPeriods.value = group.weekly_periods;
+
+  // Gespeicherte Unterrichtsblöcke laden
+
+const { data: savedBlocks, error: blocksError } = await suvDb
+  .from("lesson_block_requirements")
+  .select("periods_count")
+  .eq("grade_course_group_id", group.id)
+  .order("block_number");
+
+if (blocksError) {
+  alert("Unterrichtsblöcke konnten nicht geladen werden: " + blocksError.message);
+  return;
+}
+
+gradeCourseBlockPattern.value = (savedBlocks || [])
+  .map(block => block.periods_count)
+  .join(" + ");
+  
   gradeCourseNotes.value = group.notes || "";
 
   // Zugehörige Klassen laden
