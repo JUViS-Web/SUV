@@ -5077,6 +5077,25 @@ if (blockError || !selectedBlock) {
 }
 
 const blockLength = selectedBlock.periods_count;
+
+// Alle Unterrichtsstunden des Blocks bestimmen
+
+const blockPeriodNumbers = Array.from(
+  { length: blockLength },
+  (_, index) => lesson + index
+);
+
+const { data: availablePeriods, error: periodsError } = await suvDb
+  .from("lesson_times")
+  .select("lesson_number")
+  .in("lesson_number", blockPeriodNumbers);
+
+if (periodsError || !availablePeriods ||
+    availablePeriods.length !== blockLength) {
+  timetableMessage.textContent =
+    "Der Unterrichtsblock passt ab dieser Stunde nicht mehr vollständig in den Schultag.";
+  return;
+}
     
     const { data: version, error: versionError } = await suvDb
       .from("timetable_versions")
