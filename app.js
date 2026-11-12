@@ -2941,6 +2941,9 @@ const gradeCourseSubject =
 const gradeCourseWeeklyPeriods =
   document.getElementById("gradeCourseWeeklyPeriods");
 
+const gradeCourseBlockPattern =
+  document.getElementById("gradeCourseBlockPattern");
+
 const gradeCourseCount =
   document.getElementById("gradeCourseCount");
 
