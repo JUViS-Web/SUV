@@ -3046,6 +3046,29 @@ if (!validBlockPattern) {
 
       if (updateError) throw updateError;
 
+// Bisherige Unterrichtsblöcke entfernen
+
+const { error: deleteBlocksError } = await suvDb
+  .from("lesson_block_requirements")
+  .delete()
+  .eq("grade_course_group_id", groupId);
+
+if (deleteBlocksError) throw deleteBlocksError;
+
+// Neue Unterrichtsblöcke speichern
+
+const blockRows = blockSizes.map((periodsCount, index) => ({
+  grade_course_group_id: groupId,
+  block_number: index + 1,
+  periods_count: periodsCount
+}));
+
+const { error: insertBlocksError } = await suvDb
+  .from("lesson_block_requirements")
+  .insert(blockRows);
+
+if (insertBlocksError) throw insertBlocksError;
+      
       // Bisherige Klassenzuordnungen entfernen
 
       const { error: deleteClassesError } = await suvDb
