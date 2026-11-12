@@ -5188,37 +5188,52 @@ timetableGrid.addEventListener("click", async (event) => {
 
     allEntries.forEach(entry => {
 
-      const subject =
-        entry.class_subjects?.subjects;
+      
+const gradeCourse = entry.grade_courses;
 
-      const assignedTeachers =
-        entry.timetable_entry_teachers || [];
+const subject =
+  entry.class_subjects?.subjects ||
+  gradeCourse?.grade_course_groups?.subjects;
 
-      const teacherNames = assignedTeachers
-        .map(item => {
-          const teacher = item.teachers;
+const assignedTeachers =
+  entry.timetable_entry_teachers || [];
 
-          if (!teacher) return null;
+const courseTeacher = gradeCourse?.teachers;
 
-          return teacher.first_name + " " + teacher.last_name;
-        })
-        .filter(Boolean)
-        .join(", ");
+const room =
+  entry.rooms || gradeCourse?.rooms;
 
-      const course = document.createElement("div");
-      course.className = "timetable-more-course";
+const subjectName = document.createElement("strong");
+subjectName.textContent =
+  gradeCourse?.course_name ||
+  subject?.short_code ||
+  subject?.name ||
+  "Fach";
 
-      const subjectName = document.createElement("strong");
-      subjectName.textContent =
-        subject?.short_code || subject?.name || "Fach";
+const teacherName = document.createElement("span");
 
-      const teacherName = document.createElement("span");
-      teacherName.textContent =
-        teacherNames || "Keine Lehrkraft";
+if (courseTeacher) {
+  teacherName.textContent =
+    courseTeacher.first_name + " " +
+    courseTeacher.last_name;
+} else if (assignedTeachers.length > 0) {
+  teacherName.textContent = assignedTeachers
+    .map(item => {
+      const teacher = item.teachers;
 
-      const roomName = document.createElement("span");
-      roomName.textContent =
-        entry.rooms?.name || "Kein Raum";
+      if (!teacher) return null;
+
+      return teacher.first_name + " " + teacher.last_name;
+    })
+    .filter(Boolean)
+    .join(", ");
+} else {
+  teacherName.textContent = "Keine Lehrkraft";
+}
+
+const roomName = document.createElement("span");
+roomName.textContent =
+  room?.name || "Kein Raum";
 
       const actions = document.createElement("div");
       actions.className = "timetable-more-actions";
