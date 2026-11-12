@@ -4832,6 +4832,82 @@ timetableSubject.addEventListener("change", () => {
 
     timetableRoom.appendChild(option);
   });
+
+  
+  // Jahrgangsweite Kursgruppen der ausgewählten Klasse laden
+
+  timetableGradeCourseGroup.innerHTML =
+    '<option value="">Keine Jahrgangskursgruppe</option>';
+
+  if (!selectedTimetableClassId || !activeTimetableVersionId) {
+    return;
+  }
+
+  const { data: version, error: versionError } = await suvDb
+    .from("timetable_versions")
+    .select("school_year_id")
+    .eq("id", activeTimetableVersionId)
+    .single();
+
+  if (versionError) {
+    timetableMessage.textContent =
+      "Schuljahr der Stundenplanversion konnte nicht geladen werden.";
+    return;
+  }
+
+  const { data: memberships, error: membershipsError } = await suvDb
+    .from("grade_course_group_classes")
+    .select("grade_course_group_id")
+    .eq("class_id", selectedTimetableClassId);
+
+  if (membershipsError) {
+    timetableMessage.textContent =
+      "Jahrgangskursgruppen konnten nicht geladen werden.";
+    return;
+  }
+
+  const groupIds = (memberships || []).map(
+    item => item.grade_course_group_id
+  );
+
+  if (groupIds.length === 0) {
+    return;
+  }
+
+  const { data: groups, error: groupsError } = await suvDb
+    .from("grade_course_groups")
+    .select(`
+      id,
+      weekly_periods,
+      subjects (
+        name,
+        short_code
+      )
+    `)
+    .eq("school_year_id", version.school_year_id)
+    .in("id", groupIds);
+
+  if (groupsError) {
+    timetableMessage.textContent =
+      "Jahrgangskursgruppen konnten nicht geladen werden.";
+    return;
+  }
+
+  (groups || []).forEach(group => {
+    const option = document.createElement("option");
+
+    option.value = group.id;
+
+    const subject = group.subjects;
+
+    option.textContent =
+      (subject?.short_code || subject?.name || "Fach") +
+      " – Jahrgangskurs (" +
+      group.weekly_periods +
+      " Wochenstunden)";
+
+    timetableGradeCourseGroup.appendChild(option);
+  });
 }
 
 
