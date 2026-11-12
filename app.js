@@ -4965,6 +4965,192 @@ if (
     "Bitte entweder ein normales Fach oder eine Jahrgangskursgruppe auswählen. Bei normalem Unterricht muss außerdem mindestens eine Lehrkraft ausgewählt werden.";
   return;
 }
+
+
+  // Jahrgangsweite Kursgruppe gemeinsam einplanen
+
+  if (selectedGradeCourseGroupId) {
+    if (timetableEntryId.value) {
+      timetableMessage.textContent =
+        "Jahrgangskurse können derzeit nur neu eingeplant werden.";
+      return;
+    }
+
+    const { data: group, error: groupError } = await suvDb
+      .from("grade_course_groups")
+      .select(`
+        id,
+        school_year_id,
+        grade_course_group_classes (
+          class_id
+        ),
+        grade_courses (
+          id,
+          course_name,
+          teacher_id,
+          room_id
+        )
+      `)
+      .eq("id", selectedGradeCourseGroupId)
+      .single();
+
+    if (groupError || !group) {
+      timetableMessage.textContent =
+        "Die Jahrgangskursgruppe konnte nicht geladen werden.";
+      return;
+    }
+
+    const { data: version, error: versionError } = await suvDb
+      .from("timetable_versions")
+      .select("school_year_id")
+      .eq("id", activeTimetableVersionId)
+      .single();
+
+    if (versionError || group.school_year_id !== version.school_year_id) {
+      timetableMessage.textContent =
+        "Die Kursgruppe gehört nicht zum Schuljahr dieser Stundenplanversion.";
+      return;
+    }
+
+    const courses = group.grade_courses || [];
+
+    const participatingClassIds =
+      (group.grade_course_group_classes || [])
+        .map(item => item.class_id);
+
+    if (
+      courses.length === 0 ||
+      participatingClassIds.length === 0 ||
+      !participatingClassIds.includes(selectedTimetableClassId)
+    ) {
+      timetableMessage.textContent =
+        "Die Kursgruppe enthält keine gültigen Kurse oder gehört nicht zur ausgewählten Klasse.";
+      return;
+    }
+
+    if (courses.some(course => !course.teacher_id || !course.room_id)) {
+      timetableMessage.textContent =
+        "Bitte weise zuerst jedem Parallelkurs eine Lehrkraft und einen Raum zu.";
+      return;
+    }
+
+    const teacherIds = courses.map(course => course.teacher_id);
+    const roomIds = courses.map(course => course.room_id);
+
+    if (
+      new Set(teacherIds).size !== teacherIds.length ||
+      new Set(roomIds).size !== roomIds.length
+    ) {
+      timetableMessage.textContent =
+        "Jeder Parallelkurs benötigt eine eigene Lehrkraft und einen eigenen Raum.";
+      return;
+    }
+
+    const { data: occupiedEntries, error: occupiedError } = await suvDb
+      .from("timetable_entries")
+      .select(`
+        id,
+        teacher_id,
+        room_id,
+        class_id,
+        grade_courses (
+          grade_course_groups (
+            grade_course_group_classes (
+              class_id
+            )
+          )
+        )
+      `)
+      .eq("timetable_version_id", activeTimetableVersionId)
+      .eq("weekday", day)
+      .eq("period_number", lesson);
+
+    if (occupiedError) {
+      timetableMessage.textContent =
+        "Belegungskonflikte konnten nicht geprüft werden.";
+      return;
+    }
+
+    const occupiedClassIds = new Set();
+
+    (occupiedEntries || []).forEach(entry => {
+      if (entry.class_id) {
+        occupiedClassIds.add(entry.class_id);
+      }
+
+      const classes =
+        entry.grade_courses?.grade_course_groups
+          ?.grade_course_group_classes || [];
+
+      classes.forEach(item => {
+        occupiedClassIds.add(item.class_id);
+      });
+    });
+
+    if (
+      participatingClassIds.some(id => occupiedClassIds.has(id))
+    ) {
+      timetableMessage.textContent =
+        "Mindestens eine beteiligte Klasse hat zu diesem Zeitpunkt bereits Unterricht.";
+      return;
+    }
+
+    if (
+      courses.some(course =>
+        (occupiedEntries || []).some(entry =>
+          entry.teacher_id === course.teacher_id
+        )
+      )
+    ) {
+      timetableMessage.textContent =
+        "Mindestens eine Lehrkraft hat zu diesem Zeitpunkt bereits Unterricht.";
+      return;
+    }
+
+    if (
+      courses.some(course =>
+        (occupiedEntries || []).some(entry =>
+          entry.room_id === course.room_id
+        )
+      )
+    ) {
+      timetableMessage.textContent =
+        "Mindestens ein Kursraum ist zu diesem Zeitpunkt bereits belegt.";
+      return;
+    }
+
+    const courseEntries = courses.map(course => ({
+      timetable_version_id: activeTimetableVersionId,
+      grade_course_id: course.id,
+      teacher_id: course.teacher_id,
+      room_id: course.room_id,
+      class_id: null,
+      class_subject_id: null,
+      weekday: day,
+      period_number: lesson,
+      parallel_group_id: null
+    }));
+
+    const { error: insertError } = await suvDb
+      .from("timetable_entries")
+      .insert(courseEntries);
+
+    if (insertError) {
+      timetableMessage.textContent =
+        "Jahrgangskurse konnten nicht gespeichert werden: " +
+        insertError.message;
+      return;
+    }
+
+    timetableMessage.textContent =
+      "Alle Parallelkurse wurden gleichzeitig eingeplant.";
+
+    resetTimetableEntryForm();
+
+    await loadTimetableGrid();
+
+    return;
+  }
   
   const entryId = timetableEntryId.value;
 
