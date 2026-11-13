@@ -5328,6 +5328,24 @@ if (conflictError) {
   return;
 }
 
+// Prüfen, ob die Klasse bereits an einem Jahrgangskurs teilnimmt
+
+const gradeCourseClassConflict = conflictingEntries.some(entry => {
+  const groupClasses =
+    entry.grade_courses?.grade_course_groups
+      ?.grade_course_group_classes || [];
+
+  return groupClasses.some(
+    item => item.class_id === selectedTimetableClassId
+  );
+});
+
+if (gradeCourseClassConflict) {
+  timetableMessage.textContent =
+    "Diese Klasse nimmt zu diesem Zeitpunkt bereits an einem Jahrgangskurs teil.";
+  return;
+}
+    
 // Bereits belegte Lehrkräfte ermitteln
 
 const occupiedTeacherIds = new Set();
