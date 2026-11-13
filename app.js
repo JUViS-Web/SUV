@@ -5196,12 +5196,16 @@ if (periodsError || !availablePeriods ||
     }
 
     if (
-      courses.some(course =>
-        (occupiedEntries || []).some(entry =>
-          entry.teacher_id === course.teacher_id
-        )
+  courses.some(course =>
+    (occupiedEntries || []).some(entry =>
+      entry.teacher_id === course.teacher_id ||
+      (entry.timetable_entry_teachers || []).some(
+        assignedTeacher =>
+          assignedTeacher.teacher_id === course.teacher_id
       )
-    ) {
+    )
+  )
+) { {
       timetableMessage.textContent =
         "Mindestens eine Lehrkraft hat zu diesem Zeitpunkt bereits Unterricht.";
       return;
