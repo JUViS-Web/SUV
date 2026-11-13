@@ -5216,17 +5216,19 @@ if (periodsError || !availablePeriods ||
       return;
     }
 
-    const courseEntries = courses.map(course => ({
-      timetable_version_id: activeTimetableVersionId,
-      grade_course_id: course.id,
-      teacher_id: course.teacher_id,
-      room_id: course.room_id,
-      class_id: null,
-      class_subject_id: null,
-      weekday: day,
-      period_number: lesson,
-      parallel_group_id: null
-    }));
+    const courseEntries = courses.flatMap(course =>
+  blockPeriodNumbers.map(periodNumber => ({
+    timetable_version_id: activeTimetableVersionId,
+    grade_course_id: course.id,
+    teacher_id: course.teacher_id,
+    room_id: course.room_id,
+    class_id: null,
+    class_subject_id: null,
+    weekday: day,
+    period_number: periodNumber,
+    parallel_group_id: null
+  }))
+);
 
     const { error: insertError } = await suvDb
       .from("timetable_entries")
