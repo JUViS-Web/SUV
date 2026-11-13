@@ -5248,6 +5248,7 @@ if (periodsError || !availablePeriods ||
     const courseEntries = courses.flatMap(course =>
   blockPeriodNumbers.map(periodNumber => ({
     timetable_version_id: activeTimetableVersionId,
+    lesson_block_requirement_id: selectedBlock.id,
     grade_course_id: course.id,
     teacher_id: course.teacher_id,
     room_id: course.room_id,
