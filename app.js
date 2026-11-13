@@ -5076,6 +5076,28 @@ if (blockError || !selectedBlock) {
   return;
 }
 
+// Prüfen, ob dieser Unterrichtsblock bereits eingeplant wurde
+
+const { data: existingBlockEntries, error: existingBlockError } =
+  await suvDb
+    .from("timetable_entries")
+    .select("id")
+    .eq("timetable_version_id", activeTimetableVersionId)
+    .eq("lesson_block_requirement_id", selectedBlock.id)
+    .limit(1);
+
+if (existingBlockError) {
+  timetableMessage.textContent =
+    "Die bisherige Blockplanung konnte nicht geprüft werden.";
+  return;
+}
+
+if (existingBlockEntries && existingBlockEntries.length > 0) {
+  timetableMessage.textContent =
+    "Dieser Unterrichtsblock wurde bereits eingeplant.";
+  return;
+}
+    
 const blockLength = selectedBlock.periods_count;
 
 // Alle Unterrichtsstunden des Blocks bestimmen
