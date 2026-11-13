@@ -5624,7 +5624,8 @@ timetableGrid.addEventListener("click", async (event) => {
     courseList.className = "timetable-more-list";
 
     allEntries.forEach(entry => {
-
+const course = document.createElement("div");
+course.className = "timetable-more-course";
       
 const gradeCourse = entry.grade_courses;
 
