@@ -5146,30 +5146,22 @@ if (periodsError || !availablePeriods ||
     const { data: occupiedEntries, error: occupiedError } = await suvDb
       .from("timetable_entries")
       .select(`
-        id,
-        teacher_id,
-        room_id,
-            class_id,
-    grade_courses (
-      grade_course_groups (
-        grade_course_group_classes (
-          class_id
-        )
+  id,
+  teacher_id,
+  room_id,
+  class_id,
+  timetable_entry_teachers (
+    teacher_id
+  ),
+  grade_courses (
+    grade_course_groups (
+      grade_course_group_classes (
+        class_id
       )
-    ),
-        class_id,
-        timetable_entry_teachers (
-  teacher_id
-),
-        grade_courses (
-          grade_course_groups (
-            grade_course_group_classes (
-              class_id
-            )
-          )
-        )
-      `)
-            .eq("timetable_version_id", activeTimetableVersionId)
+    )
+  )
+`)          
+      .eq("timetable_version_id", activeTimetableVersionId)
       .eq("weekday", day)
       .in("period_number", blockPeriodNumbers);
 
