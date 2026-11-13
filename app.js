@@ -5149,6 +5149,14 @@ if (periodsError || !availablePeriods ||
         id,
         teacher_id,
         room_id,
+            class_id,
+    grade_courses (
+      grade_course_groups (
+        grade_course_group_classes (
+          class_id
+        )
+      )
+    ),
         class_id,
         timetable_entry_teachers (
   teacher_id
