@@ -5158,9 +5158,9 @@ if (periodsError || !availablePeriods ||
           )
         )
       `)
-      .eq("timetable_version_id", activeTimetableVersionId)
+            .eq("timetable_version_id", activeTimetableVersionId)
       .eq("weekday", day)
-      .eq("period_number", lesson);
+      .in("period_number", blockPeriodNumbers);
 
     if (occupiedError) {
       timetableMessage.textContent =
