@@ -4682,7 +4682,6 @@ entryContainer.appendChild(className);
 entryContainer.appendChild(actions);
   
     cell.appendChild(entryContainer);
-
   });
 
   // Weitere Kurse als +N anzeigen
