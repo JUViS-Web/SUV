@@ -4584,54 +4584,52 @@ if (matchingEntries.length > 0) {
   cell.style.gap = "3px";
 
   // Sichtbare Unterrichtskurse erstellen
-  visibleEntries.forEach(entry => {
+  // Lehrkraft-Kürzel
+const teacherName = document.createElement("strong");
+teacherName.className = "timetable-teacher-code";
 
-    
-const gradeCourse = entry.grade_courses;
-
-const subject =
-  entry.class_subjects?.subjects ||
-  gradeCourse?.grade_course_groups?.subjects;
-
-const assignedTeachers =
-  entry.timetable_entry_teachers || [];
-
-const courseTeacher = gradeCourse?.teachers;
-
-const room =
-  entry.rooms || gradeCourse?.rooms;
-
-const subjectName = document.createElement("strong");
-subjectName.textContent =
-  gradeCourse?.course_name ||
-  subject?.short_code ||
-  subject?.name ||
-  "Fach";
-
-const teacherName = document.createElement("span");
-
-if (courseTeacher) {
-  teacherName.textContent =
-    courseTeacher.first_name + " " +
-    courseTeacher.last_name;
-} else if (assignedTeachers.length > 0) {
-  teacherName.textContent = assignedTeachers
-    .map(item => {
-      const teacher = item.teachers;
-
-      if (!teacher) return null;
-
-      return teacher.first_name + " " + teacher.last_name;
-    })
-    .filter(Boolean)
-    .join(", ");
+if (courseTeacher?.short_code) {
+  teacherName.textContent = courseTeacher.short_code;
 } else {
-  teacherName.textContent = "Keine Lehrkraft";
+  teacherName.textContent = assignedTeachers
+    .map(item => item.teachers?.short_code)
+    .filter(Boolean)
+    .join(", ") || "Kein Kürzel";
 }
 
+// Fach
+const subjectName = document.createElement("span");
+subjectName.className = "timetable-subject-name";
+subjectName.textContent =
+  gradeCourse?.course_name ||
+  subject?.name ||
+  subject?.short_code ||
+  "Fach";
+
+// Raum
 const roomName = document.createElement("span");
-roomName.textContent =
-  room?.name || "Kein Raum";
+roomName.className = "timetable-room-name";
+roomName.textContent = room?.name || "Kein Raum";
+
+// Zugehörige Klassen
+const gradeGroupClasses =
+  gradeCourse?.grade_course_groups?.grade_course_group_classes || [];
+
+const classNames = gradeGroupClasses
+  .map(item => item.classes?.name)
+  .filter(Boolean);
+
+if (entry.classes?.name) {
+  classNames.push(entry.classes.name);
+}
+
+const uniqueClassNames = [...new Set(classNames)];
+
+const className = document.createElement("span");
+className.className = "timetable-class-name";
+className.textContent = uniqueClassNames.length > 0
+  ? "Klassen: " + uniqueClassNames.join(", ")
+  : "Keine Klasse zugeordnet";
 
     const editButton = document.createElement("button");
     editButton.type = "button";
