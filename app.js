@@ -4679,7 +4679,8 @@ entryContainer.style.borderLeftColor =
 entryContainer.appendChild(subjectName);
 entryContainer.appendChild(roomName);
 entryContainer.appendChild(className);
-
+entryContainer.appendChild(actions);
+  
     cell.appendChild(entryContainer);
 
   });
