@@ -4650,11 +4650,10 @@ className.textContent = uniqueClassNames.length > 0
 entryContainer.style.borderLeftColor =
   subject?.color || "#b91c1c";
     
-    entryContainer.appendChild(subjectName);
     entryContainer.appendChild(teacherName);
-    entryContainer.appendChild(roomName);
-    entryContainer.appendChild(editButton);
-    entryContainer.appendChild(deleteButton);
+entryContainer.appendChild(subjectName);
+entryContainer.appendChild(roomName);
+entryContainer.appendChild(className);
 
     cell.appendChild(entryContainer);
 
