@@ -2299,3 +2299,87 @@ form {
     grid-row: auto !important;
   }
 }
+
+/* SUV – Kompakte Unterrichtskarten */
+
+.timetable-entry {
+  gap: 3px;
+  padding: 6px;
+  min-height: 0;
+  border-radius: 7px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+/* Lehrkraft-Kürzel */
+.timetable-entry .timetable-teacher-code {
+  display: block;
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+/* Fach */
+.timetable-entry .timetable-subject-name {
+  display: block;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+/* Raum und Klassen */
+.timetable-entry .timetable-room-name,
+.timetable-entry .timetable-class-name {
+  display: block;
+  color: #64748b;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+/* Aktionsbereich */
+.timetable-entry .timetable-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+/* Große, gut antippbare Symbole */
+.timetable-entry .timetable-edit-button,
+.timetable-entry .timetable-delete-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #dce2e9;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.timetable-entry .timetable-edit-button:active {
+  background: #f1f5f9;
+  color: #a71920;
+}
+
+.timetable-entry .timetable-delete-button:active {
+  background: #fff1f2;
+  color: #b42318;
+}
+
+.timetable-entry .timetable-edit-button svg,
+.timetable-entry .timetable-delete-button svg {
+  width: 19px;
+  height: 19px;
+  pointer-events: none;
+}
+        
