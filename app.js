@@ -4443,6 +4443,9 @@ const { data: entries, error: entriesError } = await suvDb
     class_subject_id,
     grade_course_id,
     room_id,
+    classes (
+  name
+),
     weekday,
     period_number,
     parallel_group_id,
