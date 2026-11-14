@@ -4471,8 +4471,11 @@ const { data: entries, error: entriesError } = await suvDb
           color
         ),
         grade_course_group_classes (
-          class_id
-        )
+  class_id,
+  classes (
+    name
+  )
+)
       )
     ),
     timetable_entry_teachers (
