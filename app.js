@@ -3119,9 +3119,30 @@ async function loadTimetableViewGrid(type, selectedId) {
         cardGrid.appendChild(card);
       });
 
+            if (hiddenCount > 0) {
+
+        const moreButton = document.createElement("button");
+        moreButton.type = "button";
+        moreButton.className = "timetable-more-button";
+        moreButton.textContent = "+" + hiddenCount;
+        moreButton.style.gridColumn = "1 / -1";
+
+        moreButton.addEventListener("click", () => {
+
+          cardGrid.querySelectorAll(
+            '[data-hidden-course="true"]'
+          ).forEach(card => {
+            card.style.display = "block";
+          });
+
+          moreButton.remove();
+        });
+
+        cardGrid.appendChild(moreButton);
+      }
+
       cell.appendChild(cardGrid);
       cell.className = "timetable-filled";
-      row.appendChild(cell);
 
     });
 
