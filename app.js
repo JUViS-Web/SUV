@@ -2639,6 +2639,140 @@ async function loadTimetableClasses(schoolYearId) {
 }
 
 // Klassen für die Unterrichtsverteilung laden
+// SUV – Auswahl für die Stundenplan-Anzeige
+
+const timetableViewType =
+  document.getElementById("timetableViewType");
+
+const timetableViewSelection =
+  document.getElementById("timetableViewSelection");
+
+const timetableViewGrid =
+  document.getElementById("timetableViewGrid");
+
+
+timetableViewType.addEventListener("change", async () => {
+
+  const type = timetableViewType.value;
+
+  timetableViewSelection.innerHTML = "";
+
+  timetableViewGrid.innerHTML =
+    "<p>Bitte zuerst einen Eintrag auswählen.</p>";
+
+  if (!type) {
+    timetableViewGrid.innerHTML =
+      "<p>Bitte zuerst eine Stundenplanart auswählen.</p>";
+    return;
+  }
+
+  const labels = {
+    class: "Klasse",
+    teacher: "Lehrkraft",
+    room: "Raum",
+    subject: "Fach"
+  };
+
+  const selectionLabel = document.createElement("label");
+  selectionLabel.textContent = labels[type] + " auswählen";
+
+  const selection = document.createElement("select");
+  selection.id = "timetableViewItem";
+  selection.innerHTML =
+    '<option value="">Bitte auswählen</option>';
+
+  timetableViewSelection.appendChild(selectionLabel);
+  timetableViewSelection.appendChild(selection);
+
+  let data = [];
+  let error = null;
+
+  if (type === "class") {
+
+    const { data: schoolYear, error: yearError } = await suvDb
+      .from("school_years")
+      .select("id")
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (yearError || !schoolYear) {
+      timetableViewGrid.textContent =
+        "Das aktive Schuljahr konnte nicht geladen werden.";
+      return;
+    }
+
+    const result = await suvDb
+      .from("classes")
+      .select("id, name")
+      .eq("school_year_id", schoolYear.id)
+      .order("name");
+
+    data = result.data || [];
+    error = result.error;
+
+  } else if (type === "teacher") {
+
+    const result = await suvDb
+      .from("teachers")
+      .select("id, first_name, last_name, short_code")
+      .order("last_name");
+
+    data = result.data || [];
+    error = result.error;
+
+  } else if (type === "room") {
+
+    const result = await suvDb
+      .from("rooms")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("name");
+
+    data = result.data || [];
+    error = result.error;
+
+  } else if (type === "subject") {
+
+    const result = await suvDb
+      .from("subjects")
+      .select("id, name, short_code")
+      .order("name");
+
+    data = result.data || [];
+    error = result.error;
+  }
+
+  if (error) {
+    timetableViewGrid.textContent =
+      "Fehler beim Laden: " + error.message;
+    return;
+  }
+
+  if (data.length === 0) {
+    selection.innerHTML =
+      '<option value="">Keine Einträge vorhanden</option>';
+    return;
+  }
+
+  data.forEach(item => {
+
+    const option = document.createElement("option");
+    option.value = item.id;
+
+    if (type === "teacher") {
+      option.textContent =
+        `${item.first_name} ${item.last_name} (${item.short_code || "–"})`;
+    } else {
+      option.textContent =
+        item.name +
+        (item.short_code ? ` (${item.short_code})` : "");
+    }
+
+    selection.appendChild(option);
+  });
+
+});
+
 
 async function loadDistributionClasses(schoolYearId) {
 
