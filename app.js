@@ -4699,7 +4699,11 @@ entryHeader.appendChild(actions);
   // Unterrichtskarte
   const entryContainer = document.createElement("div");
   entryContainer.className = "timetable-entry";
+  entryContainer.dataset.periodsCount =
+    String(entry.lesson_block_requirements?.periods_count || 1);
 
+
+  
   entryContainer.style.borderLeftColor =
     subject?.color || "#b91c1c";
 
