@@ -3141,8 +3141,9 @@ async function loadTimetableViewGrid(type, selectedId) {
         cardGrid.appendChild(moreButton);
       }
 
-      cell.appendChild(cardGrid);
+            cell.appendChild(cardGrid);
       cell.className = "timetable-filled";
+      row.appendChild(cell);
 
     });
 
