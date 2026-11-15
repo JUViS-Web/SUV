@@ -1051,11 +1051,67 @@
   </div>
 
   <div class="panel">
-    <h3>Abwesende Lehrkräfte</h3>
-    <div id="substitutionAbsences">
-      Noch keine Abwesenheiten eingetragen.
+  <h3>Abwesenheit eintragen</h3>
+
+  <form id="substitutionAbsenceForm">
+
+    <div class="teacher-form-grid">
+
+      <div>
+        <label for="absenceTeacher">Lehrkraft</label>
+        <select id="absenceTeacher" required>
+          <option value="">Lehrkraft auswählen</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="absenceType">Abwesenheitsgrund</label>
+        <select id="absenceType" required>
+          <option value="Krankheit">Krankheit</option>
+          <option value="Fortbildung">Fortbildung</option>
+          <option value="Dienstliche Veranstaltung">Dienstliche Veranstaltung</option>
+          <option value="Sonstige Abwesenheit">Sonstige Abwesenheit</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="absenceStartDate">Von</label>
+        <input type="date" id="absenceStartDate" required>
+      </div>
+
+      <div>
+        <label for="absenceEndDate">Bis</label>
+        <input type="date" id="absenceEndDate" required>
+      </div>
+
     </div>
+
+    <div>
+      <label for="absenceNote">Anmerkung (optional)</label>
+      <textarea
+        id="absenceNote"
+        rows="2"
+        placeholder="Weitere Informationen ..."
+      ></textarea>
+    </div>
+
+    <div class="teacher-form-actions">
+      <button type="submit">
+        Abwesenheit speichern
+      </button>
+    </div>
+
+    <div id="substitutionAbsenceMessage"></div>
+
+  </form>
+</div>
+
+<div class="panel">
+  <h3>Erfasste Abwesenheiten</h3>
+  <div id="substitutionAbsences">
+    Abwesenheiten werden geladen ...
   </div>
+</div>
 
   <div class="panel">
     <h3>Offene Vertretungen</h3>
