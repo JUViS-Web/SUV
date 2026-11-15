@@ -6640,3 +6640,238 @@ loadDistributionSchoolYears().catch(error => {
     "Fehler beim Laden der Schuljahre: " +
     error.message;
 });
+
+
+// ==========================================
+// SUV – Vertretungsplanung: Abwesenheiten
+// ==========================================
+
+const absenceForm = document.getElementById(
+  "substitutionAbsenceForm"
+);
+
+const absenceTeacherSelect = document.getElementById(
+  "absenceTeacher"
+);
+
+const absenceMessage = document.getElementById(
+  "substitutionAbsenceMessage"
+);
+
+const absenceList = document.getElementById(
+  "substitutionAbsences"
+);
+
+
+// Lehrkräfte für die Auswahl laden
+
+async function loadAbsenceTeachers() {
+
+  if (!absenceTeacherSelect) return;
+
+  const { data, error } = await suvDb
+    .from("teachers")
+    .select("id, first_name, last_name")
+    .eq("is_active", true)
+    .order("last_name", { ascending: true });
+
+  if (error) {
+    absenceMessage.textContent =
+      "Lehrkräfte konnten nicht geladen werden: " +
+      error.message;
+    return;
+  }
+
+  absenceTeacherSelect.innerHTML =
+    '<option value="">Lehrkraft auswählen</option>';
+
+  (data || []).forEach(teacher => {
+
+    const option = document.createElement("option");
+
+    option.value = teacher.id;
+    option.textContent =
+      teacher.first_name + " " + teacher.last_name;
+
+    absenceTeacherSelect.appendChild(option);
+
+  });
+}
+
+
+// Erfasste Abwesenheiten anzeigen
+
+async function loadSubstitutionAbsences() {
+
+  if (!absenceList) return;
+
+  absenceList.textContent =
+    "Abwesenheiten werden geladen ...";
+
+  const { data, error } = await suvDb
+    .from("teacher_absences")
+    .select(`
+      id,
+      teacher_id,
+      start_date,
+      end_date,
+      absence_type,
+      note
+    `)
+    .order("start_date", { ascending: true });
+
+  if (error) {
+    absenceList.textContent =
+      "Fehler beim Laden: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    absenceList.textContent =
+      "Noch keine Abwesenheiten eingetragen.";
+    return;
+  }
+
+  const { data: teachers, error: teacherError } =
+    await suvDb
+      .from("teachers")
+      .select("id, first_name, last_name");
+
+  if (teacherError) {
+    absenceList.textContent =
+      "Lehrkräfte konnten nicht zugeordnet werden.";
+    return;
+  }
+
+  const teacherMap = new Map(
+    (teachers || []).map(teacher => [
+      teacher.id,
+      teacher.first_name + " " + teacher.last_name
+    ])
+  );
+
+  absenceList.innerHTML = "";
+
+  data.forEach(absence => {
+
+    const entry = document.createElement("div");
+    entry.className = "teacher-entry";
+
+    const details = document.createElement("div");
+
+    const name = document.createElement("strong");
+    name.textContent =
+      teacherMap.get(absence.teacher_id) ||
+      "Unbekannte Lehrkraft";
+
+    const dates = document.createElement("p");
+
+    const startDate = new Date(
+      absence.start_date + "T00:00:00"
+    ).toLocaleDateString("de-DE");
+
+    const endDate = new Date(
+      absence.end_date + "T00:00:00"
+    ).toLocaleDateString("de-DE");
+
+    dates.textContent =
+      startDate === endDate
+        ? startDate
+        : startDate + " bis " + endDate;
+
+    const type = document.createElement("p");
+    type.textContent = absence.absence_type;
+
+    details.appendChild(name);
+    details.appendChild(dates);
+    details.appendChild(type);
+
+    if (absence.note) {
+      const note = document.createElement("p");
+      note.textContent = absence.note;
+      details.appendChild(note);
+    }
+
+    entry.appendChild(details);
+    absenceList.appendChild(entry);
+
+  });
+}
+
+
+// Neue Abwesenheit speichern
+
+if (absenceForm) {
+
+  absenceForm.addEventListener("submit", async event => {
+
+    event.preventDefault();
+
+    const teacherId = absenceTeacherSelect.value;
+    const startDate =
+      document.getElementById("absenceStartDate").value;
+    const endDate =
+      document.getElementById("absenceEndDate").value;
+    const absenceType =
+      document.getElementById("absenceType").value;
+    const note =
+      document.getElementById("absenceNote").value.trim();
+
+    if (endDate < startDate) {
+      absenceMessage.textContent =
+        "Das Enddatum darf nicht vor dem Anfangsdatum liegen.";
+      return;
+    }
+
+    const { data: userData, error: userError } =
+      await suvDb.auth.getUser();
+
+    if (userError || !userData.user) {
+      absenceMessage.textContent =
+        "Benutzer konnte nicht ermittelt werden.";
+      return;
+    }
+
+    const saveButton =
+      absenceForm.querySelector('button[type="submit"]');
+
+    saveButton.disabled = true;
+    saveButton.textContent = "Wird gespeichert ...";
+
+    const { error } = await suvDb
+      .from("teacher_absences")
+      .insert({
+        teacher_id: teacherId,
+        start_date: startDate,
+        end_date: endDate,
+        absence_type: absenceType,
+        note: note || null,
+        created_by: userData.user.id
+      });
+
+    saveButton.disabled = false;
+    saveButton.textContent = "Abwesenheit speichern";
+
+    if (error) {
+      absenceMessage.textContent =
+        "Fehler beim Speichern: " + error.message;
+      return;
+    }
+
+    absenceMessage.textContent =
+      "Abwesenheit erfolgreich gespeichert.";
+
+    absenceForm.reset();
+
+    await loadSubstitutionAbsences();
+
+  });
+
+}
+
+
+// Initialisierung
+
+loadAbsenceTeachers();
+loadSubstitutionAbsences();
+
