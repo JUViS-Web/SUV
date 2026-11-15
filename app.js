@@ -4544,6 +4544,7 @@ timetableEntries = (entries || []).filter(entry => {
 
   const tbody = document.createElement("tbody");
 
+    const renderedLessonBlocks = new Set();
   lessons.forEach(lesson => {
     const row = document.createElement("tr");
 
