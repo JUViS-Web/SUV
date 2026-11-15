@@ -4777,6 +4777,7 @@ entryContainer.appendChild(className);
     moreButton.type = "button";
     moreButton.className = "timetable-more-button";
     moreButton.textContent = "+" + hiddenCount;
+    moreButton.style.gridColumn = "1 / -1";
 
     moreButton.dataset.weekday = day.day_number;
     moreButton.dataset.periodNumber = lesson.lesson_number;
