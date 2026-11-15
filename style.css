@@ -2508,3 +2508,15 @@ form {
   display: block;
   width: 100%;
 }
+
+        /* Unterrichtskarten in mehrstündigen Blöcken */
+.timetable-filled > div {
+  min-height: 100%;
+  height: 100%;
+  align-content: stretch;
+}
+
+.timetable-filled .timetable-entry {
+  height: 100%;
+  box-sizing: border-box;
+}
