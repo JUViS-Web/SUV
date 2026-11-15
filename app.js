@@ -3035,11 +3035,15 @@ async function loadTimetableViewGrid(type, selectedId) {
         return;
       }
 
-      const cardGrid = document.createElement("div");
+            const cardGrid = document.createElement("div");
       cardGrid.style.display = "grid";
       cardGrid.style.gridTemplateColumns =
-        "repeat(2, minmax(0, 1fr))";
+        entriesToRender.length === 1
+          ? "minmax(0, 1fr)"
+          : "repeat(2, minmax(0, 1fr))";
       cardGrid.style.gap = "3px";
+      cardGrid.style.width = "100%";
+      cardGrid.style.height = "100%";
 
             const visibleLimit =
         window.innerWidth < 600 ? 2 : 3;
