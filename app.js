@@ -4584,105 +4584,124 @@ if (matchingEntries.length > 0) {
   cell.style.gap = "3px";
 
   // Sichtbare Unterrichtskurse erstellen
+visibleEntries.forEach(entry => {
+
+  const gradeCourse = entry.grade_courses;
+
+  const subject =
+    entry.class_subjects?.subjects ||
+    gradeCourse?.grade_course_groups?.subjects;
+
+  const assignedTeachers =
+    entry.timetable_entry_teachers || [];
+
+  const courseTeacher = gradeCourse?.teachers;
+
+  const room =
+    entry.rooms || gradeCourse?.rooms;
+
   // Lehrkraft-Kürzel
-const teacherName = document.createElement("strong");
-teacherName.className = "timetable-teacher-code";
+  const teacherName = document.createElement("strong");
+  teacherName.className = "timetable-teacher-code";
 
-if (courseTeacher?.short_code) {
-  teacherName.textContent = courseTeacher.short_code;
-} else {
-  teacherName.textContent = assignedTeachers
-    .map(item => item.teachers?.short_code)
-    .filter(Boolean)
-    .join(", ") || "Kein Kürzel";
-}
+  if (courseTeacher?.short_code) {
+    teacherName.textContent = courseTeacher.short_code;
+  } else {
+    teacherName.textContent = assignedTeachers
+      .map(item => item.teachers?.short_code)
+      .filter(Boolean)
+      .join(", ") || "Kein Kürzel";
+  }
 
-// Fach
-const subjectName = document.createElement("span");
-subjectName.className = "timetable-subject-name";
-subjectName.textContent =
-  gradeCourse?.course_name ||
-  subject?.name ||
-  subject?.short_code ||
-  "Fach";
+  // Fach
+  const subjectName = document.createElement("span");
+  subjectName.className = "timetable-subject-name";
+  subjectName.textContent =
+    gradeCourse?.course_name ||
+    subject?.name ||
+    subject?.short_code ||
+    "Fach";
 
-// Raum
-const roomName = document.createElement("span");
-roomName.className = "timetable-room-name";
-roomName.textContent = room?.name || "Kein Raum";
+  // Raum
+  const roomName = document.createElement("span");
+  roomName.className = "timetable-room-name";
+  roomName.textContent = room?.name || "Kein Raum";
 
-// Zugehörige Klassen
-const gradeGroupClasses =
-  gradeCourse?.grade_course_groups?.grade_course_group_classes || [];
+  // Zugehörige Klassen
+  const gradeGroupClasses =
+    gradeCourse?.grade_course_groups?.grade_course_group_classes || [];
 
-const classNames = gradeGroupClasses
-  .map(item => item.classes?.name)
-  .filter(Boolean);
+  const classNames = gradeGroupClasses
+    .map(item => item.classes?.name)
+    .filter(Boolean);
 
-if (entry.classes?.name) {
-  classNames.push(entry.classes.name);
-}
+  if (entry.classes?.name) {
+    classNames.push(entry.classes.name);
+  }
 
-const uniqueClassNames = [...new Set(classNames)];
+  const uniqueClassNames = [...new Set(classNames)];
 
-const className = document.createElement("span");
-className.className = "timetable-class-name";
-className.textContent = uniqueClassNames.length > 0
-  ? "Klassen: " + uniqueClassNames.join(", ")
-  : "Keine Klasse zugeordnet";
+  const className = document.createElement("span");
+  className.className = "timetable-class-name";
+  className.textContent = uniqueClassNames.length > 0
+    ? "Klassen: " + uniqueClassNames.join(", ")
+    : "Keine Klasse zugeordnet";
 
-    const editButton = document.createElement("button");
-editButton.type = "button";
-editButton.className = "timetable-edit-button";
-editButton.dataset.entryId = entry.id;
-editButton.setAttribute("aria-label", "Unterricht bearbeiten");
-editButton.title = "Bearbeiten";
-editButton.innerHTML = `
-  <svg viewBox="0 0 24 24" width="20" height="20"
-       fill="none" stroke="currentColor" stroke-width="2"
-       stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 20h9"/>
-    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>
-  </svg>
-`;
+  // Bearbeiten
+  const editButton = document.createElement("button");
+  editButton.type = "button";
+  editButton.className = "timetable-edit-button";
+  editButton.dataset.entryId = entry.id;
+  editButton.setAttribute("aria-label", "Unterricht bearbeiten");
+  editButton.title = "Bearbeiten";
+  editButton.innerHTML = `
+    <svg viewBox="0 0 24 24" width="20" height="20"
+         fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 20h9"/>
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>
+    </svg>
+  `;
 
-const deleteButton = document.createElement("button");
-deleteButton.type = "button";
-deleteButton.className = "timetable-delete-button";
-deleteButton.dataset.entryId = entry.id;
-deleteButton.setAttribute("aria-label", "Unterricht löschen");
-deleteButton.title = "Löschen";
-deleteButton.innerHTML = `
-  <svg viewBox="0 0 24 24" width="20" height="20"
-       fill="none" stroke="currentColor" stroke-width="2"
-       stroke-linecap="round" stroke-linejoin="round">
-    <path d="M3 6h18"/>
-    <path d="M8 6V4h8v2"/>
-    <path d="m19 6-1 14H6L5 6"/>
-    <path d="M10 11v5M14 11v5"/>
-  </svg>
-`;
+  // Löschen
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "timetable-delete-button";
+  deleteButton.dataset.entryId = entry.id;
+  deleteButton.setAttribute("aria-label", "Unterricht löschen");
+  deleteButton.title = "Löschen";
+  deleteButton.innerHTML = `
+    <svg viewBox="0 0 24 24" width="20" height="20"
+         fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18"/>
+      <path d="M8 6V4h8v2"/>
+      <path d="m19 6-1 14H6L5 6"/>
+      <path d="M10 11v5M14 11v5"/>
+    </svg>
+  `;
 
-const actions = document.createElement("div");
-actions.className = "timetable-actions";
-actions.appendChild(editButton);
-actions.appendChild(deleteButton);
+  const actions = document.createElement("div");
+  actions.className = "timetable-actions";
+  actions.appendChild(editButton);
+  actions.appendChild(deleteButton);
 
-    const entryContainer = document.createElement("div");
-    entryContainer.className = "timetable-entry";
+  // Unterrichtskarte
+  const entryContainer = document.createElement("div");
+  entryContainer.className = "timetable-entry";
 
-// Fachfarbe aus den Stammdaten übernehmen
-entryContainer.style.borderLeftColor =
-  subject?.color || "#b91c1c";
-    
-    entryContainer.appendChild(teacherName);
-entryContainer.appendChild(subjectName);
-entryContainer.appendChild(roomName);
-entryContainer.appendChild(className);
-entryContainer.appendChild(actions);
-  
-    cell.appendChild(entryContainer);
-  });
+  entryContainer.style.borderLeftColor =
+    subject?.color || "#b91c1c";
+
+  entryContainer.appendChild(teacherName);
+  entryContainer.appendChild(subjectName);
+  entryContainer.appendChild(roomName);
+  entryContainer.appendChild(className);
+  entryContainer.appendChild(actions);
+
+  cell.appendChild(entryContainer);
+
+});
 
   // Weitere Kurse als +N anzeigen
   if (hiddenCount > 0) {
