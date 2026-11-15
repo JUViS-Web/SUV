@@ -2522,3 +2522,31 @@ form {
   height: 100%;
   box-sizing: border-box;
 }
+
+      
+/* SUV – Neue Stundenplananzeige */
+
+#timetableViewGrid {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 12px 4px 16px;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+}
+
+#timetableViewGrid .timetable-table {
+  width: 100%;
+  min-width: 1500px;
+}
+
+@media (max-width: 650px) {
+  #timetableViewGrid {
+    padding: 8px 2px 12px;
+  }
+
+  #timetableViewGrid .timetable-table {
+    min-width: 850px;
+  }
+}
+
