@@ -4778,7 +4778,7 @@ entryContainer.appendChild(className);
     moreButton.dataset.weekday = day.day_number;
     moreButton.dataset.periodNumber = lesson.lesson_number;
 
-    cell.appendChild(moreButton);
+    cardGrid.appendChild(moreButton);
   }
 
   cell.className = "timetable-filled";
