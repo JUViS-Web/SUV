@@ -4629,10 +4629,13 @@ if (entriesToRender.length > 0) {
   const columnCount =
     visibleEntries.length + (hiddenCount > 0 ? 1 : 0);
 
-  cell.style.display = "grid";
-  cell.style.gridTemplateColumns =
-    `repeat(${columnCount}, minmax(0, 1fr))`;
-  cell.style.gap = "3px";
+  const cardGrid = document.createElement("div");
+
+cardGrid.style.display = "grid";
+cardGrid.style.gridTemplateColumns =
+  `repeat(${columnCount}, minmax(0, 1fr))`;
+cardGrid.style.gap = "3px";
+cardGrid.style.width = "100%";
 
   // Sichtbare Unterrichtskurse erstellen
 visibleEntries.forEach(entry => {
