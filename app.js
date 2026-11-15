@@ -4636,6 +4636,7 @@ cardGrid.style.gridTemplateColumns =
   `repeat(${columnCount}, minmax(0, 1fr))`;
 cardGrid.style.gap = "3px";
 cardGrid.style.width = "100%";
+cardGrid.style.height = "100%";
 
   // Sichtbare Unterrichtskurse erstellen
 visibleEntries.forEach(entry => {
