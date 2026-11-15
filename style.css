@@ -2461,3 +2461,50 @@ form {
   height: 19px;
   pointer-events: none;
 }
+
+        /* Unterrichtskarte – Kopfzeile */
+.timetable-entry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Lehrkraft-Kürzel links */
+.timetable-entry-header .timetable-teacher-code {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+/* Symbole rechts neben dem Kürzel */
+.timetable-entry-header .timetable-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 5px;
+  margin: 0;
+}
+
+.timetable-entry-header .timetable-edit-button,
+.timetable-entry-header .timetable-delete-button {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Fach, Raum und Klassen bleiben darunter */
+.timetable-entry .timetable-subject-name,
+.timetable-entry .timetable-room-name,
+.timetable-entry .timetable-class-name {
+  display: block;
+  width: 100%;
+}
