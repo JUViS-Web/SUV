@@ -1030,7 +1030,45 @@
 
   <div class="panel">
     <h3>Vertretungsplanung</h3>
-    <p>Vertretungen, Abwesenheiten und schulische Sondereinsätze verwalten.</p>
+    <p>Vertretungsplan für einen ausgewählten Schultag.</p>
+
+    <div class="teacher-form-grid">
+      <div>
+        <label for="substitutionDate">Schultag auswählen</label>
+        <input
+          type="date"
+          id="substitutionDate"
+        >
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" id="substitutionLoadDay">
+          Tagesübersicht anzeigen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Abwesende Lehrkräfte</h3>
+    <div id="substitutionAbsences">
+      Noch keine Abwesenheiten eingetragen.
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Offene Vertretungen</h3>
+    <div id="substitutionOpenLessons">
+      Aktuell liegen keine Vertretungsdaten vor.
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Vertretungsplan des Tages</h3>
+    <div id="substitutionDailyPlan">
+      Für diesen Tag wurde noch kein Vertretungsplan erstellt.
+    </div>
   </div>
 
 </div>
