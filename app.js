@@ -5735,6 +5735,9 @@ className.textContent = uniqueClassNames.length
   ? "Klassen: " + uniqueClassNames.join(", ")
   : "Keine Klasse zugeordnet";
 
+course.style.borderLeftColor =
+  subject?.color || "#b91c1c";
+      
       const actions = document.createElement("div");
       actions.className = "timetable-more-actions";
 
