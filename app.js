@@ -3127,15 +3127,58 @@ async function loadTimetableViewGrid(type, selectedId) {
         moreButton.textContent = "+" + hiddenCount;
         moreButton.style.gridColumn = "1 / -1";
 
-        moreButton.addEventListener("click", () => {
+                moreButton.addEventListener("click", () => {
 
-          cardGrid.querySelectorAll(
-            '[data-hidden-course="true"]'
-          ).forEach(card => {
-            card.style.display = "block";
+          const overlay = document.createElement("div");
+          overlay.className = "timetable-more-overlay";
+
+          const modal = document.createElement("div");
+          modal.className = "timetable-more-modal";
+
+          const header = document.createElement("div");
+          header.className = "timetable-more-header";
+
+          const heading = document.createElement("h2");
+          heading.textContent = "Weitere Unterrichtskurse";
+
+          const closeButton = document.createElement("button");
+          closeButton.type = "button";
+          closeButton.textContent = "×";
+          closeButton.className = "timetable-more-close";
+
+          closeButton.addEventListener("click", () => {
+            overlay.remove();
           });
 
-          moreButton.remove();
+          header.appendChild(heading);
+          header.appendChild(closeButton);
+          modal.appendChild(header);
+
+          const courseList = document.createElement("div");
+          courseList.className = "timetable-more-list";
+
+          cardGrid.querySelectorAll(".timetable-entry").forEach(card => {
+
+            const course = card.cloneNode(true);
+
+            course.style.display = "flex";
+            course.classList.add("timetable-more-course");
+
+            courseList.appendChild(course);
+
+          });
+
+          modal.appendChild(courseList);
+          overlay.appendChild(modal);
+
+          overlay.addEventListener("click", event => {
+            if (event.target === overlay) {
+              overlay.remove();
+            }
+          });
+
+          document.body.appendChild(overlay);
+
         });
 
         cardGrid.appendChild(moreButton);
