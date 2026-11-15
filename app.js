@@ -4626,7 +4626,7 @@ if (entriesToRender.length > 0) {
 const visibleEntries = entriesToRender.slice(0, visibleLimit);
 
   // Anzahl der weiteren Kurse
-  const hiddenCount = entriesToRender.length - 3;
+  const hiddenCount = entriesToRender.length - visibleLimit;
 
   // Anzahl der Spalten festlegen
   const columnCount =
