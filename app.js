@@ -3081,7 +3081,12 @@ async function loadTimetableViewGrid(type, selectedId) {
         }
 
         const card = document.createElement("div");
-        card.className = "timetable-entry";
+                card.className = "timetable-entry";
+
+        if (index >= visibleLimit) {
+          card.style.display = "none";
+          card.dataset.hiddenCourse = "true";
+        }
         card.style.borderLeftColor =
           subject?.color || "#b91c1c";
 
