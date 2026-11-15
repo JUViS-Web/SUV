@@ -3041,7 +3041,13 @@ async function loadTimetableViewGrid(type, selectedId) {
         "repeat(2, minmax(0, 1fr))";
       cardGrid.style.gap = "3px";
 
-      entriesToRender.forEach(entry => {
+            const visibleLimit =
+        window.innerWidth < 600 ? 2 : 3;
+
+      const hiddenCount =
+        Math.max(0, entriesToRender.length - visibleLimit);
+
+      entriesToRender.forEach((entry, index) => {
 
         const gradeCourse = entry.grade_courses;
 
