@@ -4699,8 +4699,8 @@ entryHeader.appendChild(actions);
   entryContainer.style.borderLeftColor =
     subject?.color || "#b91c1c";
 
-  entryContainer.appendChild(teacherName);
-  entryContainer.appendChild(subjectName);
+  entryContainer.appendChild(entryHeader);
+entryContainer.appendChild(subjectName);
   entryContainer.appendChild(roomName);
   entryContainer.appendChild(className);
   entryContainer.appendChild(actions);
