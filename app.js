@@ -2786,6 +2786,348 @@ timetableViewType.addEventListener("change", async () => {
 });
 
 
+async function loadTimetableViewGrid(type, selectedId) {
+
+  if (!activeTimetableVersionId) {
+    timetableViewGrid.textContent =
+      "Es ist keine aktive Stundenplanversion vorhanden.";
+    return;
+  }
+
+  timetableViewGrid.innerHTML =
+    "<p>Stundenplan wird geladen ...</p>";
+
+  const { data: days, error: daysError } = await suvDb
+    .from("school_days")
+    .select("day_number, day_name, is_active")
+    .order("day_number");
+
+  if (daysError) {
+    timetableViewGrid.textContent =
+      "Unterrichtstage konnten nicht geladen werden: " +
+      daysError.message;
+    return;
+  }
+
+  const { data: lessons, error: lessonsError } = await suvDb
+    .from("lesson_times")
+    .select("lesson_number, start_time, end_time")
+    .order("lesson_number");
+
+  if (lessonsError) {
+    timetableViewGrid.textContent =
+      "Unterrichtsstunden konnten nicht geladen werden: " +
+      lessonsError.message;
+    return;
+  }
+
+  const { data: entries, error: entriesError } = await suvDb
+    .from("timetable_entries")
+    .select(`
+      id,
+      class_id,
+      room_id,
+      weekday,
+      period_number,
+      lesson_block_requirement_id,
+      lesson_block_requirements (
+        periods_count
+      ),
+      classes (
+        name
+      ),
+      class_subjects (
+        subjects (
+          id,
+          name,
+          short_code,
+          color
+        )
+      ),
+      grade_courses (
+        course_name,
+        teachers (
+          id,
+          first_name,
+          last_name,
+          short_code
+        ),
+        rooms (
+          id,
+          name
+        ),
+        grade_course_groups (
+          subjects (
+            id,
+            name,
+            short_code,
+            color
+          ),
+          grade_course_group_classes (
+            class_id,
+            classes (
+              name
+            )
+          )
+        )
+      ),
+      timetable_entry_teachers (
+        teacher_id,
+        teachers (
+          id,
+          first_name,
+          last_name,
+          short_code
+        )
+      ),
+      rooms (
+        id,
+        name
+      )
+    `)
+    .eq("timetable_version_id", activeTimetableVersionId);
+
+  if (entriesError) {
+    timetableViewGrid.textContent =
+      "Unterrichtseinheiten konnten nicht geladen werden: " +
+      entriesError.message;
+    return;
+  }
+
+  const filteredEntries = (entries || []).filter(entry => {
+
+    const gradeClasses =
+      entry.grade_courses?.grade_course_groups
+        ?.grade_course_group_classes || [];
+
+    const subject =
+      entry.class_subjects?.subjects ||
+      entry.grade_courses?.grade_course_groups?.subjects;
+
+    const teachers =
+      entry.timetable_entry_teachers || [];
+
+    const gradeTeacher =
+      entry.grade_courses?.teachers;
+
+    const room =
+      entry.rooms || entry.grade_courses?.rooms;
+
+    if (type === "class") {
+      return entry.class_id === selectedId ||
+        gradeClasses.some(item => item.class_id === selectedId);
+    }
+
+    if (type === "teacher") {
+      return teachers.some(item =>
+        item.teacher_id === selectedId
+      ) || gradeTeacher?.id === selectedId;
+    }
+
+    if (type === "room") {
+      return room?.id === selectedId;
+    }
+
+    if (type === "subject") {
+      return subject?.id === selectedId;
+    }
+
+    return false;
+  });
+
+  const activeDays = (days || []).filter(day =>
+    day.is_active !== false
+  );
+
+  const table = document.createElement("table");
+  table.className = "timetable-table";
+
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+
+  const firstHeader = document.createElement("th");
+  firstHeader.textContent = "Stunde";
+  headerRow.appendChild(firstHeader);
+
+  activeDays.forEach(day => {
+    const th = document.createElement("th");
+    th.textContent = day.day_name;
+    headerRow.appendChild(th);
+  });
+
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  const renderedBlocks = new Set();
+
+  lessons.forEach(lesson => {
+
+    const row = document.createElement("tr");
+
+    const lessonCell = document.createElement("th");
+    lessonCell.textContent =
+      lesson.lesson_number + ". Stunde\n" +
+      lesson.start_time.slice(0, 5) + "–" +
+      lesson.end_time.slice(0, 5);
+
+    row.appendChild(lessonCell);
+
+    activeDays.forEach(day => {
+
+      const cell = document.createElement("td");
+
+      const matchingEntries = filteredEntries.filter(entry =>
+        entry.weekday === day.day_number &&
+        entry.period_number === lesson.lesson_number
+      );
+
+      const entriesToRender = matchingEntries.filter(entry => {
+        if (!entry.lesson_block_requirement_id) {
+          return true;
+        }
+
+        const key =
+          `${day.day_number}:${entry.lesson_block_requirement_id}`;
+
+        return !renderedBlocks.has(key);
+      });
+
+      const blockIds = [
+        ...new Set(
+          entriesToRender
+            .map(entry => entry.lesson_block_requirement_id)
+            .filter(Boolean)
+        )
+      ];
+
+      if (
+        blockIds.length === 1 &&
+        entriesToRender.every(entry =>
+          entry.lesson_block_requirement_id === blockIds[0]
+        )
+      ) {
+        const blockId = blockIds[0];
+
+        const periodsCount = Math.max(
+          ...entriesToRender.map(entry =>
+            Number(
+              entry.lesson_block_requirements?.periods_count || 1
+            )
+          )
+        );
+
+        cell.rowSpan = periodsCount;
+        renderedBlocks.add(`${day.day_number}:${blockId}`);
+      }
+
+      if (entriesToRender.length === 0) {
+        if (matchingEntries.length === 0) {
+          cell.textContent = "–";
+          cell.className = "timetable-empty";
+        }
+
+        row.appendChild(cell);
+        return;
+      }
+
+      const cardGrid = document.createElement("div");
+      cardGrid.style.display = "grid";
+      cardGrid.style.gridTemplateColumns =
+        "repeat(2, minmax(0, 1fr))";
+      cardGrid.style.gap = "3px";
+
+      entriesToRender.forEach(entry => {
+
+        const gradeCourse = entry.grade_courses;
+
+        const subject =
+          entry.class_subjects?.subjects ||
+          gradeCourse?.grade_course_groups?.subjects;
+
+        const teachers =
+          entry.timetable_entry_teachers || [];
+
+        const teacherNames = [
+          ...teachers.map(item =>
+            item.teachers?.short_code
+          ),
+          gradeCourse?.teachers?.short_code
+        ].filter(Boolean);
+
+        const room =
+          entry.rooms || gradeCourse?.rooms;
+
+        const gradeClasses =
+          gradeCourse?.grade_course_groups
+            ?.grade_course_group_classes || [];
+
+        const classNames = gradeClasses
+          .map(item => item.classes?.name)
+          .filter(Boolean);
+
+        if (entry.classes?.name) {
+          classNames.push(entry.classes.name);
+        }
+
+        const card = document.createElement("div");
+        card.className = "timetable-entry";
+        card.style.borderLeftColor =
+          subject?.color || "#b91c1c";
+
+        const teacher = document.createElement("strong");
+        teacher.textContent =
+          [...new Set(teacherNames)].join(", ") ||
+          "Keine Lehrkraft";
+
+        const subjectName = document.createElement("span");
+        subjectName.textContent =
+          gradeCourse?.course_name ||
+          subject?.name ||
+          subject?.short_code ||
+          "Fach";
+
+        const roomName = document.createElement("span");
+        roomName.textContent =
+          room?.name || "Kein Raum";
+
+        const classes = document.createElement("span");
+        classes.textContent =
+          "Klassen: " +
+          ([...new Set(classNames)].join(", ") || "–");
+
+        card.appendChild(teacher);
+        card.appendChild(subjectName);
+        card.appendChild(roomName);
+        card.appendChild(classes);
+
+        cardGrid.appendChild(card);
+      });
+
+      cell.appendChild(cardGrid);
+      cell.className = "timetable-filled";
+      row.appendChild(cell);
+
+    });
+
+    tbody.appendChild(row);
+
+  });
+
+  table.appendChild(tbody);
+
+  timetableViewGrid.innerHTML = "";
+
+  if (filteredEntries.length === 0) {
+    timetableViewGrid.textContent =
+      "Für diese Auswahl wurden keine Unterrichtseinheiten gefunden.";
+    return;
+  }
+
+  timetableViewGrid.appendChild(table);
+}
+
+
 async function loadDistributionClasses(schoolYearId) {
 
   distributionClass.innerHTML =
