@@ -4762,7 +4762,7 @@ entryContainer.appendChild(subjectName);
 entryContainer.appendChild(roomName);
 entryContainer.appendChild(className);
 
-  cell.appendChild(entryContainer);
+  cardGrid.appendChild(entryContainer);
 
 });
 
