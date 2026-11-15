@@ -2383,3 +2383,81 @@ form {
   pointer-events: none;
 }
         
+/* SUV – Einheitliches Design im +N-Fenster */
+
+.timetable-more-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-x: visible;
+  padding: 5px 2px 12px;
+}
+
+.timetable-more-course {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 4px;
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid #dce2e9;
+  border-left: 4px solid #a71920;
+  border-radius: 8px;
+}
+
+/* Lehrkraft-Kürzel */
+.timetable-more-course .timetable-teacher-code {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+/* Fach */
+.timetable-more-course .timetable-subject-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Raum und Klassen */
+.timetable-more-course .timetable-room-name,
+.timetable-more-course .timetable-class-name {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* Aktionsbereich */
+.timetable-more-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+/* Symbol-Schaltflächen */
+.timetable-more-course .timetable-edit-button,
+.timetable-more-course .timetable-delete-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #dce2e9;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.timetable-more-course .timetable-edit-button svg,
+.timetable-more-course .timetable-delete-button svg {
+  width: 19px;
+  height: 19px;
+  pointer-events: none;
+}
