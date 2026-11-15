@@ -3021,12 +3021,16 @@ async function loadTimetableViewGrid(type, selectedId) {
         renderedBlocks.add(`${day.day_number}:${blockId}`);
       }
 
-      if (entriesToRender.length === 0) {
-        if (matchingEntries.length === 0) {
-          cell.textContent = "–";
-          cell.className = "timetable-empty";
-        }
+            if (
+        matchingEntries.length > 0 &&
+        entriesToRender.length === 0
+      ) {
+        return;
+      }
 
+      if (entriesToRender.length === 0) {
+        cell.textContent = "–";
+        cell.className = "timetable-empty";
         row.appendChild(cell);
         return;
       }
