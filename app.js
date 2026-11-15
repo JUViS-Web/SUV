@@ -4701,9 +4701,8 @@ entryHeader.appendChild(actions);
 
   entryContainer.appendChild(entryHeader);
 entryContainer.appendChild(subjectName);
-  entryContainer.appendChild(roomName);
-  entryContainer.appendChild(className);
-  entryContainer.appendChild(actions);
+entryContainer.appendChild(roomName);
+entryContainer.appendChild(className);
 
   cell.appendChild(entryContainer);
 
