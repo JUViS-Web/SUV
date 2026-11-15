@@ -4629,8 +4629,7 @@ const visibleEntries = entriesToRender.slice(0, visibleLimit);
   const hiddenCount = entriesToRender.length - visibleLimit;
 
   // Anzahl der Spalten festlegen
-  const columnCount =
-    visibleEntries.length + (hiddenCount > 0 ? 1 : 0);
+  const columnCount = visibleLimit;
 
   const cardGrid = document.createElement("div");
 
