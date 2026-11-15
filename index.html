@@ -61,6 +61,9 @@
         <button class="nav-item" data-page="timetable">
           <span>▤</span> Stundenplanung
         </button>
+        <button class="nav-item" data-page="timetableView">
+  <span>▦</span> Stundenplan
+</button>
         <button class="nav-item" data-page="distribution">
   <span>▤</span> Unterrichtsverteilung
 </button>
@@ -322,6 +325,38 @@
 
 </div>
 
+<!-- Stundenplan-Anzeige -->
+<div id="timetableView" class="page">
+
+  <div class="panel">
+    <h3>Stundenplan</h3>
+    <p>Stundenpläne der Klassen, Lehrkräfte, Räume und Fächer anzeigen.</p>
+
+    <div class="timetable-selection">
+      <div>
+        <label for="timetableViewType">Stundenplan auswählen</label>
+        <select id="timetableViewType">
+          <option value="">Bitte auswählen</option>
+          <option value="class">Klassenstundenplan</option>
+          <option value="teacher">Lehrerstundenplan</option>
+          <option value="room">Raumstundenplan</option>
+          <option value="subject">Fachstundenplan</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="timetableViewSelection"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Wochenstundenplan</h3>
+    <div id="timetableViewGrid">
+      <p>Bitte zuerst eine Stundenplanart auswählen.</p>
+    </div>
+  </div>
+
+</div>
+        
         <!-- Unterrichtsverteilung -->
 <!-- Unterrichtsverteilung -->
 <div id="distribution" class="page">
