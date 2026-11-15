@@ -4682,9 +4682,15 @@ visibleEntries.forEach(entry => {
   `;
 
   const actions = document.createElement("div");
-  actions.className = "timetable-actions";
-  actions.appendChild(editButton);
-  actions.appendChild(deleteButton);
+actions.className = "timetable-actions";
+actions.appendChild(editButton);
+actions.appendChild(deleteButton);
+
+// Kopfzeile mit Lehrkraft-Kürzel und Symbolen
+const entryHeader = document.createElement("div");
+entryHeader.className = "timetable-entry-header";
+entryHeader.appendChild(teacherName);
+entryHeader.appendChild(actions);
 
   // Unterrichtskarte
   const entryContainer = document.createElement("div");
