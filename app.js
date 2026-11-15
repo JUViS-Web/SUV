@@ -4447,7 +4447,11 @@ const { data: entries, error: entriesError } = await suvDb
   name
 ),
     weekday,
-    period_number,
+    period_number,  
+    lesson_block_requirements (
+      block_number,
+      periods_count
+    ),
     parallel_group_id,
     class_subjects (
       weekly_periods,
