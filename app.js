@@ -2768,7 +2768,19 @@ timetableViewType.addEventListener("change", async () => {
         (item.short_code ? ` (${item.short_code})` : "");
     }
 
-    selection.appendChild(option);
+        selection.appendChild(option);
+  });
+
+  selection.addEventListener("change", () => {
+
+    if (!selection.value) {
+      timetableViewGrid.innerHTML =
+        "<p>Bitte zuerst einen Eintrag auswählen.</p>";
+      return;
+    }
+
+    loadTimetableViewGrid(type, selection.value);
+
   });
 
 });
