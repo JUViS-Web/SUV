@@ -5798,10 +5798,11 @@ deleteCourseButton.addEventListener("click", () => {
       actions.appendChild(editCourseButton);
       actions.appendChild(deleteCourseButton);
 
-      course.appendChild(subjectName);
       course.appendChild(teacherName);
-      course.appendChild(roomName);
-      course.appendChild(actions);
+course.appendChild(subjectName);
+course.appendChild(roomName);
+course.appendChild(className);
+course.appendChild(actions);
 
       courseList.appendChild(course);
     });
