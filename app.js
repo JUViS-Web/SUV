@@ -6875,3 +6875,284 @@ if (absenceForm) {
 loadAbsenceTeachers();
 loadSubstitutionAbsences();
 
+
+// ==========================================
+// SUV – Vertretungsplanung: Tagesauswertung
+// ==========================================
+
+const substitutionDate = document.getElementById(
+  "substitutionDate"
+);
+
+const substitutionLoadDay = document.getElementById(
+  "substitutionLoadDay"
+);
+
+const substitutionOpenLessons = document.getElementById(
+  "substitutionOpenLessons"
+);
+
+
+// Tagesübersicht laden
+
+async function loadSubstitutionDay() {
+
+  const selectedDate = substitutionDate.value;
+
+  if (!selectedDate) {
+    substitutionOpenLessons.textContent =
+      "Bitte zuerst einen Schultag auswählen.";
+    return;
+  }
+
+  if (!activeTimetableVersionId) {
+    substitutionOpenLessons.textContent =
+      "Es ist keine aktive Stundenplanversion vorhanden.";
+    return;
+  }
+
+  substitutionOpenLessons.textContent =
+    "Betroffene Unterrichtsstunden werden ermittelt ...";
+
+  // Wochentag bestimmen:
+  // Montag = 1, Dienstag = 2 usw.
+
+  const date = new Date(selectedDate + "T12:00:00");
+  const weekday = date.getDay() === 0
+    ? 7
+    : date.getDay();
+
+  // Abwesende Lehrkräfte für diesen Tag laden
+
+  const { data: absences, error: absenceError } =
+    await suvDb
+      .from("teacher_absences")
+      .select(`
+        id,
+        teacher_id,
+        absence_type,
+        note
+      `)
+      .lte("start_date", selectedDate)
+      .gte("end_date", selectedDate);
+
+  if (absenceError) {
+    substitutionOpenLessons.textContent =
+      "Abwesenheiten konnten nicht geladen werden: " +
+      absenceError.message;
+    return;
+  }
+
+  if (!absences || absences.length === 0) {
+    substitutionOpenLessons.textContent =
+      "Für diesen Tag sind keine Lehrkräfte als abwesend eingetragen.";
+    return;
+  }
+
+  const absentTeacherIds = new Set(
+    absences.map(item => item.teacher_id)
+  );
+
+  // Reguläre Unterrichtsstunden dieses Wochentags laden
+
+  const { data: entries, error: entriesError } =
+    await suvDb
+      .from("timetable_entries")
+      .select(`
+        id,
+        teacher_id,
+        weekday,
+        period_number,
+        classes (
+          name
+        ),
+        class_subjects (
+          subjects (
+            name,
+            short_code
+          )
+        ),
+        grade_courses (
+          course_name,
+          teachers (
+            id,
+            first_name,
+            last_name,
+            short_code
+          ),
+          grade_course_groups (
+            subjects (
+              name,
+              short_code
+            ),
+            grade_course_group_classes (
+              classes (
+                name
+              )
+            )
+          )
+        ),
+        timetable_entry_teachers (
+          teacher_id,
+          teachers (
+            first_name,
+            last_name,
+            short_code
+          )
+        ),
+        rooms (
+          name
+        )
+      `)
+      .eq("timetable_version_id", activeTimetableVersionId)
+      .eq("weekday", weekday)
+      .order("period_number");
+
+  if (entriesError) {
+    substitutionOpenLessons.textContent =
+      "Unterrichtsstunden konnten nicht geladen werden: " +
+      entriesError.message;
+    return;
+  }
+
+  // Nur Stunden der abwesenden Lehrkräfte behalten
+
+  const affectedLessons = (entries || []).filter(entry => {
+
+    const assignedTeachers =
+      entry.timetable_entry_teachers || [];
+
+    const gradeTeacher =
+      entry.grade_courses?.teachers;
+
+    return absentTeacherIds.has(entry.teacher_id) ||
+      assignedTeachers.some(item =>
+        absentTeacherIds.has(item.teacher_id)
+      ) ||
+      absentTeacherIds.has(gradeTeacher?.id);
+
+  });
+
+  substitutionOpenLessons.innerHTML = "";
+
+  if (affectedLessons.length === 0) {
+    substitutionOpenLessons.textContent =
+      "Für die abwesenden Lehrkräfte wurden an diesem Tag keine Unterrichtsstunden gefunden.";
+    return;
+  }
+
+  // Lehrkraftnamen laden
+
+  const { data: teachers, error: teachersError } =
+    await suvDb
+      .from("teachers")
+      .select("id, first_name, last_name, short_code");
+
+  if (teachersError) {
+    substitutionOpenLessons.textContent =
+      "Lehrkraftdaten konnten nicht geladen werden.";
+    return;
+  }
+
+  const teacherMap = new Map(
+    (teachers || []).map(teacher => [
+      teacher.id,
+      teacher
+    ])
+  );
+
+  // Betroffene Stunden anzeigen
+
+  affectedLessons.forEach(entry => {
+
+    const card = document.createElement("div");
+    card.className = "teacher-entry";
+
+    const subject =
+      entry.class_subjects?.subjects ||
+      entry.grade_courses?.grade_course_groups?.subjects;
+
+    const heading = document.createElement("strong");
+    heading.textContent =
+      entry.period_number + ". Stunde – " +
+      (
+        entry.grade_courses?.course_name ||
+        subject?.name ||
+        subject?.short_code ||
+        "Unterricht"
+      );
+
+    const teacherIds = [
+      entry.teacher_id,
+      ...(entry.timetable_entry_teachers || [])
+        .map(item => item.teacher_id),
+      entry.grade_courses?.teachers?.id
+    ].filter(id =>
+      id && absentTeacherIds.has(id)
+    );
+
+    const uniqueTeacherIds = [...new Set(teacherIds)];
+
+    const teacherNames = uniqueTeacherIds.map(id => {
+      const teacher = teacherMap.get(id);
+      return teacher
+        ? teacher.first_name + " " + teacher.last_name
+        : "Unbekannte Lehrkraft";
+    });
+
+    const teacherInfo = document.createElement("p");
+    teacherInfo.textContent =
+      "Abwesend: " + teacherNames.join(", ");
+
+    const classNames = [];
+
+    if (entry.classes?.name) {
+      classNames.push(entry.classes.name);
+    }
+
+    const groupClasses =
+      entry.grade_courses?.grade_course_groups
+        ?.grade_course_group_classes || [];
+
+    groupClasses.forEach(item => {
+      if (item.classes?.name) {
+        classNames.push(item.classes.name);
+      }
+    });
+
+    const classInfo = document.createElement("p");
+    classInfo.textContent =
+      "Klasse(n): " +
+      ([...new Set(classNames)].join(", ") || "Nicht zugeordnet");
+
+    const roomInfo = document.createElement("p");
+    roomInfo.textContent =
+      "Raum: " + (entry.rooms?.name || "Nicht zugeordnet");
+
+    card.appendChild(heading);
+    card.appendChild(teacherInfo);
+    card.appendChild(classInfo);
+    card.appendChild(roomInfo);
+
+    substitutionOpenLessons.appendChild(card);
+
+  });
+
+  const summary = document.createElement("p");
+  summary.textContent =
+    affectedLessons.length +
+    " betroffene Unterrichtseinheit(en) gefunden.";
+
+  substitutionOpenLessons.prepend(summary);
+
+}
+
+
+// Tagesübersicht-Schaltfläche
+
+if (substitutionLoadDay) {
+  substitutionLoadDay.addEventListener(
+    "click",
+    loadSubstitutionDay
+  );
+}
