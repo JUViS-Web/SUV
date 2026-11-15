@@ -4617,13 +4617,13 @@ if (
 }
 
       
-if (matchingEntries.length > 0) {
+if (entriesToRender.length > 0) {
 
   // Höchstens drei Unterrichtskurse direkt anzeigen
-  const visibleEntries = matchingEntries.slice(0, 3);
+  const visibleEntries = entriesToRender.slice(0, 3);
 
   // Anzahl der weiteren Kurse
-  const hiddenCount = matchingEntries.length - 3;
+  const hiddenCount = entriesToRender.length - 3;
 
   // Anzahl der Spalten festlegen
   const columnCount =
