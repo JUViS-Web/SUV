@@ -4781,6 +4781,7 @@ entryContainer.appendChild(className);
     cardGrid.appendChild(moreButton);
   }
 
+  cell.appendChild(cardGrid);
   cell.className = "timetable-filled";
 
 } else {
