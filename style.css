@@ -2476,10 +2476,12 @@ form {
 .timetable-entry-header .timetable-teacher-code {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   line-height: 1.2;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Symbole rechts neben dem Kürzel */
