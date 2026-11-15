@@ -4570,6 +4570,52 @@ cell.dataset.periodNumber = String(lesson.lesson_number);
   item.period_number === lesson.lesson_number
 );
 
+const entriesToRender = matchingEntries.filter(entry => {
+  if (!entry.lesson_block_requirement_id) {
+    return true;
+  }
+
+  const blockKey =
+    `${day.day_number}:${entry.lesson_block_requirement_id}`;
+
+  return !renderedLessonBlocks.has(blockKey);
+});
+
+if (
+  matchingEntries.length > 0 &&
+  entriesToRender.length === 0
+) {
+  return;
+}
+
+const blockIds = [
+  ...new Set(
+    entriesToRender
+      .map(entry => entry.lesson_block_requirement_id)
+      .filter(Boolean)
+  )
+];
+
+if (
+  blockIds.length === 1 &&
+  entriesToRender.every(
+    entry => entry.lesson_block_requirement_id === blockIds[0]
+  )
+) {
+  const blockKey = `${day.day_number}:${blockIds[0]}`;
+
+  const periodsCount = Math.max(
+    ...entriesToRender.map(
+      entry => Number(
+        entry.lesson_block_requirements?.periods_count || 1
+      )
+    )
+  );
+
+  cell.rowSpan = periodsCount;
+  renderedLessonBlocks.add(blockKey);
+}
+
       
 if (matchingEntries.length > 0) {
 
