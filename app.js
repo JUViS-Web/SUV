@@ -4620,8 +4620,10 @@ if (
       
 if (entriesToRender.length > 0) {
 
-  // Höchstens drei Unterrichtskurse direkt anzeigen
-  const visibleEntries = entriesToRender.slice(0, 3);
+  // Höchstens zwie bei Handys und bei iPads drei Unterrichtskurse direkt anzeigen
+  const visibleLimit = window.innerWidth < 600 ? 2 : 3;
+
+const visibleEntries = entriesToRender.slice(0, visibleLimit);
 
   // Anzahl der weiteren Kurse
   const hiddenCount = entriesToRender.length - 3;
