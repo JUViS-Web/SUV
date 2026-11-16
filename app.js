@@ -6804,10 +6804,14 @@ timetableSubject.value = entry.class_subject_id;
 timetableSubject.dispatchEvent(new Event("change"));
 
 // Zugehörigen Unterrichtsblock wiederherstellen
+
+await loadClassSubjectBlocks();
+
 if (entry.lesson_block_requirement_id) {
-  await loadClassSubjectBlocks();
   timetableClassSubjectBlock.value =
     entry.lesson_block_requirement_id;
+} else {
+  timetableClassSubjectBlock.value = "";
 }
     
 // Zugeordnete Lehrkräfte laden
