@@ -6148,7 +6148,7 @@ let conflictQuery = suvDb
   `)
   .eq("timetable_version_id", activeTimetableVersionId)
   .eq("weekday", day)
-  .eq("period_number", lesson);
+  .in("period_number", blockPeriodNumbers);
 
 if (entryId) {
   conflictQuery = conflictQuery.neq("id", entryId);
