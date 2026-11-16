@@ -6305,58 +6305,177 @@ if (roomConflict) {
   }
   
   
-  // Erste Lehrkraft für die bisherige Datenbankspalte übernehmen
+  
+// Erste Lehrkraft für die bisherige Datenbankspalte übernehmen
 
-  entryData.teacher_id = selectedTeacherIds[0];
+entryData.teacher_id = selectedTeacherIds[0];
 
-  // Unterrichtseinheit speichern oder aktualisieren
+// Alle Stunden des Unterrichtsblocks vorbereiten
 
-  let result;
+const blockEntries = blockPeriodNumbers.map(periodNumber => ({
+  ...entryData,
+  period_number: periodNumber
+}));
 
-  if (entryId) {
-    result = await suvDb
-      .from("timetable_entries")
-      .update(entryData)
-      .eq("id", entryId)
-      .select("id")
-      .single();
-  } else {
-    result = await suvDb
-      .from("timetable_entries")
-      .insert(entryData)
-      .select("id")
-      .single();
+let savedEntries = [];
+
+// Unterrichtsblock neu speichern oder bearbeiten
+
+if (entryId) {
+
+  // Bisherigen Eintrag laden
+
+  const { data: originalEntry, error: originalEntryError } = await suvDb
+    .from("timetable_entries")
+    .select("id, lesson_block_requirement_id, class_subject_id")
+    .eq("id", entryId)
+    .eq("timetable_version_id", activeTimetableVersionId)
+    .single();
+
+  if (originalEntryError || !originalEntry) {
+    timetableMessage.textContent =
+      "Der bisherige Eintrag konnte nicht geladen werden.";
+    return;
   }
 
-  if (result.error) {
-  timetableMessage.textContent =
-    "Speicherfehler: " +
-    result.error.message +
-    " | Code: " +
-    result.error.code;
+  let existingBlockEntries = [];
 
-  return;
+  // Alle bisherigen Stunden des Blocks laden
+
+  if (originalEntry.lesson_block_requirement_id) {
+
+    const { data, error } = await suvDb
+      .from("timetable_entries")
+      .select("id, period_number")
+      .eq("timetable_version_id", activeTimetableVersionId)
+      .eq(
+        "lesson_block_requirement_id",
+        originalEntry.lesson_block_requirement_id
+      )
+      .eq("class_subject_id", originalEntry.class_subject_id)
+      .order("period_number");
+
+    if (error) {
+      timetableMessage.textContent =
+        "Bisherige Blockstunden konnten nicht geladen werden.";
+      return;
+    }
+
+    existingBlockEntries = data || [];
+
+  } else {
+    existingBlockEntries = [{
+      id: originalEntry.id,
+      period_number: null
+    }];
+  }
+
+  // Vorhandene Stunden aktualisieren
+
+  for (
+    let index = 0;
+    index < Math.min(existingBlockEntries.length, blockEntries.length);
+    index++
+  ) {
+
+    const { data, error } = await suvDb
+      .from("timetable_entries")
+      .update(blockEntries[index])
+      .eq("id", existingBlockEntries[index].id)
+      .select("id")
+      .single();
+
+    if (error) {
+      timetableMessage.textContent =
+        "Blockstunde konnte nicht aktualisiert werden: " +
+        error.message;
+      return;
+    }
+
+    savedEntries.push(data);
+  }
+
+  // Fehlende Stunden ergänzen
+
+  if (blockEntries.length > existingBlockEntries.length) {
+
+    const remainingEntries = blockEntries.slice(
+      existingBlockEntries.length
+    );
+
+    const { data, error } = await suvDb
+      .from("timetable_entries")
+      .insert(remainingEntries)
+      .select("id");
+
+    if (error) {
+      timetableMessage.textContent =
+        "Zusätzliche Blockstunden konnten nicht gespeichert werden: " +
+        error.message;
+      return;
+    }
+
+    savedEntries.push(...data);
+  }
+
+  // Nicht mehr benötigte Stunden entfernen
+
+  if (existingBlockEntries.length > blockEntries.length) {
+
+    const entriesToDelete = existingBlockEntries.slice(
+      blockEntries.length
+    );
+
+    const idsToDelete = entriesToDelete.map(entry => entry.id);
+
+    const { error } = await suvDb
+      .from("timetable_entries")
+      .delete()
+      .in("id", idsToDelete)
+      .eq("timetable_version_id", activeTimetableVersionId);
+
+    if (error) {
+      timetableMessage.textContent =
+        "Überzählige Blockstunden konnten nicht entfernt werden.";
+      return;
+    }
+  }
+
+} else {
+
+  // Neuen Unterrichtsblock mit allen Stunden speichern
+
+  const { data, error } = await suvDb
+    .from("timetable_entries")
+    .insert(blockEntries)
+    .select("id");
+
+  if (error) {
+    timetableMessage.textContent =
+      "Speicherfehler: " + error.message;
+    return;
+  }
+
+  savedEntries = data || [];
 }
 
-  const savedEntryId = result.data.id;
+// Lehrkraft-Zuordnungen für alle Blockstunden aktualisieren
 
-  // Bisherige Lehrkraft-Zuordnungen entfernen
+for (const savedEntry of savedEntries) {
 
   const { error: deleteTeachersError } = await suvDb
     .from("timetable_entry_teachers")
     .delete()
-    .eq("timetable_entry_id", savedEntryId);
+    .eq("timetable_entry_id", savedEntry.id);
 
   if (deleteTeachersError) {
     timetableMessage.textContent =
-      "Lehrkraft-Zuordnungen konnten nicht aktualisiert werden.";
+      "Bisherige Lehrkraft-Zuordnungen konnten nicht entfernt werden.";
     return;
   }
 
-  // Neue Lehrkraft-Zuordnungen speichern
-
   const teacherAssignments = selectedTeacherIds.map(teacherId => ({
-    timetable_entry_id: savedEntryId,
+    timetable_entry_id: savedEntry.id,
     teacher_id: teacherId
   }));
 
@@ -6366,17 +6485,18 @@ if (roomConflict) {
 
   if (insertTeachersError) {
     timetableMessage.textContent =
-      "Lehrkräfte konnten nicht zugeordnet werden.";
+      "Lehrkräfte konnten nicht allen Blockstunden zugeordnet werden.";
     return;
   }
+}
 
+timetableMessage.textContent =
+  "Unterrichtsblock erfolgreich gespeichert.";
 
-  timetableMessage.textContent =
-    "Unterrichtseinheit erfolgreich gespeichert.";
+resetTimetableEntryForm();
 
-  resetTimetableEntryForm();
+await loadTimetableGrid();
 
-  await loadTimetableGrid();
 });
 
 
