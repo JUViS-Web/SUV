@@ -6045,6 +6045,72 @@ if (periodsError || !availablePeriods ||
   } else if (timetableParallelGroup.value !== "") {
     parallelGroupId = timetableParallelGroup.value;
   }
+
+  // Ausgewählten normalen Unterrichtsblock laden
+
+  const { data: selectedClassSubjectBlock, error: classBlockError } =
+    await suvDb
+      .from("lesson_block_requirements")
+      .select("id, block_number, periods_count")
+      .eq("id", selectedClassSubjectBlockId)
+      .eq("class_subject_id", timetableSubject.value)
+      .single();
+
+  if (classBlockError || !selectedClassSubjectBlock) {
+    timetableMessage.textContent =
+      "Der ausgewählte Unterrichtsblock konnte nicht geladen werden.";
+    return;
+  }
+
+  // Blocklänge bestimmen
+
+  const blockLength = selectedClassSubjectBlock.periods_count;
+
+  // Alle Unterrichtsstunden des Blocks bestimmen
+
+  const blockPeriodNumbers = Array.from(
+    { length: blockLength },
+    (_, index) => lesson + index
+  );
+
+  // Prüfen, ob alle Stunden im Schultag existieren
+
+  const { data: availablePeriods, error: periodsError } = await suvDb
+    .from("lesson_times")
+    .select("lesson_number")
+    .in("lesson_number", blockPeriodNumbers);
+
+  if (
+    periodsError ||
+    !availablePeriods ||
+    availablePeriods.length !== blockLength
+  ) {
+    timetableMessage.textContent =
+      "Der Unterrichtsblock passt ab dieser Stunde nicht mehr vollständig in den Schultag.";
+    return;
+  }
+
+  // Prüfen, ob der Block bereits eingeplant wurde
+
+  const { data: existingBlockEntries, error: existingBlockError } =
+    await suvDb
+      .from("timetable_entries")
+      .select("id")
+      .eq("timetable_version_id", activeTimetableVersionId)
+      .eq("lesson_block_requirement_id", selectedClassSubjectBlock.id)
+      .limit(1);
+
+  if (existingBlockError) {
+    timetableMessage.textContent =
+      "Die bisherige Blockplanung konnte nicht geprüft werden.";
+    return;
+  }
+
+  if (existingBlockEntries && existingBlockEntries.length > 0) {
+    timetableMessage.textContent =
+      "Dieser Unterrichtsblock wurde bereits eingeplant.";
+    return;
+  }
   
   const entryData = {
   timetable_version_id: activeTimetableVersionId,
