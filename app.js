@@ -6537,6 +6537,8 @@ function resetTimetableEntryForm() {
 
   timetableEntryId.value = "";
 
+timetableClassSubjectBlock.disabled = false;
+  
   timetableParallelGroup.value = "";
 
   timetableSaveButton.textContent =
