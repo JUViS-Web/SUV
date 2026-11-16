@@ -6092,6 +6092,8 @@ if (periodsError || !availablePeriods ||
 
   // Prüfen, ob der Block bereits eingeplant wurde
 
+if (!entryId) {
+
   const { data: existingBlockEntries, error: existingBlockError } =
     await suvDb
       .from("timetable_entries")
@@ -6111,6 +6113,7 @@ if (periodsError || !availablePeriods ||
       "Dieser Unterrichtsblock wurde bereits eingeplant.";
     return;
   }
+}
   
   const entryData = {
   timetable_version_id: activeTimetableVersionId,
