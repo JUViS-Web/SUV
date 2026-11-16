@@ -6273,6 +6273,15 @@ if (roomConflict) {
     return;
   }
 
+// Bei der Bearbeitung den bisherigen Block herausrechnen
+
+const lessonsForWeeklyCheck = (existingLessons || []).filter(item => {
+  if (!entryId) return true;
+
+  return item.lesson_block_requirement_id !==
+    selectedClassSubjectBlockId;
+});
+  
   // Bereits verplante Blöcke und Einzelstunden ermitteln
 
   const blockIds = [
