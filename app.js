@@ -5757,6 +5757,9 @@ const selectedGradeCourseGroupId =
 
 const selectedGradeCourseBlockId =
   timetableGradeCourseBlock.value;
+
+const selectedClassSubjectBlockId =
+  timetableClassSubjectBlock.value;
   
 if (
   !day ||
