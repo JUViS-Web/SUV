@@ -5172,24 +5172,44 @@ const blockIds = [
   )
 ];
 
-if (
-  blockIds.length === 1 &&
-  entriesToRender.every(
-    entry => entry.lesson_block_requirement_id === blockIds[0]
-  )
-) {
-  const blockKey = `${day.day_number}:${blockIds[0]}`;
+// Prüfen, ob alle angezeigten Einträge Unterrichtsblöcke sind
 
-  const periodsCount = Math.max(
-    ...entriesToRender.map(
-      entry => Number(
+const allEntriesAreBlocks =
+  entriesToRender.length > 0 &&
+  entriesToRender.every(
+    entry => entry.lesson_block_requirement_id
+  );
+
+// Blocklängen ermitteln
+
+const blockPeriodsCounts = [
+  ...new Set(
+    entriesToRender.map(entry =>
+      Number(
         entry.lesson_block_requirements?.periods_count || 1
       )
     )
-  );
+  )
+];
+
+// Mehrere parallele Blöcke gemeinsam darstellen
+
+if (
+  allEntriesAreBlocks &&
+  blockPeriodsCounts.length === 1
+) {
+  const periodsCount = blockPeriodsCounts[0];
 
   cell.rowSpan = periodsCount;
-  renderedLessonBlocks.add(blockKey);
+
+  // Alle parallelen Blöcke als dargestellt markieren
+
+  blockIds.forEach(blockId => {
+    const blockKey =
+      `${day.day_number}:${blockId}`;
+
+    renderedLessonBlocks.add(blockKey);
+  });
 }
 
       
