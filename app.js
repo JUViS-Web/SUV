@@ -6653,6 +6653,13 @@ timetableSubject.value = entry.class_subject_id;
 // Lehrkräfte-Auswahl für das Fach aktualisieren
 timetableSubject.dispatchEvent(new Event("change"));
 
+// Zugehörigen Unterrichtsblock wiederherstellen
+if (entry.lesson_block_requirement_id) {
+  await loadClassSubjectBlocks();
+  timetableClassSubjectBlock.value =
+    entry.lesson_block_requirement_id;
+}
+    
 // Zugeordnete Lehrkräfte laden
 const { data: assignedTeachers, error: assignedTeachersError } =
   await suvDb
