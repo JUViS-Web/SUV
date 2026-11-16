@@ -6115,6 +6115,7 @@ if (periodsError || !availablePeriods ||
   const entryData = {
   timetable_version_id: activeTimetableVersionId,
   class_subject_id: timetableSubject.value,
+  lesson_block_requirement_id: selectedClassSubjectBlock.id,
   room_id: timetableRoom.value || null,
   class_id: selectedTimetableClassId,
   weekday: day,
