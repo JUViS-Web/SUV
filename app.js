@@ -6184,12 +6184,6 @@ const conflictingEntries = (loadedConflictingEntries || []).filter(entry => {
   return entry.id !== entryId;
 });
 
-if (conflictError) {
-  timetableMessage.textContent =
-    "Belegungskonflikte konnten nicht geprüft werden.";
-  return;
-}
-
 // Prüfen, ob die Klasse bereits an einem Jahrgangskurs teilnimmt
 
 const gradeCourseClassConflict = conflictingEntries.some(entry => {
