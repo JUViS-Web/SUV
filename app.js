@@ -6316,7 +6316,7 @@ const lessonsForWeeklyCheck = (existingLessons || []).filter(item => {
 
   // Einzelstunden und Parallelgruppen berücksichtigen
 
-  (existingLessons || []).forEach(item => {
+  lessonsForWeeklyCheck.forEach(item => {
     if (item.lesson_block_requirement_id) return;
 
     const key = item.parallel_group_id
