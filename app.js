@@ -6235,34 +6235,13 @@ if (roomConflict) {
     return;
   }
 
-  let weeklyQuery = suvDb
-  .from("timetable_entries")
-  .select("id, parallel_group_id")
-  .eq("timetable_version_id", activeTimetableVersionId)
-  .eq("class_subject_id", timetableSubject.value);
+    // Bereits verplante Unterrichtseinheiten laden
 
-  if (entryId) {
-    weeklyQuery = weeklyQuery.neq("id", entryId);
-  }
-
-  const { data: existingLessons, error: weeklyError } =
-  await weeklyQuery;
-
-if (weeklyError) {
-  timetableMessage.textContent =
-    "Wochenstunden konnten nicht überprüft werden.";
-  return;
-}
-
-// Parallele Kurse nur einmal als Wochenstunde zählen
-
-const countedLessons = new Set(
-  (existingLessons || []).map(item =>
-    item.parallel_group_id
-      ? "parallel-" + item.parallel_group_id
-      : "entry-" + item.id
-  )
-);
+  const { data: existingLessons, error: weeklyError } = await suvDb
+    .from("timetable_entries")
+    .select("id, parallel_group_id, lesson_block_requirement_id")
+    .eq("timetable_version_id", activeTimetableVersionId)
+    .eq("class_subject_id", timetableSubject.value);
 
   if (weeklyError) {
     timetableMessage.textContent =
@@ -6270,9 +6249,58 @@ const countedLessons = new Set(
     return;
   }
 
-  if (countedLessons.size >= subjectData.weekly_periods) {
+  // Bereits verplante Blöcke und Einzelstunden ermitteln
+
+  const blockIds = [
+    ...new Set(
+      (existingLessons || [])
+        .map(item => item.lesson_block_requirement_id)
+        .filter(Boolean)
+    )
+  ];
+
+  const countedLessons = new Set();
+  let plannedPeriods = 0;
+
+  // Unterrichtsblöcke zählen ihre tatsächliche Stundenanzahl
+
+  if (blockIds.length > 0) {
+    const { data: blocks, error: blocksError } = await suvDb
+      .from("lesson_block_requirements")
+      .select("id, periods_count")
+      .in("id", blockIds);
+
+    if (blocksError) {
+      timetableMessage.textContent =
+        "Verplante Unterrichtsblöcke konnten nicht geladen werden.";
+      return;
+    }
+
+    (blocks || []).forEach(block => {
+      plannedPeriods += block.periods_count;
+    });
+  }
+
+  // Einzelstunden und Parallelgruppen berücksichtigen
+
+  (existingLessons || []).forEach(item => {
+    if (item.lesson_block_requirement_id) return;
+
+    const key = item.parallel_group_id
+      ? "parallel-" + item.parallel_group_id
+      : "entry-" + item.id;
+
+    if (!countedLessons.has(key)) {
+      countedLessons.add(key);
+      plannedPeriods++;
+    }
+  });
+
+  // Prüfen, ob der neue Block noch in die Wochenstunden passt
+
+  if (plannedPeriods + blockLength > subjectData.weekly_periods) {
     timetableMessage.textContent =
-      "Die festgelegten Wochenstunden für dieses Fach sind bereits vollständig verplant.";
+      "Dieser Unterrichtsblock überschreitet die noch verfügbaren Wochenstunden des Fachs.";
     return;
   }
   
