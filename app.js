@@ -6720,11 +6720,50 @@ timetableRoom.value = entry.room_id || "";
 
     const entryId = deleteButton.dataset.entryId;
 
-    const { error } = await suvDb
-      .from("timetable_entries")
-      .delete()
-      .eq("id", entryId)
-      .eq("timetable_version_id", activeTimetableVersionId);
+// Zu löschenden Eintrag laden
+
+const { data: entryToDelete, error: loadDeleteError } = await suvDb
+  .from("timetable_entries")
+  .select("id, lesson_block_requirement_id, class_subject_id")
+  .eq("id", entryId)
+  .eq("timetable_version_id", activeTimetableVersionId)
+  .single();
+
+if (loadDeleteError || !entryToDelete) {
+  timetableMessage.textContent =
+    "Unterrichtseinheit konnte nicht gefunden werden.";
+  return;
+}
+
+let deleteQuery = suvDb
+  .from("timetable_entries")
+  .delete()
+  .eq("timetable_version_id", activeTimetableVersionId);
+
+// Bei normalen Unterrichtsblöcken alle Blockstunden löschen
+
+if (
+  entryToDelete.lesson_block_requirement_id &&
+  entryToDelete.class_subject_id
+) {
+  deleteQuery = deleteQuery
+    .eq(
+      "lesson_block_requirement_id",
+      entryToDelete.lesson_block_requirement_id
+    )
+    .eq("class_subject_id", entryToDelete.class_subject_id);
+} else {
+  deleteQuery = deleteQuery.eq("id", entryId);
+}
+
+const { error } = await deleteQuery;
+
+if (error) {
+  timetableMessage.textContent =
+    "Unterrichtseinheit konnte nicht gelöscht werden: " +
+    error.message;
+  return;
+}
 
     if (error) {
       timetableMessage.textContent =
