@@ -6360,10 +6360,17 @@ if (entryId) {
     .single();
 
   if (originalEntryError || !originalEntry) {
-    timetableMessage.textContent =
-      "Der bisherige Eintrag konnte nicht geladen werden.";
-    return;
-  }
+  timetableMessage.textContent =
+    "Der bisherige Eintrag konnte nicht geladen werden: " +
+    (originalEntryError?.message || "Kein Datensatz gefunden.");
+
+  console.error(
+    "Fehler beim Laden des bisherigen Eintrags:",
+    originalEntryError
+  );
+
+  return;
+}
 
   let existingBlockEntries = [];
 
