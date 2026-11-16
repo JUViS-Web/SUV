@@ -6126,6 +6126,7 @@ if (periodsError || !availablePeriods ||
 // Mehrfachbelegung einer Klasse ist erlaubt.
 // Die Parallelgruppen-ID kennzeichnet zusammengehörige Kurse.
 
+
 // Belegte Unterrichtseinheiten zum gleichen Zeitpunkt laden
 
 let conflictQuery = suvDb
@@ -6135,6 +6136,8 @@ let conflictQuery = suvDb
     teacher_id,
     room_id,
     class_id,
+    class_subject_id,
+    lesson_block_requirement_id,
     grade_courses (
       grade_course_groups (
         grade_course_group_classes (
@@ -6150,12 +6153,33 @@ let conflictQuery = suvDb
   .eq("weekday", day)
   .in("period_number", blockPeriodNumbers);
 
-if (entryId) {
-  conflictQuery = conflictQuery.neq("id", entryId);
+const {
+  data: loadedConflictingEntries,
+  error: conflictError
+} = await conflictQuery;
+
+if (conflictError) {
+  timetableMessage.textContent =
+    "Belegungskonflikte konnten nicht geprüft werden.";
+  return;
 }
 
-const { data: conflictingEntries, error: conflictError } =
-  await conflictQuery;
+// Beim Bearbeiten alle bisherigen Stunden des eigenen Blocks ausschließen
+
+const conflictingEntries = (loadedConflictingEntries || []).filter(entry => {
+
+  if (!entryId) return true;
+
+  if (
+    selectedClassSubjectBlockId &&
+    entry.lesson_block_requirement_id === selectedClassSubjectBlockId &&
+    entry.class_subject_id === timetableSubject.value
+  ) {
+    return false;
+  }
+
+  return entry.id !== entryId;
+});
 
 if (conflictError) {
   timetableMessage.textContent =
