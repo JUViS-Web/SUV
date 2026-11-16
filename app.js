@@ -6815,11 +6815,35 @@ if (entry.lesson_block_requirement_id) {
 }
     
 // Zugeordnete Lehrkräfte laden
+
+let teacherEntryIds = [entry.id];
+
+if (entry.lesson_block_requirement_id) {
+
+  const { data: blockEntries, error: blockEntriesError } = await suvDb
+    .from("timetable_entries")
+    .select("id")
+    .eq("timetable_version_id", activeTimetableVersionId)
+    .eq(
+      "lesson_block_requirement_id",
+      entry.lesson_block_requirement_id
+    )
+    .eq("class_subject_id", entry.class_subject_id);
+
+  if (blockEntriesError) {
+    timetableMessage.textContent =
+      "Blockstunden konnten nicht geladen werden.";
+    return;
+  }
+
+  teacherEntryIds = (blockEntries || []).map(item => item.id);
+}
+
 const { data: assignedTeachers, error: assignedTeachersError } =
   await suvDb
     .from("timetable_entry_teachers")
     .select("teacher_id")
-    .eq("timetable_entry_id", entry.id);
+    .in("timetable_entry_id", teacherEntryIds);
 
 if (assignedTeachersError) {
   timetableMessage.textContent =
