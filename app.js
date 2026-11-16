@@ -5654,6 +5654,54 @@ async function loadGradeCourseBlocks() {
   timetableGradeCourseBlock.disabled = false;
 }
 
+async function loadClassSubjectBlocks() {
+  timetableClassSubjectBlock.innerHTML =
+    '<option value="">Block auswählen</option>';
+
+  timetableClassSubjectBlock.disabled = true;
+
+  const classSubjectId = timetableSubject.value;
+
+  if (!classSubjectId) {
+    timetableClassSubjectBlock.innerHTML =
+      '<option value="">Zuerst ein Fach auswählen</option>';
+    return;
+  }
+
+  const { data: blocks, error } = await suvDb
+    .from("lesson_block_requirements")
+    .select("id, block_number, periods_count")
+    .eq("class_subject_id", classSubjectId)
+    .order("block_number");
+
+  if (error) {
+    timetableMessage.textContent =
+      "Unterrichtsblöcke konnten nicht geladen werden: " +
+      error.message;
+    return;
+  }
+
+  if (!blocks || blocks.length === 0) {
+    timetableClassSubjectBlock.innerHTML =
+      '<option value="">Keine Blöcke hinterlegt</option>';
+    return;
+  }
+
+  blocks.forEach(block => {
+    const option = document.createElement("option");
+
+    option.value = block.id;
+    option.textContent =
+      "Block " + block.block_number +
+      " – " + block.periods_count +
+      (block.periods_count === 1 ? " Stunde" : " Stunden");
+
+    timetableClassSubjectBlock.appendChild(option);
+  });
+
+  timetableClassSubjectBlock.disabled = false;
+}
+
 // Blöcke bei Auswahl einer Kursgruppe neu laden
 
 timetableGradeCourseGroup.addEventListener(
