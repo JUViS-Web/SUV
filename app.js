@@ -6286,7 +6286,7 @@ const lessonsForWeeklyCheck = (existingLessons || []).filter(item => {
 
   const blockIds = [
     ...new Set(
-      (existingLessons || [])
+      lessonsForWeeklyCheck
         .map(item => item.lesson_block_requirement_id)
         .filter(Boolean)
     )
