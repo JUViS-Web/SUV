@@ -5709,6 +5709,11 @@ timetableGradeCourseGroup.addEventListener(
   loadGradeCourseBlocks
 );
 
+timetableSubject.addEventListener(
+  "change",
+  loadClassSubjectBlocks
+);
+
 /// Auswahlfelder bei Klassenwechsel aktualisieren
 
 timetableClass.addEventListener("change", async () => {
