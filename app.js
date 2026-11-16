@@ -6807,6 +6807,10 @@ timetableSubject.dispatchEvent(new Event("change"));
 
 await loadClassSubjectBlocks();
 
+// Blockauswahl während der Bearbeitung sperren
+
+timetableClassSubjectBlock.disabled = true;
+    
 if (entry.lesson_block_requirement_id) {
   timetableClassSubjectBlock.value =
     entry.lesson_block_requirement_id;
