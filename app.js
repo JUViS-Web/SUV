@@ -2833,6 +2833,7 @@ async function loadTimetableViewGrid(type, selectedId) {
       weekday,
       period_number,
       lesson_block_requirement_id,
+      parallel_group_id,
       lesson_block_requirements (
         periods_count
       ),
