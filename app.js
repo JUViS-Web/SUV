@@ -58,8 +58,6 @@ document.body.appendChild(status);
   return;
 }
 
-alert("SUV-Test: Die Verbindungsprüfung wurde gestartet.");
-
   status.style.setProperty("display", "block", "important");
   status.textContent = "SUV verbindet mit der Datenbank ...";
 
