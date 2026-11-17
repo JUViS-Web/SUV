@@ -5040,15 +5040,6 @@ async function loadTimetableGrid() {
   .select("day_number, day_name, is_active")
   .order("day_number");
 
-alert(
-  "Geladene Unterrichtstage:\n" +
-  days.map(day =>
-    day.day_number + " – " +
-    day.day_name + " – Aktiv: " +
-    day.is_active
-  ).join("\n")
-);
-
   if (daysError) {
     timetableGrid.textContent =
       "Unterrichtstage konnten nicht geladen werden.";
