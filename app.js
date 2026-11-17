@@ -29,6 +29,47 @@ const suvDb = createClient(
   window.SUV_CONFIG.SUPABASE_KEY
 );
 
+
+async function checkSUVConnection() {
+  const status = document.getElementById("connectionStatus");
+
+  if (!status) return;
+
+  status.style.display = "block";
+  status.textContent = "SUV verbindet mit der Datenbank ...";
+
+  try {
+    const { error } = await suvDb
+      .from("profiles")
+      .select("id")
+      .limit(1);
+
+    if (error && !error.code) {
+      throw error;
+    }
+
+    status.textContent =
+      "Verbindung zur SUV-Datenbank erfolgreich.";
+
+    status.style.background = "#e5f5e9";
+    status.style.color = "#176b35";
+
+    window.setTimeout(() => {
+      status.style.display = "none";
+    }, 60000);
+
+  } catch (error) {
+    status.textContent =
+      "Datenbankverbindung fehlgeschlagen: " +
+      error.message;
+
+    status.style.background = "#fde8e8";
+    status.style.color = "#a12626";
+  }
+}
+
+checkSUVConnection();
+
 window.onerror = function(message, source, lineno, colno) {
   alert(
     "JavaScript-Fehler:\n" +
