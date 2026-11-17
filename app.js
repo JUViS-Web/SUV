@@ -244,7 +244,11 @@ alert("TEST: Anmeldung erfolgreich, Verbindungsprüfung startet.");
 
 // Datenbankverbindung prüfen und Status anzeigen
     
+alert("TEST 1: Funktionsaufruf erreicht.");
+
 await checkSUVConnection();
+
+alert("TEST 2: Funktion beendet.");
     
   } catch (error) {
   alert("SUV-Login-Fehler:\n" + error.message);
