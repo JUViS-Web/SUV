@@ -1,11 +1,23 @@
+
 window.onerror = function(message, source, lineno, colno) {
   alert(
     "JavaScript-Fehler:\n" +
     message +
+    "\nDatei: " + source +
     "\nZeile: " + lineno +
     "\nSpalte: " + colno
   );
+
+  return false;
 };
+
+window.onunhandledrejection = function(event) {
+  alert(
+    "JavaScript-Fehler (Promise):\n" +
+    (event.reason?.message || event.reason)
+  );
+};
+
 
 // SUV – Supabase-Verbindung - Aktialisiert
 
@@ -23,19 +35,26 @@ console.log("SUV: Supabase-Verbindung initialisiert.");
 
 alert("TEST 1: app.js gestartet");
 
+
 window.onerror = function(message, source, lineno, colno) {
   alert(
     "JavaScript-Fehler:\n" +
     message +
-    "\nZeile: " + lineno
+    "\nDatei: " + source +
+    "\nZeile: " + lineno +
+    "\nSpalte: " + colno
+  );
+
+  return false;
+};
+
+window.onunhandledrejection = function(event) {
+  alert(
+    "JavaScript-Fehler (Promise):\n" +
+    (event.reason?.message || event.reason)
   );
 };
 
-alert("TEST 2: JavaScript funktioniert");
-
-alert("TEST 3: Supabase-Bibliothek gefunden");
-
-alert("TEST 4: Supabase initialisiert");
 // SUV – Navigation mit Rollenprüfung
 
 document.querySelectorAll(".nav-item").forEach(button => {
