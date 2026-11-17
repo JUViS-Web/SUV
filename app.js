@@ -217,8 +217,11 @@ loginForm.onsubmit = async (event) => {
     // Anmeldemaske nach erfolgreicher Anmeldung ausblenden
     loginScreen.style.display = "none";
 
+alert("TEST: Anmeldung erfolgreich, Verbindungsprüfung startet.");
+
 // Datenbankverbindung prüfen und Status anzeigen
-    await checkSUVConnection();
+    
+await checkSUVConnection();
     
   } catch (error) {
     loginMessage.textContent = error.message;
