@@ -4987,7 +4987,6 @@ alert(
       "Unterrichtstage konnten nicht geladen werden.";
     return;
   }
-  timetableGrid.textContent = "TEST 1: Unterrichtstage geladen";
 
   // Unterrichtsstunden laden
 
@@ -5001,7 +5000,6 @@ alert(
       "Unterrichtsstunden konnten nicht geladen werden.";
     return;
   }
-  timetableGrid.textContent = "TEST 2: Unterrichtsstunden geladen";
 
   // Unterrichtseinheiten laden
 
@@ -5076,8 +5074,6 @@ if (entriesError) {
     "Unterrichtseinheiten konnten nicht geladen werden.";
   return;
 }
-
-timetableGrid.textContent = "TEST 3: Unterrichtseinheiten geladen";
 
 timetableEntries = (entries || []).filter(entry => {
   if (entry.class_id === selectedTimetableClassId) {
