@@ -74,12 +74,12 @@ document.querySelectorAll(".nav-item").forEach(button => {
 
     // Administrationsbereich schützen
     if (
-      pageId === "administration" &&
-      profile.role !== "administrator"
-    ) {
-      alert("Du hast keine Berechtigung für diesen Bereich.");
-      return;
-    }
+  pageId === "administration" &&
+  profile.role !== "administrator"
+) {
+  console.warn("SUV: Zugriff auf die Administration verweigert.");
+  return;
+}
 
     // Navigation ausführen
     document.querySelectorAll(".nav-item").forEach(item => {
@@ -102,45 +102,6 @@ document.querySelectorAll(".nav-item").forEach(button => {
       button.textContent.trim();
   });
 });
-// SUV – Verbindungstest
-
-async function testSUVConnection() {
-  const status = document.getElementById("connectionStatus");
-
-  status.textContent = "Verbindung zu Supabase wird geprüft ...";
-
-  try {
-    const { data, error } = await suvDb
-      .from("profiles")
-      .select("id, role")
-      .limit(1);
-
-    if (error) {
-      status.textContent =
-        "Datenbank antwortet, aber Zugriff nicht möglich: " +
-        error.message;
-
-      status.style.background = "#fff0e5";
-      status.style.color = "#8a3b08";
-      return;
-    }
-
-    status.textContent =
-      "Verbindung zur SUV-Datenbank erfolgreich.";
-
-    status.style.background = "#e5f5e9";
-    status.style.color = "#176b35";
-
-  } catch (error) {
-    status.textContent =
-      "Verbindungsfehler: " + error.message;
-
-    status.style.background = "#fde8e8";
-    status.style.color = "#a12626";
-  }
-}
-
-testSUVConnection();
 
 // SUV – Benutzeranmeldung
 
