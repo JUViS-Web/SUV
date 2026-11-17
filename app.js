@@ -2469,6 +2469,7 @@ const timetableCancelEdit =
 
 // Vorhandene Parallelgruppen laden
 
+
 async function loadParallelGroups() {
   timetableParallelGroup.innerHTML = `
     <option value="">Normaler Unterricht</option>
@@ -2494,14 +2495,10 @@ async function loadParallelGroups() {
     .not("parallel_group_id", "is", null);
 
   if (error) {
-  timetableMessage.textContent =
-    "Fehler beim Laden: " + error.message;
-  return;
-}
-
-timetableMessage.textContent =
-  "Gefundene Parallelgruppen: " + (data || []).length;
-);
+    timetableMessage.textContent =
+      "Fehler beim Laden: " + error.message;
+    return;
+  }
 
   const groupIds = [
     ...new Set(
