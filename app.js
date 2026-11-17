@@ -6895,7 +6895,6 @@ timetableRoom.value = entry.room_id || "";
       behavior: "smooth",
       block: "start"
     });
-    alert("Test B: Nach dem Listener");
   }
 
 
