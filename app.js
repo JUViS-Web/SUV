@@ -216,7 +216,9 @@ loginForm.onsubmit = async (event) => {
     }
 
     // Anmeldemaske nach erfolgreicher Anmeldung ausblenden
+    alert("TEST: Benutzerprofil erfolgreich geladen.");
     loginScreen.style.display = "none";
+    alert("TEST: Anmeldemaske wird ausgeblendet.");
 
 alert("TEST: Anmeldung erfolgreich, Verbindungsprüfung startet.");
 
