@@ -1,4 +1,3 @@
-alert("SUV-Test: Die aktuelle app.js wurde geladen. v1.0");
 
 window.onerror = function(message, source, lineno, colno) {
   alert(
