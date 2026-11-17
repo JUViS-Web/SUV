@@ -36,7 +36,7 @@ async function checkSUVConnection() {
 
   if (!status) return;
 
-  status.style.display = "block";
+  status.style.setProperty("display", "block", "important");
   status.textContent = "SUV verbindet mit der Datenbank ...";
 
   try {
