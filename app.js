@@ -171,7 +171,6 @@ const loginForm = document.getElementById("loginForm");
 const loginScreen = document.getElementById("loginScreen");
 const loginMessage = document.getElementById("loginMessage");
 
-alert("TEST: Der Login-Handler wurde gestartet.");
 loginForm.onsubmit = async (event) => {
   event.preventDefault();
 
