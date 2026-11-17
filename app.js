@@ -2998,32 +2998,60 @@ async function loadTimetableViewGrid(type, selectedId) {
       });
 
       const blockIds = [
-        ...new Set(
-          entriesToRender
-            .map(entry => entry.lesson_block_requirement_id)
-            .filter(Boolean)
-        )
-      ];
+  ...new Set(
+    entriesToRender
+      .map(entry => entry.lesson_block_requirement_id)
+      .filter(Boolean)
+  )
+];
 
-      if (
-        blockIds.length === 1 &&
-        entriesToRender.every(entry =>
-          entry.lesson_block_requirement_id === blockIds[0]
-        )
-      ) {
-        const blockId = blockIds[0];
+const periodsCounts = entriesToRender.map(entry =>
+  Number(
+    entry.lesson_block_requirements?.periods_count || 1
+  )
+);
 
-        const periodsCount = Math.max(
-          ...entriesToRender.map(entry =>
-            Number(
-              entry.lesson_block_requirements?.periods_count || 1
-            )
-          )
-        );
+const parallelGroupIds = [
+  ...new Set(
+    entriesToRender
+      .map(entry => entry.parallel_group_id)
+      .filter(Boolean)
+  )
+];
 
-        cell.rowSpan = periodsCount;
-        renderedBlocks.add(`${day.day_number}:${blockId}`);
-      }
+const allEntriesHaveBlocks =
+  entriesToRender.length > 0 &&
+  entriesToRender.every(entry =>
+    Boolean(entry.lesson_block_requirement_id)
+  );
+
+const sameBlockLength =
+  periodsCounts.every(count =>
+    count === periodsCounts[0]
+  );
+
+const sameBlockOrParallelGroup =
+  blockIds.length === 1 ||
+  (
+    parallelGroupIds.length === 1 &&
+    entriesToRender.every(entry =>
+      entry.parallel_group_id === parallelGroupIds[0]
+    )
+  );
+
+if (
+  allEntriesHaveBlocks &&
+  sameBlockLength &&
+  sameBlockOrParallelGroup
+) {
+  cell.rowSpan = periodsCounts[0];
+
+  blockIds.forEach(blockId => {
+    renderedBlocks.add(
+      `${day.day_number}:${blockId}`
+    );
+  });
+}
 
             if (
         matchingEntries.length > 0 &&
