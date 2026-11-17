@@ -30,6 +30,7 @@ const suvDb = createClient(
 );
 
 
+
 async function checkSUVConnection() {
   const status = document.getElementById("connectionStatus");
 
@@ -44,9 +45,7 @@ async function checkSUVConnection() {
       .select("id")
       .limit(1);
 
-    if (error && !error.code) {
-      throw error;
-    }
+    if (error) throw error;
 
     status.textContent =
       "Verbindung zur SUV-Datenbank erfolgreich.";
@@ -67,8 +66,6 @@ async function checkSUVConnection() {
     status.style.color = "#a12626";
   }
 }
-
-checkSUVConnection();
 
 window.onerror = function(message, source, lineno, colno) {
   alert(
