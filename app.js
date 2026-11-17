@@ -327,6 +327,8 @@ async function checkSUVLogin() {
   }
 
   loginScreen.style.display = "none";
+
+  await checkSUVConnection();
 }
 
 checkSUVLogin();
