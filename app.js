@@ -239,7 +239,6 @@ loginForm.onsubmit = async (event) => {
 await checkSUVConnection();
     
   } catch (error) {
-  alert("SUV-Login-Fehler:\n" + error.message);
 
   loginMessage.textContent = error.message;
   loginMessage.style.color = "#b42318";
