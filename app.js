@@ -212,6 +212,9 @@ loginForm.onsubmit = async (event) => {
     // Anmeldemaske nach erfolgreicher Anmeldung ausblenden
     loginScreen.style.display = "none";
 
+// Datenbankverbindung prüfen und Status anzeigen
+    await checkSUVConnection();
+    
   } catch (error) {
     loginMessage.textContent = error.message;
     loginMessage.style.color = "#b42318";
