@@ -108,13 +108,8 @@ document.querySelectorAll(".nav-item").forEach(button => {
 const loginForm = document.getElementById("loginForm");
 const loginScreen = document.getElementById("loginScreen");
 const loginMessage = document.getElementById("loginMessage");
-alert("SUV-Test: Login-Code wird ausgeführt.");
 
-console.log("SUV: Login-Formular gefunden", loginForm);
 loginForm.onsubmit = async (event) => {
-  loginMessage.textContent = "TEST: Anmelde-Handler wurde gestartet.";
-  console.log("SUV: Anmelde-Event wurde ausgelöst");
-  console.log("SUV: Submit-Handler gestartet");
   event.preventDefault();
 
   const email = document.getElementById("loginEmail").value.trim();
@@ -126,7 +121,6 @@ loginForm.onsubmit = async (event) => {
   loginMessage.textContent = "";
 
   try {
-   alert("SUV-Test: Anmelde-Handler wird registriert.");
     const { data, error } = await suvDb.auth.signInWithPassword({
       email,
       password
