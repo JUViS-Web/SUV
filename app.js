@@ -34,7 +34,12 @@ const suvDb = createClient(
 async function checkSUVConnection() {
   const status = document.getElementById("connectionStatus");
 
-  if (!status) return;
+  if (!status) {
+  alert("SUV-Fehler: Das Element connectionStatus wurde nicht gefunden.");
+  return;
+}
+
+alert("SUV-Test: Die Verbindungsprüfung wurde gestartet.");
 
   status.style.setProperty("display", "block", "important");
   status.textContent = "SUV verbindet mit der Datenbank ...";
