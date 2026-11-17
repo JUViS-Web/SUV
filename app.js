@@ -228,9 +228,11 @@ alert("TEST: Anmeldung erfolgreich, Verbindungsprüfung startet.");
 await checkSUVConnection();
     
   } catch (error) {
-    loginMessage.textContent = error.message;
-    loginMessage.style.color = "#b42318";
-  } finally {
+  alert("SUV-Login-Fehler:\n" + error.message);
+
+  loginMessage.textContent = error.message;
+  loginMessage.style.color = "#b42318";
+} finally {
     loginButton.disabled = false;
     loginButton.textContent = "Anmelden";
   }
