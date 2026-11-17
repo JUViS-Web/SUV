@@ -6980,7 +6980,6 @@ if (error) {
 // ==========================================
 // SUV – Unterrichtsverteilung
 // ==========================================
-alert("Vor Unterrichtsverteilung erreicht");
 
 // Schuljahre für die Unterrichtsverteilung laden
 
