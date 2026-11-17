@@ -21,20 +21,13 @@ window.onunhandledrejection = function(event) {
 
 // SUV – Supabase-Verbindung - Aktialisiert
 
+
 const { createClient } = supabase;
-alert("TEST 1: Supabase-Bibliothek verfügbar");
 
 const suvDb = createClient(
   window.SUV_CONFIG.SUPABASE_URL,
   window.SUV_CONFIG.SUPABASE_KEY
 );
-
-alert("TEST 2: Supabase-Client erstellt");
-
-console.log("SUV: Supabase-Verbindung initialisiert.");
-
-alert("TEST 1: app.js gestartet");
-
 
 window.onerror = function(message, source, lineno, colno) {
   alert(
@@ -75,9 +68,9 @@ document.querySelectorAll(".nav-item").forEach(button => {
       .single();
 
     if (error || !profile) {
-      alert("Benutzerrechte konnten nicht geprüft werden.");
-      return;
-    }
+  console.error("SUV: Benutzerrechte konnten nicht geprüft werden.", error);
+  return;
+}
 
     // Administrationsbereich schützen
     if (
