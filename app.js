@@ -4765,20 +4765,41 @@ async function loadGradeCourseGroups(schoolYearId) {
     );
 
 
-    if (offering.notes) {
+   if (offering.notes) {
 
-      const notes = document.createElement("p");
+  const notes = document.createElement("p");
 
-      notes.textContent =
-        "Anmerkungen: " + offering.notes;
+  notes.textContent =
+    "Anmerkungen: " + offering.notes;
 
-      card.appendChild(notes);
+  card.appendChild(notes);
 
-    }
+}
 
 
-    gradeCourseGroupList.appendChild(card);
+// Bearbeiten-Schaltfläche
 
+const editButton = document.createElement("button");
+
+editButton.type = "button";
+
+editButton.textContent =
+  "Jahrgangs-Kursgruppe bearbeiten";
+
+editButton.className = "edit-button";
+
+editButton.addEventListener("click", () => {
+
+  editGradeCourseOffering(offering.id);
+
+});
+
+card.appendChild(editButton);
+
+
+// Karte anzeigen
+
+gradeCourseGroupList.appendChild(card);
   });
 
 
