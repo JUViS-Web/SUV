@@ -3662,6 +3662,7 @@ gradeCourseAddSubjectButton.addEventListener("click", () => {
 
 // Jahrgangsweites Kursangebot erstellen
 
+
 gradeCourseGroupForm.addEventListener("submit", async (event) => {
 
   event.preventDefault();
@@ -3670,38 +3671,34 @@ gradeCourseGroupForm.addEventListener("submit", async (event) => {
 
   const schoolYearId = distributionSchoolYear.value;
   const gradeId = gradeCourseGrade.value;
-  const subjectId = gradeCourseSubject.value;
+  const offeringName = gradeCourseOfferingName.value.trim();
   const weeklyPeriods = Number(gradeCourseWeeklyPeriods.value);
-  const courseCount = Number(gradeCourseCount.value);
+  const blockPattern = gradeCourseBlockPattern.value.trim();
+  const notes = gradeCourseOfferingNotes.value.trim() || null;
 
-const blockPattern = gradeCourseBlockPattern.value.trim();
-
-const blockSizes = blockPattern
-  .split("+")
-  .map(value => Number(value.trim()));
-
-const validBlockPattern =
-  blockPattern !== "" &&
-  blockSizes.every(value =>
-    Number.isInteger(value) && value > 0
-  ) &&
-  blockSizes.reduce((sum, value) => sum + value, 0) === weeklyPeriods;
-
-if (!validBlockPattern) {
-  gradeCourseGroupMessage.textContent =
-    "Die Unterrichtsblöcke müssen positive ganze Zahlen enthalten und zusammen genau " +
-    weeklyPeriods + " Wochenstunden ergeben. Beispiel: 2 + 2.";
-
-  return;
-}
-  
   const selectedClassIds = Array.from(
     gradeCourseClasses.selectedOptions
   ).map(option => option.value);
 
-  if (!schoolYearId || !gradeId || !subjectId) {
+
+  // Unterrichtsblöcke prüfen
+
+  const blockSizes = blockPattern
+    .split("+")
+    .map(value => Number(value.trim()));
+
+  const validBlockPattern =
+    blockPattern !== "" &&
+    blockSizes.length > 0 &&
+    blockSizes.every(value =>
+      Number.isInteger(value) && value > 0
+    ) &&
+    blockSizes.reduce((sum, value) => sum + value, 0) === weeklyPeriods;
+
+
+  if (!schoolYearId || !gradeId || !offeringName) {
     gradeCourseGroupMessage.textContent =
-      "Bitte Schuljahr, Jahrgang und Fach auswählen.";
+      "Bitte Schuljahr, Jahrgang und Bezeichnung ausfüllen.";
     return;
   }
 
@@ -3711,293 +3708,280 @@ if (!validBlockPattern) {
     return;
   }
 
-  if (weeklyPeriods < 1 || courseCount < 2) {
+  if (
+    !Number.isInteger(weeklyPeriods) ||
+    weeklyPeriods < 1 ||
+    !validBlockPattern
+  ) {
     gradeCourseGroupMessage.textContent =
-      "Bitte gültige Wochenstunden und mindestens zwei Kurse angeben.";
+      "Die Unterrichtsblöcke müssen positive ganze Zahlen enthalten und zusammen genau " +
+      weeklyPeriods +
+      " Wochenstunden ergeben. Beispiel: 2 + 2.";
+
     return;
   }
 
+
+  // Fachangebote aus den dynamischen Feldern auslesen
+
+  const subjectRows = Array.from(
+    gradeCourseSubjectsContainer.querySelectorAll(
+      ".grade-course-subject-row"
+    )
+  );
+
+  const subjectOffers = subjectRows.map(row => {
+
+    const subjectSelect = row.querySelector(
+      ".grade-course-subject-select"
+    );
+
+    const countInput = row.querySelector(
+      ".grade-course-count-input"
+    );
+
+    return {
+      subjectId: subjectSelect.value,
+      courseCount: Number(countInput.value),
+      subjectName: subjectSelect.selectedOptions[0]?.textContent
+        .split(" (")[0] || ""
+    };
+
+  });
+
+
+  if (subjectOffers.length === 0) {
+    gradeCourseGroupMessage.textContent =
+      "Bitte mindestens ein Fachangebot hinzufügen.";
+    return;
+  }
+
+  if (subjectOffers.some(offer => !offer.subjectId)) {
+    gradeCourseGroupMessage.textContent =
+      "Bitte für jedes Fachangebot ein Fach auswählen.";
+    return;
+  }
+
+  if (subjectOffers.some(offer =>
+    !Number.isInteger(offer.courseCount) ||
+    offer.courseCount < 2 ||
+    offer.courseCount > 20
+  )) {
+    gradeCourseGroupMessage.textContent =
+      "Jedes Fachangebot benötigt mindestens 2 und höchstens 20 Parallelkurse.";
+    return;
+  }
+
+
+  // Doppelte Fächer verhindern
+
+  const selectedSubjectIds = subjectOffers.map(
+    offer => offer.subjectId
+  );
+
+  if (
+    new Set(selectedSubjectIds).size !==
+    selectedSubjectIds.length
+  ) {
+    gradeCourseGroupMessage.textContent =
+      "Jedes Fach darf innerhalb einer Jahrgangs-Kursgruppe nur einmal vorkommen.";
+    return;
+  }
+
+
+  // Bearbeitung vorerst noch nicht freigeben
+
+  if (editingGradeCourseOfferingId) {
+    gradeCourseGroupMessage.textContent =
+      "Die Bearbeitung bestehender Jahrgangs-Kursgruppen wird im nächsten Schritt angepasst. Bitte zunächst eine neue Kursgruppe erstellen.";
+    return;
+  }
+
+
   gradeCourseGroupSaveButton.disabled = true;
+
   gradeCourseGroupMessage.textContent =
-    "Kursangebot wird erstellt ...";
+    "Jahrgangs-Kursgruppe wird erstellt ...";
+
+
+  let newOfferingId = null;
 
   try {
 
+    // Prüfen, ob eines der Fächer bereits in diesem
+    // Jahrgang und Schuljahr als Kursangebot existiert
 
-// Bestehendes Kursangebot bearbeiten
-
-    if (editingGradeCourseGroupId) {
-
-      const groupId = editingGradeCourseGroupId;
-
-      // Kursgruppe aktualisieren
-
-      const { error: updateError } = await suvDb
+    const { data: existingGroups, error: checkError } =
+      await suvDb
         .from("grade_course_groups")
-        .update({
-          grade_level_id: gradeId,
-          subject_id: subjectId,
-          weekly_periods: weeklyPeriods,
-          notes: gradeCourseNotes.value.trim() || null
-        })
-        .eq("id", groupId);
+        .select("id, subject_id")
+        .eq("school_year_id", schoolYearId)
+        .eq("grade_level_id", gradeId)
+        .in("subject_id", selectedSubjectIds);
 
-      if (updateError) throw updateError;
+    if (checkError) throw checkError;
 
-// Bisherige Unterrichtsblöcke entfernen
+    if (existingGroups && existingGroups.length > 0) {
 
-const { error: deleteBlocksError } = await suvDb
-  .from("lesson_block_requirements")
-  .delete()
-  .eq("grade_course_group_id", groupId);
-
-if (deleteBlocksError) throw deleteBlocksError;
-
-// Neue Unterrichtsblöcke speichern
-
-const blockRows = blockSizes.map((periodsCount, index) => ({
-  grade_course_group_id: groupId,
-  block_number: index + 1,
-  periods_count: periodsCount
-}));
-
-const { error: insertBlocksError } = await suvDb
-  .from("lesson_block_requirements")
-  .insert(blockRows);
-
-if (insertBlocksError) throw insertBlocksError;
-      
-      // Bisherige Klassenzuordnungen entfernen
-
-      const { error: deleteClassesError } = await suvDb
-        .from("grade_course_group_classes")
-        .delete()
-        .eq("grade_course_group_id", groupId);
-
-      if (deleteClassesError) throw deleteClassesError;
-
-      // Neue Klassenzuordnungen speichern
-
-      const classEntries = selectedClassIds.map(classId => ({
-        grade_course_group_id: groupId,
-        class_id: classId
-      }));
-
-      const { error: insertClassesError } = await suvDb
-        .from("grade_course_group_classes")
-        .insert(classEntries);
-
-      if (insertClassesError) throw insertClassesError;
-
-      // Vorhandene Parallelkurse laden
-
-      const { data: existingCourses, error: loadCoursesError } =
-        await suvDb
-          .from("grade_courses")
-          .select("id, course_number")
-          .eq("grade_course_group_id", groupId);
-
-      if (loadCoursesError) throw loadCoursesError;
-
-      const subjectName = gradeCourseSubject
-        .selectedOptions[0].textContent
-        .split(" (")[0];
-
-      // Kurse aktualisieren, ergänzen oder entfernen
-
-      for (let i = 1; i <= courseCount; i++) {
-
-        const existingCourse = existingCourses.find(
-          course => course.course_number === i
-        );
-
-        if (existingCourse) {
-
-          const { error } = await suvDb
-            .from("grade_courses")
-            .update({
-              course_name: subjectName + " " + i
-            })
-            .eq("id", existingCourse.id);
-
-          if (error) throw error;
-
-        } else {
-
-          const { error } = await suvDb
-            .from("grade_courses")
-            .insert({
-              grade_course_group_id: groupId,
-              course_number: i,
-              course_name: subjectName + " " + i
-            });
-
-          if (error) throw error;
-
-        }
-      }
-
-      // Überzählige Kurse entfernen
-
-      const coursesToDelete = existingCourses.filter(
-        course => course.course_number > courseCount
+      const existingSubjectIds = existingGroups.map(
+        group => group.subject_id
       );
 
-      for (const course of coursesToDelete) {
+      const conflictingOffers = subjectOffers.filter(
+        offer => existingSubjectIds.includes(offer.subjectId)
+      );
 
-        const { error } = await suvDb
-          .from("grade_courses")
-          .delete()
-          .eq("id", course.id);
-
-        if (error) throw error;
-
-      }
-
-      // Bearbeitungsmodus beenden
-
-      editingGradeCourseGroupId = null;
-
-      gradeCourseGroupForm.reset();
-      gradeCourseCount.value = 5;
-      gradeCourseClasses.innerHTML = "";
-
-      gradeCourseGroupSaveButton.textContent =
-        "Kursangebot erstellen";
-
-      gradeCourseGroupMessage.textContent =
-        "Kursangebot wurde erfolgreich aktualisiert.";
-
-      await loadGradeCourseGroups(schoolYearId);
-
-      return;
-    }
-    
-    // Prüfen, ob für diesen Jahrgang und dieses Fach
-    // bereits ein Kursangebot existiert
-
-    const { data: existingGroup, error: checkError } = await suvDb
-      .from("grade_course_groups")
-      .select("id")
-      .eq("school_year_id", schoolYearId)
-      .eq("grade_level_id", gradeId)
-      .eq("subject_id", subjectId)
-      .maybeSingle();
-
-    if (checkError) {
-      throw checkError;
-    }
-
-    if (existingGroup) {
       throw new Error(
-        "Für diesen Jahrgang und dieses Fach existiert bereits ein Kursangebot."
+        "Für folgende Fächer existiert in diesem Jahrgang bereits ein Kursangebot: " +
+        conflictingOffers.map(offer => offer.subjectName).join(", ") +
+        "."
       );
     }
 
-    // Kursgruppe erstellen
 
-    const { data: newGroup, error: groupError } = await suvDb
-      .from("grade_course_groups")
-      .insert({
-        school_year_id: schoolYearId,
-        grade_level_id: gradeId,
-        subject_id: subjectId,
-        weekly_periods: weeklyPeriods,
-        notes: gradeCourseNotes.value.trim() || null
-      })
-      .select("id")
-      .single();
+    // 1. Übergeordnete Jahrgangs-Kursgruppe erstellen
 
-    if (groupError) {
-      throw groupError;
-    }
+    const { data: newOffering, error: offeringError } =
+      await suvDb
+        .from("grade_course_offerings")
+        .insert({
+          school_year_id: schoolYearId,
+          grade_level_id: gradeId,
+          offering_name: offeringName,
+          notes: notes
+        })
+        .select("id")
+        .single();
 
-// Unterrichtsblöcke speichern
+    if (offeringError) throw offeringError;
 
-const blockRows = blockSizes.map((periodsCount, index) => ({
-  grade_course_group_id: newGroup.id,
-  block_number: index + 1,
-  periods_count: periodsCount
-}));
+    newOfferingId = newOffering.id;
 
-const { error: blockError } = await suvDb
-  .from("lesson_block_requirements")
-  .insert(blockRows);
 
-if (blockError) {
-  await suvDb
-    .from("grade_course_groups")
-    .delete()
-    .eq("id", newGroup.id);
-
-  throw blockError;
-}
-    
-    // Beteiligte Klassen speichern
+    // 2. Beteiligte Klassen der gesamten Kursgruppe zuordnen
 
     const classEntries = selectedClassIds.map(classId => ({
-      grade_course_group_id: newGroup.id,
+      grade_course_offering_id: newOfferingId,
       class_id: classId
     }));
 
     const { error: classesError } = await suvDb
-      .from("grade_course_group_classes")
+      .from("grade_course_offering_classes")
       .insert(classEntries);
 
-    if (classesError) {
-      await suvDb
-        .from("grade_course_groups")
-        .delete()
-        .eq("id", newGroup.id);
+    if (classesError) throw classesError;
 
-      throw classesError;
-    }
 
-    // Parallelkurse erstellen
+    // 3. Gemeinsame Unterrichtsblöcke speichern
 
-    const subjectName = gradeCourseSubject
-      .selectedOptions[0].textContent
-      .split(" (")[0];
+    const blockRows = blockSizes.map((periodsCount, index) => ({
+      grade_course_offering_id: newOfferingId,
+      block_number: index + 1,
+      periods_count: periodsCount
+    }));
+
+    const { error: blockError } = await suvDb
+      .from("lesson_block_requirements")
+      .insert(blockRows);
+
+    if (blockError) throw blockError;
+
+
+    // 4. Alle Fachangebote als einzelne Kursgruppen erstellen
+
+    const groupRows = subjectOffers.map(offer => ({
+      school_year_id: schoolYearId,
+      grade_level_id: gradeId,
+      subject_id: offer.subjectId,
+      weekly_periods: weeklyPeriods,
+      notes: null,
+      offering_id: newOfferingId
+    }));
+
+    const { data: newGroups, error: groupsError } = await suvDb
+      .from("grade_course_groups")
+      .insert(groupRows)
+      .select("id, subject_id");
+
+    if (groupsError) throw groupsError;
+
+
+    // 5. Für jedes Fach die Parallelkurse erstellen
 
     const courseEntries = [];
 
-    for (let i = 1; i <= courseCount; i++) {
-      courseEntries.push({
-        grade_course_group_id: newGroup.id,
-        course_number: i,
-        course_name: subjectName + " " + i
-      });
-    }
+    newGroups.forEach(group => {
+
+      const offer = subjectOffers.find(
+        item => item.subjectId === group.subject_id
+      );
+
+      for (let i = 1; i <= offer.courseCount; i++) {
+
+        courseEntries.push({
+          grade_course_group_id: group.id,
+          course_number: i,
+          course_name: offer.subjectName + " " + i
+        });
+
+      }
+
+    });
 
     const { error: coursesError } = await suvDb
       .from("grade_courses")
       .insert(courseEntries);
 
-    if (coursesError) {
+    if (coursesError) throw coursesError;
 
-      await suvDb
-        .from("grade_course_group_classes")
-        .delete()
-        .eq("grade_course_group_id", newGroup.id);
 
-      await suvDb
-        .from("grade_course_groups")
-        .delete()
-        .eq("id", newGroup.id);
+    // Erfolgreich gespeichert
 
-      throw coursesError;
-    }
+    const totalCourses = courseEntries.length;
 
     gradeCourseGroupMessage.textContent =
-      courseCount + " Parallelkurse wurden erfolgreich erstellt.";
-await loadGradeCourseGroups(schoolYearId);
-    
+      "Jahrgangs-Kursgruppe erfolgreich erstellt: " +
+      subjectOffers.length +
+      " Fachangebote und " +
+      totalCourses +
+      " Parallelkurse.";
+
+    await loadGradeCourseGroups(schoolYearId);
+
     gradeCourseGroupForm.reset();
 
-    gradeCourseCount.value = 5;
+    gradeCourseSubjectsContainer.innerHTML = "";
+
+    addGradeCourseSubjectRow();
+
     gradeCourseClasses.innerHTML = "";
 
+    editingGradeCourseOfferingId = null;
+
+    gradeCourseGroupSaveButton.textContent =
+      "Jahrgangs-Kursgruppe erstellen";
+
+
   } catch (error) {
+
+    // Bei einem Fehler die neu angelegte Kursgruppe
+    // einschließlich ihrer abhängigen Datensätze entfernen
+
+    if (newOfferingId) {
+
+      const { error: cleanupError } = await suvDb
+        .from("grade_course_offerings")
+        .delete()
+        .eq("id", newOfferingId);
+
+      if (cleanupError) {
+        console.error(
+          "Fehler beim Aufräumen der unvollständigen Kursgruppe:",
+          cleanupError
+        );
+      }
+
+    }
 
     gradeCourseGroupMessage.textContent =
       "Fehler: " + error.message;
@@ -4009,6 +3993,7 @@ await loadGradeCourseGroups(schoolYearId);
   }
 
 });
+
 
 // Klassen passend zum Jahrgang laden
 
