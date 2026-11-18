@@ -3507,48 +3507,6 @@ async function loadDistributionOptions() {
   });
 }
 
-// DOM-Elemente
-const distributionSchoolYear =
-  document.getElementById("distributionSchoolYear");
-
-const distributionClass =
-  document.getElementById("distributionClass");
-
-const distributionMessage =
-  document.getElementById("distributionMessage");
-
-const distributionForm =
-  document.getElementById("distributionForm");
-
-const distributionEntryId =
-  document.getElementById("distributionEntryId");
-
-const distributionSubject =
-  document.getElementById("distributionSubject");
-
-const distributionWeeklyPeriods =
-  document.getElementById("distributionWeeklyPeriods");
-
-const distributionBlocks = 
-  document.getElementById("distributionBlocks");
-
-const distributionBlockPattern =
-  document.getElementById("distributionBlockPattern");
-
-const distributionTeachers =
-  document.getElementById("distributionTeachers");
-
-const distributionNotes =
-  document.getElementById("distributionNotes");
-
-const distributionList =
-  document.getElementById("distributionList");
-
-const distributionSaveButton =
-  document.getElementById("distributionSaveButton");
-
-const distributionCancelEdit =
-  document.getElementById("distributionCancelEdit");
 
 // DOM-Elemente der jahrgangsweiten Kursverteilung
 
@@ -3561,8 +3519,8 @@ const gradeCourseGrade =
 const gradeCourseClasses =
   document.getElementById("gradeCourseClasses");
 
-const gradeCourseSubject =
-  document.getElementById("gradeCourseSubject");
+const gradeCourseOfferingName =
+  document.getElementById("gradeCourseOfferingName");
 
 const gradeCourseWeeklyPeriods =
   document.getElementById("gradeCourseWeeklyPeriods");
@@ -3570,11 +3528,14 @@ const gradeCourseWeeklyPeriods =
 const gradeCourseBlockPattern =
   document.getElementById("gradeCourseBlockPattern");
 
-const gradeCourseCount =
-  document.getElementById("gradeCourseCount");
+const gradeCourseSubjectsContainer =
+  document.getElementById("gradeCourseSubjectsContainer");
 
-const gradeCourseNotes =
-  document.getElementById("gradeCourseNotes");
+const gradeCourseAddSubjectButton =
+  document.getElementById("gradeCourseAddSubjectButton");
+
+const gradeCourseOfferingNotes =
+  document.getElementById("gradeCourseOfferingNotes");
 
 const gradeCourseGroupSaveButton =
   document.getElementById("gradeCourseGroupSaveButton");
@@ -3585,8 +3546,8 @@ const gradeCourseGroupMessage =
 const gradeCourseGroupList =
   document.getElementById("gradeCourseGroupList");
 
-// Aktuell bearbeitetes jahrgangsweites Kursangebot
-let editingGradeCourseGroupId = null;
+// Aktuell bearbeitete Jahrgangs-Kursgruppe
+let editingGradeCourseOfferingId = null;
 
 // Jahrgangsweites Kursangebot erstellen
 
