@@ -3546,6 +3546,120 @@ const gradeCourseGroupList =
 // Aktuell bearbeitete Jahrgangs-Kursgruppe
 let editingGradeCourseOfferingId = null;
 
+
+// Verfügbare Fächer für die Jahrgangs-Kursgruppe
+let gradeCourseAvailableSubjects = [];
+
+
+// Fügt ein neues Fachangebot hinzu
+function addGradeCourseSubjectRow(
+  selectedSubjectId = "",
+  courseCount = 5
+) {
+
+  const row = document.createElement("div");
+
+  row.className = "grade-course-subject-row";
+
+
+  // Fachauswahl
+  const subjectLabel = document.createElement("label");
+
+  subjectLabel.textContent = "Fach";
+
+
+  const subjectSelect = document.createElement("select");
+
+  subjectSelect.className = "grade-course-subject-select";
+
+  subjectSelect.required = true;
+
+
+  const placeholder = document.createElement("option");
+
+  placeholder.value = "";
+
+  placeholder.textContent = "Fach auswählen";
+
+  subjectSelect.appendChild(placeholder);
+
+
+  gradeCourseAvailableSubjects.forEach(subject => {
+
+    const option = document.createElement("option");
+
+    option.value = subject.id;
+
+    option.textContent =
+      subject.name + " (" + subject.short_code + ")";
+
+    subjectSelect.appendChild(option);
+
+  });
+
+
+  subjectSelect.value = selectedSubjectId;
+
+
+  // Anzahl der Kurse
+  const countLabel = document.createElement("label");
+
+  countLabel.textContent = "Anzahl paralleler Kurse";
+
+
+  const countInput = document.createElement("input");
+
+  countInput.type = "number";
+
+  countInput.className = "grade-course-count-input";
+
+  countInput.min = "2";
+
+  countInput.max = "20";
+
+  countInput.value = courseCount;
+
+  countInput.required = true;
+
+
+  // Entfernen-Schaltfläche
+  const removeButton = document.createElement("button");
+
+  removeButton.type = "button";
+
+  removeButton.textContent = "Fach entfernen";
+
+  removeButton.addEventListener("click", () => {
+
+    row.remove();
+
+  });
+
+
+  row.appendChild(subjectLabel);
+
+  row.appendChild(subjectSelect);
+
+  row.appendChild(countLabel);
+
+  row.appendChild(countInput);
+
+  row.appendChild(removeButton);
+
+
+  gradeCourseSubjectsContainer.appendChild(row);
+
+}
+
+
+// Schaltfläche zum Hinzufügen weiterer Fächer
+gradeCourseAddSubjectButton.addEventListener("click", () => {
+
+  addGradeCourseSubjectRow();
+
+});
+
+
 // Jahrgangsweites Kursangebot erstellen
 
 gradeCourseGroupForm.addEventListener("submit", async (event) => {
