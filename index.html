@@ -404,87 +404,92 @@
       einrichten.
     </p>
 
-    <form id="gradeCourseGroupForm">
+ 
+<form id="gradeCourseGroupForm">
 
-      <div>
-        <label for="gradeCourseGrade">Jahrgang</label>
-        <select id="gradeCourseGrade" required>
-          <option value="">Jahrgang auswählen</option>
-        </select>
-      </div>
+  <h3>Jahrgangs-Kursgruppe</h3>
 
-      <div>
-        <label for="gradeCourseClasses">Beteiligte Klassen</label>
-        <select id="gradeCourseClasses" multiple size="5" required>
-        </select>
-        <small>
-          Alle ausgewählten Klassen nehmen gemeinsam am Kursangebot teil.
-        </small>
-      </div>
+  <div>
+    <label for="gradeCourseGrade">Jahrgang</label>
+    <select id="gradeCourseGrade" required>
+      <option value="">Jahrgang auswählen</option>
+    </select>
+  </div>
 
-      <div>
-        <label for="gradeCourseSubject">Fach</label>
-        <select id="gradeCourseSubject" required>
-          <option value="">Fach auswählen</option>
-        </select>
-      </div>
-      
-      <div>
-        <label for="gradeCourseWeeklyPeriods">Wochenstunden</label>
-        <input
-          type="number"
-          id="gradeCourseWeeklyPeriods"
-          min="1"
-          max="40"
-          required
-          placeholder="z. B. 4"
-        >
-      </div>
+  <div>
+    <label for="gradeCourseOfferingName">Bezeichnung der Kursgruppe</label>
+    <input
+      type="text"
+      id="gradeCourseOfferingName"
+      required
+      placeholder="z. B. Wahlpflichtkurse Jahrgang 7"
+    >
+  </div>
 
-      <div>
-        <label for="gradeCourseBlockPattern">Unterrichtsblöcke</label>
-        <input
-          type="text"
-          id="gradeCourseBlockPattern"
-          placeholder="z. B. 2 + 2"
-          required
-        >
-        <small>
-          Lege fest, wie die Wochenstunden auf Einzel-, Doppel- oder
-          Dreifachstunden verteilt werden.
-        </small>
-      </div>
-      
-      <div>
-        <label for="gradeCourseCount">Anzahl der Parallelkurse</label>
-        <input
-          type="number"
-          id="gradeCourseCount"
-          min="2"
-          max="20"
-          value="5"
-          required
-        >
-      </div>
+  <div>
+    <label for="gradeCourseClasses">Beteiligte Klassen</label>
+    <select id="gradeCourseClasses" multiple size="5" required>
+    </select>
+    <small>
+      Alle ausgewählten Klassen nehmen gleichzeitig an der Kursgruppe teil.
+    </small>
+  </div>
 
-      <div>
-        <label for="gradeCourseNotes">Anmerkungen</label>
-        <textarea
-          id="gradeCourseNotes"
-          rows="3"
-          placeholder="Optionale Anmerkungen"
-        ></textarea>
-      </div>
+  <h3>Gemeinsame Unterrichtsplanung</h3>
 
-      <div class="teacher-form-actions">
-        <button type="submit" id="gradeCourseGroupSaveButton">
-          Kursangebot erstellen
-        </button>
-      </div>
+  <div>
+    <label for="gradeCourseWeeklyPeriods">Wochenstunden je Fach</label>
+    <input
+      type="number"
+      id="gradeCourseWeeklyPeriods"
+      min="1"
+      max="40"
+      required
+      placeholder="z. B. 4"
+    >
+  </div>
 
-      <div id="gradeCourseGroupMessage"></div>
+  <div>
+    <label for="gradeCourseBlockPattern">Gemeinsame Unterrichtsblöcke</label>
+    <input
+      type="text"
+      id="gradeCourseBlockPattern"
+      required
+      placeholder="z. B. 2 + 2"
+    >
+    <small>
+      Alle Fachangebote werden in denselben Zeitblöcken geplant.
+    </small>
+  </div>
 
-    </form>
+  <h3>Parallele Fachangebote</h3>
+
+  <div id="gradeCourseSubjectsContainer"></div>
+
+  <div>
+    <button type="button" id="gradeCourseAddSubjectButton">
+      + Fach hinzufügen
+    </button>
+  </div>
+
+  <div>
+    <label for="gradeCourseOfferingNotes">Anmerkungen</label>
+    <textarea
+      id="gradeCourseOfferingNotes"
+      rows="3"
+      placeholder="Optionale Anmerkungen zur gesamten Kursgruppe"
+    ></textarea>
+  </div>
+
+  <div class="teacher-form-actions">
+    <button type="submit" id="gradeCourseGroupSaveButton">
+      Jahrgangs-Kursgruppe erstellen
+    </button>
+  </div>
+
+  <div id="gradeCourseGroupMessage"></div>
+
+</form>
   </div>
 
   <div class="panel">
