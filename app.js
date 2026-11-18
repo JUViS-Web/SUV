@@ -3660,6 +3660,334 @@ gradeCourseAddSubjectButton.addEventListener("click", () => {
 });
 
 
+
+async function updateGradeCourseOffering(data) {
+
+  const offeringId = editingGradeCourseOfferingId;
+
+  // Bestehende Fachgruppen laden
+  const { data: currentGroups, error: groupsError } =
+    await suvDb
+      .from("grade_course_groups")
+      .select("id, subject_id")
+      .eq("offering_id", offeringId);
+
+  if (groupsError) throw groupsError;
+
+  const groupIds = currentGroups.map(group => group.id);
+
+  // Bestehende Kurse laden
+  let currentCourses = [];
+
+  if (groupIds.length > 0) {
+
+    const { data: courses, error: coursesError } =
+      await suvDb
+        .from("grade_courses")
+        .select("id, grade_course_group_id, course_number")
+        .in("grade_course_group_id", groupIds);
+
+    if (coursesError) throw coursesError;
+
+    currentCourses = courses || [];
+  }
+
+  // Bestehende gemeinsame Unterrichtsblöcke laden
+  const { data: currentBlocks, error: blocksError } =
+    await suvDb
+      .from("lesson_block_requirements")
+      .select("id, block_number, periods_count")
+      .eq("grade_course_offering_id", offeringId);
+
+  if (blocksError) throw blocksError;
+
+
+  // Prüfen, ob bereits Stundenplaneinträge existieren
+
+  const courseIds = currentCourses.map(course => course.id);
+  const blockIds = currentBlocks.map(block => block.id);
+
+  let hasTimetableEntries = false;
+
+  if (courseIds.length > 0) {
+
+    const { data: courseEntries, error: courseEntriesError } =
+      await suvDb
+        .from("timetable_entries")
+        .select("id")
+        .in("grade_course_id", courseIds)
+        .limit(1);
+
+    if (courseEntriesError) throw courseEntriesError;
+
+    if (courseEntries.length > 0) {
+      hasTimetableEntries = true;
+    }
+  }
+
+  if (blockIds.length > 0) {
+
+    const { data: blockEntries, error: blockEntriesError } =
+      await suvDb
+        .from("timetable_entries")
+        .select("id")
+        .in("lesson_block_requirement_id", blockIds)
+        .limit(1);
+
+    if (blockEntriesError) throw blockEntriesError;
+
+    if (blockEntries.length > 0) {
+      hasTimetableEntries = true;
+    }
+  }
+
+  if (hasTimetableEntries) {
+    throw new Error(
+      "Diese Kursgruppe wird bereits im Stundenplan verwendet. " +
+      "Strukturelle Änderungen sind deshalb vorerst gesperrt. " +
+      "Entferne zuerst die zugehörigen Stundenplaneinträge."
+    );
+  }
+
+
+  // Prüfen, ob die ausgewählten Klassen zum Jahrgang gehören
+
+  const { data: selectedClasses, error: classesCheckError } =
+    await suvDb
+      .from("classes")
+      .select("id, school_year_id, grade_level_id")
+      .in("id", data.selectedClassIds);
+
+  if (classesCheckError) throw classesCheckError;
+
+  if (
+    selectedClasses.length !== data.selectedClassIds.length ||
+    selectedClasses.some(item =>
+      item.school_year_id !== data.schoolYearId ||
+      item.grade_level_id !== data.gradeId
+    )
+  ) {
+    throw new Error(
+      "Die ausgewählten Klassen passen nicht zum gewählten Schuljahr und Jahrgang."
+    );
+  }
+
+
+  // Prüfen, ob die Fächer bereits anderweitig angeboten werden
+
+  const selectedSubjectIds = data.subjectOffers.map(
+    offer => offer.subjectId
+  );
+
+  const { data: conflictingGroups, error: conflictError } =
+    await suvDb
+      .from("grade_course_groups")
+      .select("id, subject_id, offering_id")
+      .eq("school_year_id", data.schoolYearId)
+      .eq("grade_level_id", data.gradeId)
+      .in("subject_id", selectedSubjectIds);
+
+  if (conflictError) throw conflictError;
+
+  const conflicts = conflictingGroups.filter(
+    group => group.offering_id !== offeringId
+  );
+
+  if (conflicts.length > 0) {
+    throw new Error(
+      "Mindestens eines der ausgewählten Fächer besitzt bereits ein anderes Kursangebot in diesem Jahrgang."
+    );
+  }
+
+
+  // Übergeordnete Kursgruppe aktualisieren
+
+  const { error: offeringUpdateError } = await suvDb
+    .from("grade_course_offerings")
+    .update({
+      school_year_id: data.schoolYearId,
+      grade_level_id: data.gradeId,
+      offering_name: data.offeringName,
+      notes: data.notes
+    })
+    .eq("id", offeringId);
+
+  if (offeringUpdateError) throw offeringUpdateError;
+
+
+  // Klassen-Zuordnung aktualisieren
+
+  const { error: classDeleteError } = await suvDb
+    .from("grade_course_offering_classes")
+    .delete()
+    .eq("grade_course_offering_id", offeringId);
+
+  if (classDeleteError) throw classDeleteError;
+
+  const classRows = data.selectedClassIds.map(classId => ({
+    grade_course_offering_id: offeringId,
+    class_id: classId
+  }));
+
+  const { error: classInsertError } = await suvDb
+    .from("grade_course_offering_classes")
+    .insert(classRows);
+
+  if (classInsertError) throw classInsertError;
+
+
+  // Gemeinsame Unterrichtsblöcke erneuern
+
+  const { error: blockDeleteError } = await suvDb
+    .from("lesson_block_requirements")
+    .delete()
+    .eq("grade_course_offering_id", offeringId);
+
+  if (blockDeleteError) throw blockDeleteError;
+
+  const blockRows = data.blockSizes.map((periodsCount, index) => ({
+    grade_course_offering_id: offeringId,
+    block_number: index + 1,
+    periods_count: periodsCount
+  }));
+
+  const { error: blockInsertError } = await suvDb
+    .from("lesson_block_requirements")
+    .insert(blockRows);
+
+  if (blockInsertError) throw blockInsertError;
+
+
+  // Fachgruppen abgleichen
+
+  const existingBySubject = new Map(
+    currentGroups.map(group => [group.subject_id, group])
+  );
+
+  const selectedIds = data.subjectOffers.map(
+    offer => offer.subjectId
+  );
+
+  // Entfernte Fachgruppen löschen
+  const removedGroups = currentGroups.filter(
+    group => !selectedIds.includes(group.subject_id)
+  );
+
+  for (const group of removedGroups) {
+
+    const { error } = await suvDb
+      .from("grade_course_groups")
+      .delete()
+      .eq("id", group.id);
+
+    if (error) throw error;
+  }
+
+
+  // Bestehende und neue Fachgruppen aktualisieren
+
+  for (const offer of data.subjectOffers) {
+
+    let group = existingBySubject.get(offer.subjectId);
+
+    if (group) {
+
+      const { error } = await suvDb
+        .from("grade_course_groups")
+        .update({
+          school_year_id: data.schoolYearId,
+          grade_level_id: data.gradeId,
+          weekly_periods: data.weeklyPeriods
+        })
+        .eq("id", group.id);
+
+      if (error) throw error;
+
+    } else {
+
+      const { data: newGroup, error } = await suvDb
+        .from("grade_course_groups")
+        .insert({
+          school_year_id: data.schoolYearId,
+          grade_level_id: data.gradeId,
+          subject_id: offer.subjectId,
+          weekly_periods: data.weeklyPeriods,
+          offering_id: offeringId
+        })
+        .select("id, subject_id")
+        .single();
+
+      if (error) throw error;
+
+      group = newGroup;
+    }
+
+
+    // Kurse dieses Fachangebots abgleichen
+
+    const existingGroupCourses = currentCourses.filter(
+      course => course.grade_course_group_id === group.id
+    );
+
+    for (const course of existingGroupCourses) {
+
+      if (course.course_number > offer.courseCount) {
+
+        const { error } = await suvDb
+          .from("grade_courses")
+          .delete()
+          .eq("id", course.id);
+
+        if (error) throw error;
+
+      } else {
+
+        const { error } = await suvDb
+          .from("grade_courses")
+          .update({
+            course_name: offer.subjectName +
+              " " + course.course_number
+          })
+          .eq("id", course.id);
+
+        if (error) throw error;
+      }
+    }
+
+
+    // Fehlende Kurse ergänzen
+
+    const existingNumbers = existingGroupCourses
+      .filter(course => course.course_number <= offer.courseCount)
+      .map(course => course.course_number);
+
+    const newCourseRows = [];
+
+    for (let i = 1; i <= offer.courseCount; i++) {
+
+      if (!existingNumbers.includes(i)) {
+
+        newCourseRows.push({
+          grade_course_group_id: group.id,
+          course_number: i,
+          course_name: offer.subjectName + " " + i
+        });
+      }
+    }
+
+    if (newCourseRows.length > 0) {
+
+      const { error } = await suvDb
+        .from("grade_courses")
+        .insert(newCourseRows);
+
+      if (error) throw error;
+    }
+  }
+
+}
+
+
 // Jahrgangsweites Kursangebot erstellen
 
 
