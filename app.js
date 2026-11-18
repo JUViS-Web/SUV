@@ -4038,6 +4038,7 @@ gradeCourseGrade.addEventListener("change", async () => {
 
 // Bestehende jahrgangsweite Kursangebote laden
 
+
 async function loadGradeCourseGroups(schoolYearId) {
 
   gradeCourseGroupList.innerHTML =
@@ -4049,33 +4050,66 @@ async function loadGradeCourseGroups(schoolYearId) {
     return;
   }
 
-  const { data: groups, error: groupsError } = await suvDb
-    .from("grade_course_groups")
-    .select("id, grade_level_id, subject_id, weekly_periods, notes")
+
+  // Jahrgangs-Kursgruppen laden
+
+  const { data: offerings, error: offeringsError } = await suvDb
+    .from("grade_course_offerings")
+    .select("id, grade_level_id, offering_name, notes, created_at")
     .eq("school_year_id", schoolYearId)
     .order("created_at", { ascending: false });
 
+  if (offeringsError) {
+    gradeCourseGroupList.textContent =
+      "Jahrgangs-Kursgruppen konnten nicht geladen werden: " +
+      offeringsError.message;
+    return;
+  }
+
+
+  // Alle Fach-Kursgruppen laden
+
+  const { data: groups, error: groupsError } = await suvDb
+    .from("grade_course_groups")
+    .select("id, grade_level_id, subject_id, weekly_periods, notes, offering_id")
+    .eq("school_year_id", schoolYearId);
+
   if (groupsError) {
     gradeCourseGroupList.textContent =
-      "Kursangebote konnten nicht geladen werden: " +
+      "Fachangebote konnten nicht geladen werden: " +
       groupsError.message;
     return;
   }
 
-  if (!groups || groups.length === 0) {
+
+  const allGroups = groups || [];
+  const allOfferings = offerings || [];
+
+  const offeringIds = allOfferings.map(item => item.id);
+
+  const newGroups = allGroups.filter(
+    group => group.offering_id !== null
+  );
+
+  const legacyGroups = allGroups.filter(
+    group => group.offering_id === null
+  );
+
+  const groupIds = allGroups.map(group => group.id);
+
+
+  if (allOfferings.length === 0 && legacyGroups.length === 0) {
     gradeCourseGroupList.textContent =
-      "Für dieses Schuljahr gibt es noch keine jahrgangsweiten Kursangebote.";
+      "Für dieses Schuljahr gibt es noch keine Kursangebote.";
     return;
   }
 
-  const groupIds = groups.map(group => group.id);
+
+  // Jahrgänge laden
 
   const gradeIds = [...new Set(
-    groups.map(group => group.grade_level_id)
-  )];
-
-  const subjectIds = [...new Set(
-    groups.map(group => group.subject_id)
+    allGroups.map(group => group.grade_level_id)
+      .concat(allOfferings.map(item => item.grade_level_id))
   )];
 
   const { data: grades, error: gradesError } = await suvDb
@@ -4090,6 +4124,13 @@ async function loadGradeCourseGroups(schoolYearId) {
     return;
   }
 
+
+  // Fächer laden
+
+  const subjectIds = [...new Set(
+    allGroups.map(group => group.subject_id)
+  )];
+
   const { data: subjects, error: subjectsError } = await suvDb
     .from("subjects")
     .select("id, name")
@@ -4102,20 +4143,58 @@ async function loadGradeCourseGroups(schoolYearId) {
     return;
   }
 
-  const { data: groupClasses, error: classesError } = await suvDb
-    .from("grade_course_group_classes")
-    .select("grade_course_group_id, class_id")
-    .in("grade_course_group_id", groupIds);
 
-  if (classesError) {
-    gradeCourseGroupList.textContent =
-      "Klassenzuordnungen konnten nicht geladen werden: " +
-      classesError.message;
-    return;
+  // Beteiligte Klassen der neuen Kursgruppen laden
+
+  let offeringClasses = [];
+
+  if (offeringIds.length > 0) {
+
+    const { data, error } = await suvDb
+      .from("grade_course_offering_classes")
+      .select("grade_course_offering_id, class_id")
+      .in("grade_course_offering_id", offeringIds);
+
+    if (error) {
+      gradeCourseGroupList.textContent =
+        "Klassenzuordnungen konnten nicht geladen werden: " +
+        error.message;
+      return;
+    }
+
+    offeringClasses = data || [];
   }
 
+
+  // Klassen alter Kursgruppen laden
+
+  let legacyClasses = [];
+
+  if (legacyGroups.length > 0) {
+
+    const legacyIds = legacyGroups.map(group => group.id);
+
+    const { data, error } = await suvDb
+      .from("grade_course_group_classes")
+      .select("grade_course_group_id, class_id")
+      .in("grade_course_group_id", legacyIds);
+
+    if (error) {
+      gradeCourseGroupList.textContent =
+        "Alte Klassenzuordnungen konnten nicht geladen werden: " +
+        error.message;
+      return;
+    }
+
+    legacyClasses = data || [];
+  }
+
+
+  // Alle benötigten Klassen laden
+
   const classIds = [...new Set(
-    groupClasses.map(entry => entry.class_id)
+    offeringClasses.map(item => item.class_id)
+      .concat(legacyClasses.map(item => item.class_id))
   )];
 
   let classes = [];
@@ -4137,21 +4216,79 @@ async function loadGradeCourseGroups(schoolYearId) {
     classes = data || [];
   }
 
-  const { data: courses, error: coursesError } = await suvDb
-    .from("grade_courses")
-        .select("id, grade_course_group_id, course_number, course_name, teacher_id, room_id")
-    .in("grade_course_group_id", groupIds)
-    .order("course_number");
 
-  if (coursesError) {
-    gradeCourseGroupList.textContent =
-      "Parallelkurse konnten nicht geladen werden: " +
-      coursesError.message;
-    return;
+  // Parallelkurse laden
+
+  let courses = [];
+
+  if (groupIds.length > 0) {
+
+    const { data, error } = await suvDb
+      .from("grade_courses")
+      .select("id, grade_course_group_id, course_number, course_name, teacher_id, room_id")
+      .in("grade_course_group_id", groupIds)
+      .order("course_number");
+
+    if (error) {
+      gradeCourseGroupList.textContent =
+        "Parallelkurse konnten nicht geladen werden: " +
+        error.message;
+      return;
+    }
+
+    courses = data || [];
   }
 
-  
-  // Verfügbare Lehrkräfte laden
+
+  // Gemeinsame Unterrichtsblöcke laden
+
+  let offeringBlocks = [];
+
+  if (offeringIds.length > 0) {
+
+    const { data, error } = await suvDb
+      .from("lesson_block_requirements")
+      .select("grade_course_offering_id, block_number, periods_count")
+      .in("grade_course_offering_id", offeringIds)
+      .order("block_number");
+
+    if (error) {
+      gradeCourseGroupList.textContent =
+        "Gemeinsame Unterrichtsblöcke konnten nicht geladen werden: " +
+        error.message;
+      return;
+    }
+
+    offeringBlocks = data || [];
+  }
+
+
+  // Unterrichtsblöcke alter Kursgruppen laden
+
+  let legacyBlocks = [];
+
+  if (legacyGroups.length > 0) {
+
+    const legacyIds = legacyGroups.map(group => group.id);
+
+    const { data, error } = await suvDb
+      .from("lesson_block_requirements")
+      .select("grade_course_group_id, block_number, periods_count")
+      .in("grade_course_group_id", legacyIds)
+      .order("block_number");
+
+    if (error) {
+      gradeCourseGroupList.textContent =
+        "Alte Unterrichtsblöcke konnten nicht geladen werden: " +
+        error.message;
+      return;
+    }
+
+    legacyBlocks = data || [];
+  }
+
+
+  // Lehrkräfte laden
 
   const { data: teachers, error: teachersError } = await suvDb
     .from("teachers")
@@ -4166,7 +4303,8 @@ async function loadGradeCourseGroups(schoolYearId) {
     return;
   }
 
-  // Verfügbare Unterrichtsräume laden
+
+  // Räume laden
 
   const { data: rooms, error: roomsError } = await suvDb
     .from("rooms")
@@ -4180,56 +4318,17 @@ async function loadGradeCourseGroups(schoolYearId) {
     return;
   }
 
-  gradeCourseGroupList.innerHTML = "";
 
-  groups.forEach(group => {
+  // Hilfsfunktion: Lehrkraft- und Raumzuordnung darstellen
 
-    const card = document.createElement("div");
-    card.className = "distribution-card";
-
-    const grade = grades.find(item =>
-      item.id === group.grade_level_id
-    );
-
-    const subject = subjects.find(item =>
-      item.id === group.subject_id
-    );
-
-    const groupClassNames = groupClasses
-      .filter(item =>
-        item.grade_course_group_id === group.id
-      )
-      .map(item => {
-        const schoolClass = classes.find(cls =>
-          cls.id === item.class_id
-        );
-
-        return schoolClass ? schoolClass.name : null;
-      })
-      .filter(Boolean);
+  function createCourseList(group) {
 
     const groupCourses = courses.filter(course =>
       course.grade_course_group_id === group.id
     );
 
-    const heading = document.createElement("h4");
-    heading.textContent =
-      (grade ? grade.name : "Unbekannter Jahrgang") +
-      " – " +
-      (subject ? subject.name : "Unbekanntes Fach");
-
-    const details = document.createElement("p");
-    details.textContent =
-      "Klassen: " + groupClassNames.join(", ") +
-      " | Wochenstunden: " + group.weekly_periods;
-
-    const courseHeading = document.createElement("p");
-    courseHeading.textContent =
-      "Parallelkurse: " + groupCourses.length;
-
     const courseList = document.createElement("ul");
 
-    
     groupCourses.forEach(course => {
 
       const item = document.createElement("li");
@@ -4244,16 +4343,22 @@ async function loadGradeCourseGroups(schoolYearId) {
       teacherPlaceholder.textContent = "Lehrkraft auswählen";
       teacherSelect.appendChild(teacherPlaceholder);
 
-      teachers.forEach(teacher => {
+      (teachers || []).forEach(teacher => {
+
         const option = document.createElement("option");
+
         option.value = teacher.id;
+
         option.textContent =
           teacher.last_name + ", " + teacher.first_name +
           (teacher.short_code ? " (" + teacher.short_code + ")" : "");
 
         option.selected = teacher.id === course.teacher_id;
+
         teacherSelect.appendChild(option);
+
       });
+
 
       const roomSelect = document.createElement("select");
 
@@ -4262,15 +4367,19 @@ async function loadGradeCourseGroups(schoolYearId) {
       roomPlaceholder.textContent = "Raum auswählen";
       roomSelect.appendChild(roomPlaceholder);
 
-      rooms.forEach(room => {
+      (rooms || []).forEach(room => {
+
         const option = document.createElement("option");
+
         option.value = room.id;
         option.textContent = room.name;
         option.selected = room.id === course.room_id;
+
         roomSelect.appendChild(option);
+
       });
 
-      
+
       // Lehrkraft speichern
 
       teacherSelect.addEventListener("change", async () => {
@@ -4287,13 +4396,19 @@ async function loadGradeCourseGroups(schoolYearId) {
         teacherSelect.disabled = false;
 
         if (error) {
-          alert("Lehrkraft konnte nicht gespeichert werden: " + error.message);
+          alert(
+            "Lehrkraft konnte nicht gespeichert werden: " +
+            error.message
+          );
           return;
         }
 
+        course.teacher_id = teacherSelect.value || null;
+
       });
 
-      // Unterrichtsraum speichern
+
+      // Raum speichern
 
       roomSelect.addEventListener("change", async () => {
 
@@ -4309,9 +4424,14 @@ async function loadGradeCourseGroups(schoolYearId) {
         roomSelect.disabled = false;
 
         if (error) {
-          alert("Raum konnte nicht gespeichert werden: " + error.message);
+          alert(
+            "Raum konnte nicht gespeichert werden: " +
+            error.message
+          );
           return;
         }
+
+        course.room_id = roomSelect.value || null;
 
       });
 
@@ -4323,191 +4443,268 @@ async function loadGradeCourseGroups(schoolYearId) {
         document.createElement("br"),
         roomSelect
       );
-      
+
       courseList.appendChild(item);
+
+    });
+
+    return courseList;
+  }
+
+
+  // Hilfsfunktion: Jahrgangsnamen ermitteln
+
+  function getGradeName(gradeId) {
+
+    const grade = (grades || []).find(item =>
+      item.id === gradeId
+    );
+
+    return grade ? grade.name : "Unbekannter Jahrgang";
+  }
+
+
+  // Hilfsfunktion: Klassennamen ermitteln
+
+  function getClassNames(classIds) {
+
+    return classIds.map(classId => {
+
+      const schoolClass = classes.find(item =>
+        item.id === classId
+      );
+
+      return schoolClass ? schoolClass.name : null;
+
+    }).filter(Boolean);
+  }
+
+
+  gradeCourseGroupList.innerHTML = "";
+
+
+  // NEUE JAHRGANGS-KURSGRUPPEN DARSTELLEN
+
+  allOfferings.forEach(offering => {
+
+    const card = document.createElement("div");
+    card.className = "distribution-card";
+
+
+    const heading = document.createElement("h4");
+
+    heading.textContent =
+      getGradeName(offering.grade_level_id) +
+      " – " +
+      offering.offering_name;
+
+
+    const assignedClassIds = offeringClasses
+      .filter(item =>
+        item.grade_course_offering_id === offering.id
+      )
+      .map(item => item.class_id);
+
+    const classNames = getClassNames(assignedClassIds);
+
+
+    const details = document.createElement("p");
+
+    details.textContent =
+      "Beteiligte Klassen: " +
+      classNames.join(", ");
+
+
+    // Gemeinsame Unterrichtsblöcke anzeigen
+
+    const blocks = offeringBlocks
+      .filter(item =>
+        item.grade_course_offering_id === offering.id
+      )
+      .sort((a, b) => a.block_number - b.block_number);
+
+    const blockText = blocks
+      .map(block => block.periods_count)
+      .join(" + ");
+
+
+    const blockInfo = document.createElement("p");
+
+    blockInfo.textContent =
+      "Gemeinsame Wochenplanung: " +
+      (blockText || "Keine Blöcke hinterlegt") +
+      " (" +
+      blocks.reduce((sum, block) => sum + block.periods_count, 0) +
+      " Wochenstunden)";
+
+
+    const subjectHeading = document.createElement("h5");
+
+    subjectHeading.textContent =
+      "Parallele Fachangebote";
+
+
+    const subjectContainer = document.createElement("div");
+
+
+    const offeringGroups = newGroups.filter(group =>
+      group.offering_id === offering.id
+    );
+
+
+    offeringGroups.forEach(group => {
+
+      const subject = subjects.find(item =>
+        item.id === group.subject_id
+      );
+
+      const subjectSection = document.createElement("div");
+
+      subjectSection.className = "grade-course-subject-display";
+
+
+      const subjectTitle = document.createElement("h5");
+
+      subjectTitle.textContent =
+        (subject ? subject.name : "Unbekanntes Fach") +
+        " – " +
+        group.weekly_periods +
+        " Wochenstunden";
+
+
+      const groupCourses = courses.filter(course =>
+        course.grade_course_group_id === group.id
+      );
+
+      const courseCountInfo = document.createElement("p");
+
+      courseCountInfo.textContent =
+        "Anzahl paralleler Kurse: " +
+        groupCourses.length;
+
+
+      subjectSection.append(
+        subjectTitle,
+        courseCountInfo,
+        createCourseList(group)
+      );
+
+      subjectContainer.appendChild(subjectSection);
+
     });
 
 
     card.append(
       heading,
       details,
-      courseHeading,
-      courseList
+      blockInfo,
+      subjectHeading,
+      subjectContainer
     );
 
-    if (group.notes) {
+
+    if (offering.notes) {
+
       const notes = document.createElement("p");
-      notes.textContent = "Anmerkungen: " + group.notes;
+
+      notes.textContent =
+        "Anmerkungen: " + offering.notes;
+
       card.appendChild(notes);
+
     }
 
 
-// Kursangebot bearbeiten
-
-const editButton = document.createElement("button");
-editButton.textContent = "Bearbeiten";
-editButton.className = "edit-button";
-
-editButton.addEventListener("click", async () => {
-
-  editingGradeCourseGroupId = group.id;
-
-  gradeCourseGrade.value = group.grade_level_id;
-  gradeCourseSubject.value = group.subject_id;
-  gradeCourseWeeklyPeriods.value = group.weekly_periods;
-
-  // Gespeicherte Unterrichtsblöcke laden
-
-const { data: savedBlocks, error: blocksError } = await suvDb
-  .from("lesson_block_requirements")
-  .select("periods_count")
-  .eq("grade_course_group_id", group.id)
-  .order("block_number");
-
-if (blocksError) {
-  alert("Unterrichtsblöcke konnten nicht geladen werden: " + blocksError.message);
-  return;
-}
-
-gradeCourseBlockPattern.value = (savedBlocks || [])
-  .map(block => block.periods_count)
-  .join(" + ");
-  
-  gradeCourseNotes.value = group.notes || "";
-
-  // Zugehörige Klassen laden
-
-  const { data: assignedClasses, error } = await suvDb
-    .from("grade_course_group_classes")
-    .select("class_id")
-    .eq("grade_course_group_id", group.id);
-
-  if (error) {
-    alert("Klassen konnten nicht geladen werden: " + error.message);
-    return;
-  }
-
-  // Klassen des Jahrgangs laden
-
-  const { data: availableClasses, error: classError } = await suvDb
-    .from("classes")
-    .select("id, name")
-    .eq("school_year_id", distributionSchoolYear.value)
-    .eq("grade_level_id", group.grade_level_id)
-    .order("name");
-
-  if (classError) {
-    alert("Klassen konnten nicht geladen werden: " + classError.message);
-    return;
-  }
-
-  gradeCourseClasses.innerHTML = "";
-
-  availableClasses.forEach(schoolClass => {
-
-    const option = document.createElement("option");
-    option.value = schoolClass.id;
-    option.textContent = schoolClass.name;
-
-    option.selected = assignedClasses.some(
-      item => item.class_id === schoolClass.id
-    );
-
-    gradeCourseClasses.appendChild(option);
+    gradeCourseGroupList.appendChild(card);
 
   });
 
-  // Anzahl der vorhandenen Parallelkurse laden
 
-  const { data: existingCourses, error: courseError } = await suvDb
-    .from("grade_courses")
-    .select("id, course_number")
-    .eq("grade_course_group_id", group.id);
+  // ALTE EINZELNE KURSGRUPPEN WEITERHIN ANZEIGEN
 
-  if (courseError) {
-    alert("Parallelkurse konnten nicht geladen werden: " + courseError.message);
-    return;
-  }
+  if (legacyGroups.length > 0) {
 
-  gradeCourseCount.value = existingCourses.length;
+    const legacyHeading = document.createElement("h3");
 
-  gradeCourseGroupSaveButton.textContent =
-    "Änderungen speichern";
+    legacyHeading.textContent =
+      "Bestehende einzelne Kursangebote";
 
-  gradeCourseGroupMessage.textContent =
-    "Bearbeitungsmodus: Änderungen vornehmen und speichern.";
-
-    gradeCourseGroupForm.scrollIntoView({
-  behavior: "smooth",
-  block: "start"
-});
-
-});
-
-card.appendChild(editButton);
-    
-    // Kursangebot löschen
-
-const deleteButton = document.createElement("button");
-deleteButton.textContent = "Kursangebot löschen";
-deleteButton.className = "delete-button";
-
-deleteButton.addEventListener("click", async () => {
-
-  const confirmed = confirm(
-    "Möchtest du dieses Kursangebot wirklich löschen?"
-  );
-
-  if (!confirmed) return;
-
-  deleteButton.disabled = true;
-  deleteButton.textContent = "Wird gelöscht ...";
-
-  try {
-
-    const { error: coursesError } = await suvDb
-      .from("grade_courses")
-      .delete()
-      .eq("grade_course_group_id", group.id);
-
-    if (coursesError) throw coursesError;
-
-    const { error: periodsError } = await suvDb
-      .from("grade_course_group_periods")
-      .delete()
-      .eq("grade_course_group_id", group.id);
-
-    if (periodsError) throw periodsError;
-
-    const { error: classesError } = await suvDb
-      .from("grade_course_group_classes")
-      .delete()
-      .eq("grade_course_group_id", group.id);
-
-    if (classesError) throw classesError;
-
-    const { error: groupError } = await suvDb
-      .from("grade_course_groups")
-      .delete()
-      .eq("id", group.id);
-
-    if (groupError) throw groupError;
-
-    await loadGradeCourseGroups(schoolYearId);
-
-  } catch (error) {
-
-    alert("Kursangebot konnte nicht gelöscht werden: " + error.message);
-    deleteButton.disabled = false;
-    deleteButton.textContent = "Kursangebot löschen";
+    gradeCourseGroupList.appendChild(legacyHeading);
 
   }
 
-});
 
-card.appendChild(deleteButton);
+  legacyGroups.forEach(group => {
 
-gradeCourseGroupList.appendChild(card);
+    const card = document.createElement("div");
+
+    card.className = "distribution-card";
+
+
+    const subject = subjects.find(item =>
+      item.id === group.subject_id
+    );
+
+
+    const heading = document.createElement("h4");
+
+    heading.textContent =
+      getGradeName(group.grade_level_id) +
+      " – " +
+      (subject ? subject.name : "Unbekanntes Fach");
+
+
+    const assignedClassIds = legacyClasses
+      .filter(item =>
+        item.grade_course_group_id === group.id
+      )
+      .map(item => item.class_id);
+
+
+    const details = document.createElement("p");
+
+    details.textContent =
+      "Klassen: " +
+      getClassNames(assignedClassIds).join(", ") +
+      " | Wochenstunden: " +
+      group.weekly_periods;
+
+
+    const blocks = legacyBlocks
+      .filter(item =>
+        item.grade_course_group_id === group.id
+      )
+      .sort((a, b) => a.block_number - b.block_number);
+
+
+    const blockInfo = document.createElement("p");
+
+    blockInfo.textContent =
+      "Unterrichtsblöcke: " +
+      blocks.map(block => block.periods_count).join(" + ");
+
+
+    const groupCourses = courses.filter(course =>
+      course.grade_course_group_id === group.id
+    );
+
+
+    const courseHeading = document.createElement("p");
+
+    courseHeading.textContent =
+      "Parallelkurse: " + groupCourses.length;
+
+
+    card.append(
+      heading,
+      details,
+      blockInfo,
+      courseHeading,
+      createCourseList(group)
+    );
+
+
+    gradeCourseGroupList.appendChild(card);
 
   });
 
