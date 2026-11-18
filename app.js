@@ -3613,7 +3613,7 @@ function addGradeCourseSubjectRow(
 
   countInput.className = "grade-course-count-input";
 
-  countInput.min = "2";
+  countInput.min = "1";
 
   countInput.max = "20";
 
