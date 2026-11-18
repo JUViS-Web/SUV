@@ -4117,13 +4117,59 @@ gradeCourseGroupForm.addEventListener("submit", async (event) => {
   }
 
 
-  // Bearbeitung vorerst noch nicht freigeben
+// Bestehende Jahrgangs-Kursgruppe bearbeiten
 
-  if (editingGradeCourseOfferingId) {
+if (editingGradeCourseOfferingId) {
+
+  gradeCourseGroupSaveButton.disabled = true;
+
+  gradeCourseGroupMessage.textContent =
+    "Änderungen werden gespeichert ...";
+
+  try {
+
+    await updateGradeCourseOffering({
+      schoolYearId,
+      gradeId,
+      offeringName,
+      weeklyPeriods,
+      blockSizes,
+      notes,
+      selectedClassIds,
+      subjectOffers
+    });
+
     gradeCourseGroupMessage.textContent =
-      "Die Bearbeitung bestehender Jahrgangs-Kursgruppen wird im nächsten Schritt angepasst. Bitte zunächst eine neue Kursgruppe erstellen.";
-    return;
+      "Jahrgangs-Kursgruppe erfolgreich aktualisiert.";
+
+    editingGradeCourseOfferingId = null;
+
+    gradeCourseGroupForm.reset();
+
+    gradeCourseSubjectsContainer.innerHTML = "";
+
+    addGradeCourseSubjectRow();
+
+    gradeCourseClasses.innerHTML = "";
+
+    gradeCourseGroupSaveButton.textContent =
+      "Jahrgangs-Kursgruppe erstellen";
+
+    await loadGradeCourseGroups(schoolYearId);
+
+  } catch (error) {
+
+    gradeCourseGroupMessage.textContent =
+      "Fehler beim Bearbeiten: " + error.message;
+
+  } finally {
+
+    gradeCourseGroupSaveButton.disabled = false;
+
   }
+
+  return;
+}
 
 
   gradeCourseGroupSaveButton.disabled = true;
