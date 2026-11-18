@@ -3440,12 +3440,10 @@ const teacherDisplay = teacherCount > 0
 // Fächer und Lehrkräfte laden
 
 
+
 async function loadDistributionOptions() {
 
   distributionSubject.innerHTML =
-    '<option value="">Fach auswählen</option>';
-
-  gradeCourseSubject.innerHTML =
     '<option value="">Fach auswählen</option>';
 
   distributionTeachers.innerHTML = "";
@@ -3461,7 +3459,9 @@ async function loadDistributionOptions() {
     return;
   }
 
-  subjects.forEach(subject => {
+  gradeCourseAvailableSubjects = subjects || [];
+
+  gradeCourseAvailableSubjects.forEach(subject => {
 
     const option = document.createElement("option");
 
@@ -3471,15 +3471,12 @@ async function loadDistributionOptions() {
 
     distributionSubject.appendChild(option);
 
-    const gradeOption = document.createElement("option");
-
-    gradeOption.value = subject.id;
-    gradeOption.textContent =
-      subject.name + " (" + subject.short_code + ")";
-
-    gradeCourseSubject.appendChild(gradeOption);
-
   });
+
+  // Beim ersten Laden ein Fachfeld bereitstellen
+  if (gradeCourseSubjectsContainer.children.length === 0) {
+    addGradeCourseSubjectRow();
+  }
 
   const { data: teachers, error: teachersError } = await suvDb
     .from("teachers")
