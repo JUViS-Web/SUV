@@ -4038,6 +4038,168 @@ gradeCourseGrade.addEventListener("change", async () => {
 
 // Bestehende jahrgangsweite Kursangebote laden
 
+async function editGradeCourseOffering(offeringId) {
+
+  gradeCourseGroupMessage.textContent =
+    "Kursgruppe wird zum Bearbeiten geladen ...";
+
+  try {
+
+    // Übergeordnete Kursgruppe laden
+
+    const { data: offering, error: offeringError } = await suvDb
+      .from("grade_course_offerings")
+      .select("*")
+      .eq("id", offeringId)
+      .single();
+
+    if (offeringError) throw offeringError;
+
+
+    // Zugehörige Fachangebote laden
+
+    const { data: groups, error: groupsError } = await suvDb
+      .from("grade_course_groups")
+      .select("id, subject_id, weekly_periods, notes")
+      .eq("offering_id", offeringId);
+
+    if (groupsError) throw groupsError;
+
+
+    // Gemeinsame Unterrichtsblöcke laden
+
+    const { data: blocks, error: blocksError } = await suvDb
+      .from("lesson_block_requirements")
+      .select("block_number, periods_count")
+      .eq("grade_course_offering_id", offeringId)
+      .order("block_number");
+
+    if (blocksError) throw blocksError;
+
+
+    // Beteiligte Klassen laden
+
+    const { data: assignedClasses, error: assignedError } = await suvDb
+      .from("grade_course_offering_classes")
+      .select("class_id")
+      .eq("grade_course_offering_id", offeringId);
+
+    if (assignedError) throw assignedError;
+
+
+    // Klassen des Jahrgangs laden
+
+    const { data: availableClasses, error: classesError } = await suvDb
+      .from("classes")
+      .select("id, name")
+      .eq("school_year_id", offering.school_year_id)
+      .eq("grade_level_id", offering.grade_level_id)
+      .order("name");
+
+    if (classesError) throw classesError;
+
+
+    // Kurszahlen für jedes Fach laden
+
+    const groupOffers = [];
+
+    for (const group of groups) {
+
+      const { data: courses, error: coursesError } = await suvDb
+        .from("grade_courses")
+        .select("id")
+        .eq("grade_course_group_id", group.id);
+
+      if (coursesError) throw coursesError;
+
+      groupOffers.push({
+        subjectId: group.subject_id,
+        courseCount: courses.length
+      });
+
+    }
+
+
+    // Formular befüllen
+
+    distributionSchoolYear.value = offering.school_year_id;
+
+    gradeCourseGrade.value = offering.grade_level_id;
+
+    gradeCourseOfferingName.value = offering.offering_name;
+
+    gradeCourseWeeklyPeriods.value =
+      groups[0]?.weekly_periods || "";
+
+    gradeCourseBlockPattern.value = blocks
+      .map(block => block.periods_count)
+      .join(" + ");
+
+    gradeCourseOfferingNotes.value =
+      offering.notes || "";
+
+
+    // Klassen-Auswahl neu aufbauen
+
+    gradeCourseClasses.innerHTML = "";
+
+    availableClasses.forEach(schoolClass => {
+
+      const option = document.createElement("option");
+
+      option.value = schoolClass.id;
+      option.textContent = schoolClass.name;
+
+      option.selected = assignedClasses.some(
+        item => item.class_id === schoolClass.id
+      );
+
+      gradeCourseClasses.appendChild(option);
+
+    });
+
+
+    // Fachangebote neu aufbauen
+
+    gradeCourseSubjectsContainer.innerHTML = "";
+
+    groupOffers.forEach(offer => {
+
+      addGradeCourseSubjectRow(
+        offer.subjectId,
+        offer.courseCount
+      );
+
+    });
+
+
+    // Bearbeitungsmodus aktivieren
+
+    editingGradeCourseOfferingId = offeringId;
+
+    gradeCourseGroupSaveButton.textContent =
+      "Änderungen speichern";
+
+    gradeCourseGroupMessage.textContent =
+      "Bearbeitungsmodus: Jahrgangs-Kursgruppe geladen.";
+
+
+    gradeCourseGroupForm.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+
+
+  } catch (error) {
+
+    gradeCourseGroupMessage.textContent =
+      "Kursgruppe konnte nicht geladen werden: " +
+      error.message;
+
+  }
+
+}
+
 
 async function loadGradeCourseGroups(schoolYearId) {
 
