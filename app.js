@@ -5498,6 +5498,7 @@ distributionCancelEdit.addEventListener("click", () => {
 });
 
 // Schuljahr-Auswahl
+
 distributionSchoolYear.addEventListener("change", async () => {
 
   selectedDistributionSchoolYearId =
@@ -5514,10 +5515,24 @@ distributionSchoolYear.addEventListener("change", async () => {
   distributionMessage.textContent = "";
 
   if (selectedDistributionSchoolYearId) {
+
+    // Normale Klassen laden
     await loadDistributionClasses(
       selectedDistributionSchoolYearId
     );
+
+    // Jahrgänge für die Kursverteilung laden
+    await loadGradeCourseGrades(
+      selectedDistributionSchoolYearId
+    );
+
+    // Bestehende Jahrgangs-Kursgruppen aktualisieren
+    await loadGradeCourseGroups(
+      selectedDistributionSchoolYearId
+    );
+
   }
+
 });
 
 // Bearbeiten und Löschen von Unterrichtszuordnungen
