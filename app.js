@@ -4091,14 +4091,14 @@ gradeCourseGroupForm.addEventListener("submit", async (event) => {
   }
 
   if (subjectOffers.some(offer =>
-    !Number.isInteger(offer.courseCount) ||
-    offer.courseCount < 2 ||
-    offer.courseCount > 20
-  )) {
-    gradeCourseGroupMessage.textContent =
-      "Jedes Fachangebot benötigt mindestens 2 und höchstens 20 Parallelkurse.";
-    return;
-  }
+  !Number.isInteger(offer.courseCount) ||
+  offer.courseCount < 1 ||
+  offer.courseCount > 20
+)) {
+  gradeCourseGroupMessage.textContent =
+    "Jedes Fachangebot benötigt mindestens 1 und höchstens 20 Kurse.";
+  return;
+}
 
 
   // Doppelte Fächer verhindern
