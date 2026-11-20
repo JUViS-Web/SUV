@@ -5914,7 +5914,19 @@ lesson_block_requirements (
         name
       ),
       grade_course_groups (
+        offering_id,
         subjects (
+          name,
+          short_code,
+          color
+        ),
+        grade_course_group_classes (
+          class_id,
+          classes (
+            name
+          )
+        )
+      )
           name,
           short_code,
           color
