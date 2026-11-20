@@ -6413,44 +6413,44 @@ timetableSubject.addEventListener("change", () => {
   
   // Jahrgangsweite Kursgruppen der ausgewählten Klasse laden
 
-  timetableGradeCourseGroup.innerHTML =
-    '<option value="">Keine Jahrgangskursgruppe</option>';
+  
+timetableGradeCourseGroup.innerHTML =
+  '<option value="">Keine Jahrgangskursgruppe</option>';
 
-  if (!selectedTimetableClassId || !activeTimetableVersionId) {
-    return;
-  }
+if (!selectedTimetableClassId || !activeTimetableVersionId) {
+  return;
+}
 
-  const { data: version, error: versionError } = await suvDb
-    .from("timetable_versions")
-    .select("school_year_id")
-    .eq("id", activeTimetableVersionId)
-    .single();
+const { data: version, error: versionError } = await suvDb
+  .from("timetable_versions")
+  .select("school_year_id")
+  .eq("id", activeTimetableVersionId)
+  .single();
 
-  if (versionError) {
-    timetableMessage.textContent =
-      "Schuljahr der Stundenplanversion konnte nicht geladen werden.";
-    return;
-  }
+if (versionError) {
+  timetableMessage.textContent =
+    "Schuljahr der Stundenplanversion konnte nicht geladen werden.";
+  return;
+}
 
-  const { data: memberships, error: membershipsError } = await suvDb
-    .from("grade_course_group_classes")
-    .select("grade_course_group_id")
-    .eq("class_id", selectedTimetableClassId);
+// Alte Jahrgangs-Kursgruppen laden
 
-  if (membershipsError) {
-    timetableMessage.textContent =
-      "Jahrgangskursgruppen konnten nicht geladen werden.";
-    return;
-  }
+const { data: memberships, error: membershipsError } = await suvDb
+  .from("grade_course_group_classes")
+  .select("grade_course_group_id")
+  .eq("class_id", selectedTimetableClassId);
 
-  const groupIds = (memberships || []).map(
-    item => item.grade_course_group_id
-  );
+if (membershipsError) {
+  timetableMessage.textContent =
+    "Jahrgangskursgruppen konnten nicht geladen werden.";
+  return;
+}
 
-  if (groupIds.length === 0) {
-    return;
-  }
+const groupIds = (memberships || []).map(
+  item => item.grade_course_group_id
+);
 
+if (groupIds.length > 0) {
   const { data: groups, error: groupsError } = await suvDb
     .from("grade_course_groups")
     .select(`
@@ -6466,7 +6466,7 @@ timetableSubject.addEventListener("change", () => {
 
   if (groupsError) {
     timetableMessage.textContent =
-      "Jahrgangskursgruppen konnten nicht geladen werden.";
+      "Alte Jahrgangskursgruppen konnten nicht geladen werden.";
     return;
   }
 
@@ -6474,6 +6474,7 @@ timetableSubject.addEventListener("change", () => {
     const option = document.createElement("option");
 
     option.value = group.id;
+    option.dataset.planType = "group";
 
     const subject = group.subjects;
 
@@ -6482,6 +6483,49 @@ timetableSubject.addEventListener("change", () => {
       " – Jahrgangskurs (" +
       group.weekly_periods +
       " Wochenstunden)";
+
+    timetableGradeCourseGroup.appendChild(option);
+  });
+}
+
+// Neue Jahrgangs-Kursangebote laden
+
+const { data: offeringMemberships, error: offeringMembershipsError } =
+  await suvDb
+    .from("grade_course_offering_classes")
+    .select("grade_course_offering_id")
+    .eq("class_id", selectedTimetableClassId);
+
+if (offeringMembershipsError) {
+  timetableMessage.textContent =
+    "Neue Jahrgangs-Kursangebote konnten nicht geladen werden.";
+  return;
+}
+
+const offeringIds = (offeringMemberships || []).map(
+  item => item.grade_course_offering_id
+);
+
+if (offeringIds.length > 0) {
+  const { data: offerings, error: offeringsError } = await suvDb
+    .from("grade_course_offerings")
+    .select("id, offering_name")
+    .eq("school_year_id", version.school_year_id)
+    .in("id", offeringIds);
+
+  if (offeringsError) {
+    timetableMessage.textContent =
+      "Jahrgangs-Kursangebote konnten nicht geladen werden.";
+    return;
+  }
+
+  (offerings || []).forEach(offering => {
+    const option = document.createElement("option");
+
+    option.value = offering.id;
+    option.dataset.planType = "offering";
+    option.textContent =
+      offering.offering_name + " – Jahrgangs-Kursangebot";
 
     timetableGradeCourseGroup.appendChild(option);
   });
