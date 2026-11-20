@@ -7072,11 +7072,24 @@ if (periodsError || !availablePeriods ||
       .eq("class_subject_id", timetableSubject.value)
       .single();
 
-  if (classBlockError || !selectedClassSubjectBlock) {
-    timetableMessage.textContent =
-      "Der ausgewählte Unterrichtsblock konnte nicht geladen werden.";
-    return;
-  }
+  if (blockError || !selectedBlock) {
+  timetableMessage.textContent =
+    "Blockfehler: " +
+    (blockError?.message || "Kein Datensatz gefunden.") +
+    " | Typ: " + selectedGradeCoursePlanType +
+    " | Kurs-ID: " + selectedGradeCourseGroupId +
+    " | Block-ID: " + selectedGradeCourseBlockId;
+
+  console.error("Unterrichtsblock-Fehler:", {
+    blockError,
+    selectedBlock,
+    planType: selectedGradeCoursePlanType,
+    groupId: selectedGradeCourseGroupId,
+    blockId: selectedGradeCourseBlockId
+  });
+
+  return;
+}
 
   // Blocklänge bestimmen
 
