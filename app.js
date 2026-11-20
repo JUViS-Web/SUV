@@ -6003,15 +6003,33 @@ if (entriesError) {
 }
 
 timetableEntries = (entries || []).filter(entry => {
+  // Normaler Klassenunterricht
   if (entry.class_id === selectedTimetableClassId) {
     return true;
   }
 
-  const participatingClasses =
-    entry.grade_courses?.grade_course_groups
-      ?.grade_course_group_classes || [];
+  const gradeGroup =
+    entry.grade_courses?.grade_course_groups;
 
-  return participatingClasses.some(item =>
+  // Alte Jahrgangskursstruktur
+  const legacyClasses =
+    gradeGroup?.grade_course_group_classes || [];
+
+  if (
+    legacyClasses.some(item =>
+      item.class_id === selectedTimetableClassId
+    )
+  ) {
+    return true;
+  }
+
+  // Neue Jahrgangs-Kursangebote
+  const offeringId = gradeGroup?.offering_id;
+
+  const offeringClasses =
+    offeringClassesById[offeringId] || [];
+
+  return offeringClasses.some(item =>
     item.class_id === selectedTimetableClassId
   );
 });
