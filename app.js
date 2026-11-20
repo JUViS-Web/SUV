@@ -6442,7 +6442,9 @@ const { data: memberships, error: membershipsError } = await suvDb
 
 if (membershipsError) {
   timetableMessage.textContent =
-    "Jahrgangskursgruppen konnten nicht geladen werden.";
+    "Jahrgangskursgruppen konnten nicht geladen werden: " +
+    membershipsError.message;
+  console.error("Fehler beim Laden der Kursgruppen:", membershipsError);
   return;
 }
 
