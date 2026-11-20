@@ -6531,6 +6531,7 @@ if (offeringIds.length > 0) {
   });
 }
 
+}
 // Unterrichtsblöcke einer Jahrgangskursgruppe laden
 
 
