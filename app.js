@@ -4631,6 +4631,12 @@ async function loadGradeCourseGroups(schoolYearId) {
     group => group.offering_id === null
   );
 
+  gradeCourseGroupMessage.textContent =
+  "Diagnose: " +
+  allOfferings.length + " Jahrgangs-Kursgruppen geladen, " +
+  newGroups.length + " Fachangebote zugeordnet, " +
+  legacyGroups.length + " alte Kursgruppen.";
+
   const groupIds = allGroups.map(group => group.id);
 
 
