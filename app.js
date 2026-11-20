@@ -6533,22 +6533,35 @@ if (offeringIds.length > 0) {
 
 // Unterrichtsblöcke einer Jahrgangskursgruppe laden
 
+
 async function loadGradeCourseBlocks() {
   timetableGradeCourseBlock.innerHTML =
     '<option value="">Block auswählen</option>';
 
   timetableGradeCourseBlock.disabled = true;
 
+  const selectedOption =
+    timetableGradeCourseGroup.selectedOptions[0];
+
   const groupId = timetableGradeCourseGroup.value;
 
-  if (!groupId) {
+  if (!groupId || !selectedOption) {
     return;
   }
 
-  const { data: blocks, error } = await suvDb
+  const planType = selectedOption.dataset.planType;
+
+  let query = suvDb
     .from("lesson_block_requirements")
-    .select("id, block_number, periods_count")
-    .eq("grade_course_group_id", groupId)
+    .select("id, block_number, periods_count");
+
+  if (planType === "offering") {
+    query = query.eq("grade_course_offering_id", groupId);
+  } else {
+    query = query.eq("grade_course_group_id", groupId);
+  }
+
+  const { data: blocks, error } = await query
     .order("block_number");
 
   if (error) {
