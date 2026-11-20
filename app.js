@@ -6734,23 +6734,82 @@ if (
       return;
     }
 
-    const { data: group, error: groupError } = await suvDb
-      .from("grade_course_groups")
-      .select(`
-        id,
-        school_year_id,
-        grade_course_group_classes (
-          class_id
-        ),
+    let group = null;
+let groupError = null;
+
+if (selectedGradeCoursePlanType === "offering") {
+
+  // Neues Jahrgangs-Kursangebot laden
+
+  const { data: offering, error } = await suvDb
+    .from("grade_course_offerings")
+    .select(`
+      id,
+      school_year_id,
+      grade_course_offering_classes (
+        class_id
+      ),
+      grade_course_groups (
         grade_courses (
           id,
           course_name,
           teacher_id,
           room_id
         )
-      `)
-      .eq("id", selectedGradeCourseGroupId)
-      .single();
+      )
+    `)
+    .eq("id", selectedGradeCourseGroupId)
+    .single();
+
+  groupError = error;
+
+  if (offering) {
+    group = {
+      school_year_id: offering.school_year_id,
+
+      grade_course_group_classes:
+        offering.grade_course_offering_classes || [],
+
+      grade_courses:
+        (offering.grade_course_groups || [])
+          .flatMap(item => item.grade_courses || [])
+    };
+  }
+
+} else {
+
+  // Bisherige Jahrgangs-Kursgruppe laden
+
+  const { data, error } = await suvDb
+    .from("grade_course_groups")
+    .select(`
+      id,
+      school_year_id,
+      grade_course_group_classes (
+        class_id
+      ),
+      grade_courses (
+        id,
+        course_name,
+        teacher_id,
+        room_id
+      )
+    `)
+    .eq("id", selectedGradeCourseGroupId)
+    .single();
+
+  group = data;
+  groupError = error;
+}
+
+if (groupError || !group) {
+  timetableMessage.textContent =
+    "Die Jahrgangskursgruppe konnte nicht geladen werden: " +
+    (groupError?.message || "Kein Datensatz gefunden.");
+
+  console.error("Fehler beim Laden der Kursgruppe:", groupError);
+  return;
+}
 
     if (groupError || !group) {
       timetableMessage.textContent =
