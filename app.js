@@ -6819,12 +6819,25 @@ if (groupError || !group) {
 
 // Ausgewählten Unterrichtsblock laden
 
-const { data: selectedBlock, error: blockError } = await suvDb
+let blockQuery = suvDb
   .from("lesson_block_requirements")
   .select("id, block_number, periods_count")
-  .eq("id", selectedGradeCourseBlockId)
-  .eq("grade_course_group_id", selectedGradeCourseGroupId)
-  .single();
+  .eq("id", selectedGradeCourseBlockId);
+
+if (selectedGradeCoursePlanType === "offering") {
+  blockQuery = blockQuery.eq(
+    "grade_course_offering_id",
+    selectedGradeCourseGroupId
+  );
+} else {
+  blockQuery = blockQuery.eq(
+    "grade_course_group_id",
+    selectedGradeCourseGroupId
+  );
+}
+
+const { data: selectedBlock, error: blockError } =
+  await blockQuery.single();
 
 if (blockError || !selectedBlock) {
   timetableMessage.textContent =
