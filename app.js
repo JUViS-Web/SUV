@@ -6217,12 +6217,27 @@ visibleEntries.forEach(entry => {
   roomName.textContent = room?.name || "Kein Raum";
 
   // Zugehörige Klassen
-  const gradeGroupClasses =
-    gradeCourse?.grade_course_groups?.grade_course_group_classes || [];
+  const gradeGroup =
+  gradeCourse?.grade_course_groups;
 
-  const classNames = gradeGroupClasses
-    .map(item => item.classes?.name)
-    .filter(Boolean);
+const gradeGroupClasses =
+  gradeGroup?.grade_course_group_classes || [];
+
+const classNames = gradeGroupClasses
+  .map(item => item.classes?.name)
+  .filter(Boolean);
+
+// Klassen aus neuen Jahrgangs-Kursangeboten ergänzen
+const offeringId = gradeGroup?.offering_id;
+
+const offeringClasses =
+  offeringClassesById[offeringId] || [];
+
+offeringClasses.forEach(item => {
+  if (item.classes?.name) {
+    classNames.push(item.classes.name);
+  }
+});
 
   if (entry.classes?.name) {
     classNames.push(entry.classes.name);
