@@ -2907,6 +2907,49 @@ async function loadTimetableViewGrid(type, selectedId) {
     `)
     .eq("timetable_version_id", activeTimetableVersionId);
 
+// Klassen der neuen Jahrgangs-Kursangebote laden
+
+const offeringIds = [
+  ...new Set(
+    (entries || [])
+      .map(entry =>
+        entry.grade_courses?.grade_course_groups?.offering_id
+      )
+      .filter(Boolean)
+  )
+];
+
+let offeringClassesById = {};
+
+if (offeringIds.length > 0) {
+  const { data: offeringClasses, error: offeringClassesError } =
+    await suvDb
+      .from("grade_course_offering_classes")
+      .select(`
+        grade_course_offering_id,
+        class_id,
+        classes (
+          name
+        )
+      `)
+      .in("grade_course_offering_id", offeringIds);
+
+  if (offeringClassesError) {
+    timetableGrid.textContent =
+      "Klassen der Jahrgangs-Kursangebote konnten nicht geladen werden.";
+    console.error(offeringClassesError);
+    return;
+  }
+
+  (offeringClasses || []).forEach(item => {
+    if (!offeringClassesById[item.grade_course_offering_id]) {
+      offeringClassesById[item.grade_course_offering_id] = [];
+    }
+
+    offeringClassesById[item.grade_course_offering_id].push(item);
+  });
+}
+  
   if (entriesError) {
     timetableViewGrid.textContent =
       "Unterrichtseinheiten konnten nicht geladen werden: " +
