@@ -6696,6 +6696,9 @@ timetableEntryForm.addEventListener("submit", async (event) => {
 const selectedGradeCourseGroupId =
   timetableGradeCourseGroup.value;
 
+  const selectedGradeCoursePlanType =
+  timetableGradeCourseGroup.selectedOptions[0]?.dataset.planType;
+
 const selectedGradeCourseBlockId =
   timetableGradeCourseBlock.value;
 
