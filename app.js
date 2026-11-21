@@ -3454,6 +3454,9 @@ async function loadDistributionEntries() {
 
     const row = document.createElement("tr");
 
+row.dataset.substitutionId = item.id;
+row.style.cursor = "pointer";
+    
     const assignedTeachers =
   (entry.class_subject_teachers || [])
     .map(item => item.teachers)
