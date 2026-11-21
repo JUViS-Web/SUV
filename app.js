@@ -9113,8 +9113,11 @@ async function loadSubstitutionRecords() {
 
     const row = document.createElement("tr");
 
-    [
-      item.substitution_number,
+row.dataset.substitutionId = item.id;
+row.style.cursor = "pointer";
+
+[
+  item.substitution_number,
       date,
       periodText,
       classText,
