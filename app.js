@@ -2975,10 +2975,18 @@ if (offeringIds.length > 0) {
     const room =
       entry.rooms || entry.grade_courses?.rooms;
 
-    if (type === "class") {
-      return entry.class_id === selectedId ||
-        gradeClasses.some(item => item.class_id === selectedId);
-    }
+    
+if (type === "class") {
+  const offeringId =
+    entry.grade_courses?.grade_course_groups?.offering_id;
+
+  const offeringClasses =
+    offeringClassesById[offeringId] || [];
+
+  return entry.class_id === selectedId ||
+    gradeClasses.some(item => item.class_id === selectedId) ||
+    offeringClasses.some(item => item.class_id === selectedId);
+}
 
     if (type === "teacher") {
       return teachers.some(item =>
