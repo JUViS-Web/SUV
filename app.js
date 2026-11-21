@@ -9195,3 +9195,84 @@ document.getElementById("cancelSubstitutionEdit")
   .addEventListener("click", () => {
     substitutionEditModal.hidden = true;
   });
+
+// ==========================================
+// SUV – Auswahlmöglichkeiten für Vertretungen laden
+// ==========================================
+
+async function loadSubstitutionEditOptions() {
+
+  const teacherSelect = document.getElementById(
+    "editSubstituteTeacher"
+  );
+
+  const roomSelect = document.getElementById(
+    "editSubstitutionRoom"
+  );
+
+  if (!teacherSelect || !roomSelect) return;
+
+  // Aktive Lehrkräfte laden
+
+  const { data: teachers, error: teacherError } =
+    await suvDb
+      .from("teachers")
+      .select("id, first_name, last_name, short_code")
+      .eq("is_active", true)
+      .order("last_name");
+
+  if (teacherError) {
+    console.error("Lehrkräfte konnten nicht geladen werden:", teacherError);
+    return;
+  }
+
+  teacherSelect.innerHTML =
+    '<option value="">Noch nicht ausgewählt</option>';
+
+  (teachers || []).forEach(teacher => {
+
+    const option = document.createElement("option");
+
+    option.value = teacher.id;
+    option.textContent =
+      `${teacher.last_name}, ${teacher.first_name}` +
+      (teacher.short_code ? ` (${teacher.short_code})` : "");
+
+    teacherSelect.appendChild(option);
+
+  });
+
+  // Aktive Räume laden
+
+  const { data: rooms, error: roomError } =
+    await suvDb
+      .from("rooms")
+      .select("id, name, room_type")
+      .eq("is_active", true)
+      .order("name");
+
+  if (roomError) {
+    console.error("Räume konnten nicht geladen werden:", roomError);
+    return;
+  }
+
+  roomSelect.innerHTML =
+    '<option value="">Kein neuer Raum</option>';
+
+  (rooms || []).forEach(room => {
+
+    const option = document.createElement("option");
+
+    option.value = room.id;
+    option.textContent =
+      room.name +
+      (room.room_type ? ` (${room.room_type})` : "");
+
+    roomSelect.appendChild(option);
+
+  });
+
+}
+
+// Auswahlmöglichkeiten beim Start laden
+loadSubstitutionEditOptions();
