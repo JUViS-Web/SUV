@@ -9276,3 +9276,315 @@ async function loadSubstitutionEditOptions() {
 
 // Auswahlmöglichkeiten beim Start laden
 loadSubstitutionEditOptions();
+
+
+// ==========================================
+// SUV – Lehrervorschläge ermitteln
+// ==========================================
+
+const suggestSubstituteTeacherButton =
+  document.getElementById("suggestSubstituteTeacher");
+
+const substituteTeacherSuggestions =
+  document.getElementById("substituteTeacherSuggestions");
+
+if (suggestSubstituteTeacherButton) {
+  suggestSubstituteTeacherButton.addEventListener("click", async () => {
+
+    const substitutionId =
+      document.getElementById("editSubstitutionId").value;
+
+    if (!substitutionId) return;
+
+    substituteTeacherSuggestions.hidden = false;
+    substituteTeacherSuggestions.textContent =
+      "Lehrkräfte werden geprüft ...";
+
+    try {
+
+      // Vertretung laden
+
+      const { data: substitution, error: substitutionError } =
+        await suvDb
+          .from("lesson_substitutions")
+          .select("lesson_date, timetable_version_id, timetable_entry_id")
+          .eq("id", substitutionId)
+          .single();
+
+      if (substitutionError) throw substitutionError;
+
+      // Betroffene Unterrichtsstunde laden
+
+      const { data: entry, error: entryError } =
+        await suvDb
+          .from("timetable_entries")
+          .select(`
+            id,
+            weekday,
+            period_number,
+            teacher_id,
+            class_id,
+            class_subject_id,
+            grade_course_id,
+            lesson_block_requirement_id,
+            lesson_block_requirements(periods_count)
+          `)
+          .eq("id", substitution.timetable_entry_id)
+          .single();
+
+      if (entryError) throw entryError;
+
+      // Fach und betroffene Klassen ermitteln
+
+      let subjectId = null;
+      const classIds = [];
+
+      if (entry.class_id) {
+        classIds.push(entry.class_id);
+      }
+
+      if (entry.class_subject_id) {
+        const { data, error } = await suvDb
+          .from("class_subjects")
+          .select("subject_id, class_id")
+          .eq("id", entry.class_subject_id)
+          .single();
+
+        if (error) throw error;
+
+        subjectId = data.subject_id;
+
+        if (data.class_id) classIds.push(data.class_id);
+      }
+
+      if (entry.grade_course_id) {
+        const { data: course, error: courseError } =
+          await suvDb
+            .from("grade_courses")
+            .select("grade_course_group_id")
+            .eq("id", entry.grade_course_id)
+            .single();
+
+        if (courseError) throw courseError;
+
+        const { data: group, error: groupError } =
+          await suvDb
+            .from("grade_course_groups")
+            .select("subject_id")
+            .eq("id", course.grade_course_group_id)
+            .single();
+
+        if (groupError) throw groupError;
+
+        subjectId = group.subject_id;
+
+        const { data: participants, error: participantError } =
+          await suvDb
+            .from("grade_course_group_classes")
+            .select("class_id")
+            .eq("grade_course_group_id", course.grade_course_group_id);
+
+        if (participantError) throw participantError;
+
+        (participants || []).forEach(item => {
+          classIds.push(item.class_id);
+        });
+      }
+
+      const uniqueClassIds = [...new Set(classIds)];
+
+      // Lehrkräfte laden
+
+      const { data: teachers, error: teachersError } =
+        await suvDb
+          .from("teachers")
+          .select("id, first_name, last_name, short_code")
+          .eq("is_active", true);
+
+      if (teachersError) throw teachersError;
+
+      // Fachkenntnis laden
+
+      const { data: subjectTeachers, error: subjectError } =
+        await suvDb
+          .from("teacher_subjects")
+          .select("teacher_id")
+          .eq("subject_id", subjectId);
+
+      if (subjectError) throw subjectError;
+
+      const subjectTeacherIds = new Set(
+        (subjectTeachers || []).map(item => item.teacher_id)
+      );
+
+      // Klassenkenntnis laden
+
+      const { data: classTeachers, error: classError } =
+        await suvDb
+          .from("class_teachers")
+          .select("teacher_id, class_id")
+          .in("class_id", uniqueClassIds.length ? uniqueClassIds : ["00000000-0000-0000-0000-000000000000"]);
+
+      if (classError) throw classError;
+
+      const knownClassTeacherIds = new Set(
+        (classTeachers || []).map(item => item.teacher_id)
+      );
+
+      // Stundenplan des Tages laden
+
+      const { data: dayEntries, error: dayError } =
+        await suvDb
+          .from("timetable_entries")
+          .select(`
+            id,
+            period_number,
+            teacher_id,
+            lesson_block_requirements(periods_count),
+            grade_courses(teacher_id),
+            timetable_entry_teachers(teacher_id)
+          `)
+          .eq("timetable_version_id", substitution.timetable_version_id)
+          .eq("weekday", entry.weekday);
+
+      if (dayError) throw dayError;
+
+      const periodsCount =
+        entry.lesson_block_requirements?.periods_count || 1;
+
+      const affectedPeriods = [];
+
+      for (let p = 0; p < periodsCount; p++) {
+        affectedPeriods.push(entry.period_number + p);
+      }
+
+      // Eignung berechnen
+
+      const suggestions = teachers.map(teacher => {
+
+        let score = 0;
+        const reasons = [];
+
+        const knowsSubject =
+          subjectTeacherIds.has(teacher.id);
+
+        const knowsClass =
+          knownClassTeacherIds.has(teacher.id);
+
+        const occupiedPeriods = [];
+
+        (dayEntries || []).forEach(dayEntry => {
+
+          const assignedIds = [
+            dayEntry.teacher_id,
+            dayEntry.grade_courses?.teacher_id,
+            ...(dayEntry.timetable_entry_teachers || [])
+              .map(item => item.teacher_id)
+          ].filter(Boolean);
+
+          if (!assignedIds.includes(teacher.id)) return;
+
+          const count =
+            dayEntry.lesson_block_requirements?.periods_count || 1;
+
+          for (let p = 0; p < count; p++) {
+            occupiedPeriods.push(dayEntry.period_number + p);
+          }
+
+        });
+
+        const hasConflict = affectedPeriods.some(period =>
+          occupiedPeriods.includes(period)
+        );
+
+        if (knowsSubject) {
+          score += 50;
+          reasons.push("Kennfach");
+        }
+
+        if (knowsClass) {
+          score += 20;
+          reasons.push("Kennt die Klasse");
+        }
+
+        if (!hasConflict) {
+          score += 30;
+          reasons.push("Zeitlich verfügbar");
+        } else {
+          reasons.push("Bereits Unterricht");
+        }
+
+        return {
+          ...teacher,
+          score,
+          knowsSubject,
+          knowsClass,
+          hasConflict,
+          occupiedPeriods,
+          reasons
+        };
+
+      });
+
+      suggestions.sort((a, b) => b.score - a.score);
+
+      // Vorschläge anzeigen
+
+      substituteTeacherSuggestions.innerHTML = "";
+
+      const heading = document.createElement("h4");
+      heading.textContent = "Lehrervorschläge";
+      substituteTeacherSuggestions.appendChild(heading);
+
+      suggestions.forEach(teacher => {
+
+        const card = document.createElement("div");
+        card.className = "teacher-entry";
+
+        const name = document.createElement("strong");
+        name.textContent =
+          `${teacher.last_name}, ${teacher.first_name}`;
+
+        const rating = document.createElement("p");
+
+        rating.textContent =
+          `Eignung: ${teacher.score}/100 · ` +
+          teacher.reasons.join(" · ");
+
+        const status = document.createElement("p");
+
+        status.textContent = teacher.hasConflict
+          ? "Nicht verfügbar – Überschneidung im Stundenplan"
+          : teacher.knowsSubject
+            ? "Gut geeignet"
+            : "Fachkenntnis nicht hinterlegt";
+
+        const chooseButton = document.createElement("button");
+        chooseButton.type = "button";
+        chooseButton.textContent = "Diese Lehrkraft auswählen";
+
+        chooseButton.disabled = teacher.hasConflict;
+
+        chooseButton.addEventListener("click", () => {
+          document.getElementById("editSubstituteTeacher").value =
+            teacher.id;
+        });
+
+        card.appendChild(name);
+        card.appendChild(rating);
+        card.appendChild(status);
+        card.appendChild(chooseButton);
+
+        substituteTeacherSuggestions.appendChild(card);
+
+      });
+
+    } catch (error) {
+
+      substituteTeacherSuggestions.textContent =
+        "Fehler beim Erstellen der Vorschläge: " + error.message;
+
+    }
+
+  });
+}
