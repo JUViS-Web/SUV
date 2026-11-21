@@ -5922,11 +5922,6 @@ lesson_block_requirements (
           )
         )
       )
-          name,
-          short_code,
-          color
-        ),
-        grade_course_group_classes (
   class_id,
   classes (
     name
