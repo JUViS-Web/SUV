@@ -2841,6 +2841,7 @@ async function loadTimetableViewGrid(type, selectedId) {
   }
 
   
+
 const { data: entries, error: entriesError } = await suvDb
   .from("timetable_entries")
   .select(`
@@ -2849,9 +2850,7 @@ const { data: entries, error: entriesError } = await suvDb
     class_subject_id,
     grade_course_id,
     room_id,
-    classes (
-      name
-    ),
+    classes (name),
     weekday,
     period_number,
     lesson_block_requirement_id,
@@ -2875,9 +2874,7 @@ const { data: entries, error: entriesError } = await suvDb
         last_name,
         short_code
       ),
-      rooms (
-        name
-      ),
+      rooms (name),
       grade_course_groups (
         offering_id,
         subjects (
@@ -2887,9 +2884,7 @@ const { data: entries, error: entriesError } = await suvDb
         ),
         grade_course_group_classes (
           class_id,
-          classes (
-            name
-          )
+          classes (name)
         )
       )
     ),
@@ -2901,9 +2896,7 @@ const { data: entries, error: entriesError } = await suvDb
         short_code
       )
     ),
-    rooms (
-      name
-    )
+    rooms (name)
   `)
   .eq("timetable_version_id", activeTimetableVersionId);
 
@@ -2912,61 +2905,9 @@ if (entriesError) {
     "Unterrichtseinheiten konnten nicht geladen werden: " +
     entriesError.message;
 
-  console.error("Fehler beim Laden der Unterrichtseinheiten:", entriesError);
+  console.error("Fehler beim Laden:", entriesError);
   return;
 }
-
-// Klassen der neuen Jahrgangs-Kursangebote laden
-
-const offeringIds = [
-  ...new Set(
-    (entries || [])
-      .map(entry =>
-        entry.grade_courses?.grade_course_groups?.offering_id
-      )
-      .filter(Boolean)
-  )
-];
-
-let offeringClassesById = {};
-
-if (offeringIds.length > 0) {
-  const { data: offeringClasses, error: offeringClassesError } =
-    await suvDb
-      .from("grade_course_offering_classes")
-      .select(`
-        grade_course_offering_id,
-        class_id,
-        classes (
-          name
-        )
-      `)
-      .in("grade_course_offering_id", offeringIds);
-
-  if (offeringClassesError) {
-    timetableGrid.textContent =
-      "Klassen der Jahrgangs-Kursangebote konnten nicht geladen werden: " +
-      offeringClassesError.message;
-
-    console.error(offeringClassesError);
-    return;
-  }
-
-  (offeringClasses || []).forEach(item => {
-    if (!offeringClassesById[item.grade_course_offering_id]) {
-      offeringClassesById[item.grade_course_offering_id] = [];
-    }
-
-    offeringClassesById[item.grade_course_offering_id].push(item);
-  });
-}
-  
-  if (entriesError) {
-    timetableViewGrid.textContent =
-      "Unterrichtseinheiten konnten nicht geladen werden: " +
-      entriesError.message;
-    return;
-  }
 
   const filteredEntries = (entries || []).filter(entry => {
 
