@@ -8938,6 +8938,7 @@ if (substitutionCreateOpen) {
 // SUV – Gespeicherte Vertretungen anzeigen
 // ==========================================
 
+
 async function loadSubstitutionRecords() {
 
   const selectedDate = substitutionDate.value;
@@ -8957,7 +8958,57 @@ async function loadSubstitutionRecords() {
       substitution_number,
       lesson_date,
       substitution_type,
-      status
+      status,
+      note,
+      absent_teacher:teachers!lesson_substitutions_absent_teacher_id_fkey (
+        first_name,
+        last_name
+      ),
+      substitute_teacher:teachers!lesson_substitutions_substitute_teacher_id_fkey (
+        first_name,
+        last_name
+      ),
+      new_room:rooms!lesson_substitutions_room_id_fkey (
+        name
+      ),
+      timetable_entry:timetable_entries!lesson_substitutions_timetable_entry_id_fkey (
+        period_number,
+        class:classes!timetable_entries_class_id_fkey (
+          name
+        ),
+        original_room:rooms!timetable_entries_room_id_fkey (
+          name
+        ),
+        class_subject:class_subjects!timetable_entries_class_subject_id_fkey (
+          subject:subjects!class_subjects_subject_id_fkey (
+            name,
+            short_code
+          ),
+          class:classes!class_subjects_class_id_fkey (
+            name
+          )
+        ),
+        grade_course:grade_courses!timetable_entries_grade_course_id_fkey (
+          course_name,
+          course_room:rooms!grade_courses_room_id_fkey (
+            name
+          ),
+          grade_course_group:grade_course_groups!grade_courses_grade_course_group_id_fkey (
+            subject:subjects!grade_course_groups_subject_id_fkey (
+              name,
+              short_code
+            ),
+            participants:grade_course_group_classes (
+              class:classes (
+                name
+              )
+            )
+          )
+        ),
+        lesson_block_requirement:lesson_block_requirements!timetable_entries_lesson_block_requirement_id_fkey (
+          periods_count
+        )
+      )
     `)
     .eq("lesson_date", selectedDate)
     .order("substitution_number");
@@ -8983,8 +9034,16 @@ async function loadSubstitutionRecords() {
       <tr>
         <th>Nr.</th>
         <th>Datum</th>
+        <th>Stunde(n)</th>
+        <th>Klasse / Kurs</th>
+        <th>Fach</th>
+        <th>Ursprüngliche Lehrkraft</th>
+        <th>Vertretungslehrkraft</th>
+        <th>Raum alt</th>
+        <th>Raum neu</th>
         <th>Art</th>
         <th>Status</th>
+        <th>Hinweis</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -8994,17 +9053,78 @@ async function loadSubstitutionRecords() {
 
   data.forEach(item => {
 
-    const row = document.createElement("tr");
+    const entry = item.timetable_entry || {};
+    const course = entry.grade_course || {};
+    const courseGroup = course.grade_course_group || {};
+    const classSubject = entry.class_subject || {};
 
     const date = new Date(
       item.lesson_date + "T00:00:00"
     ).toLocaleDateString("de-DE");
 
+    const periodCount =
+      entry.lesson_block_requirement?.periods_count || 1;
+
+    const periodText = periodCount > 1
+      ? `${entry.period_number}–${entry.period_number + periodCount - 1}`
+      : `${entry.period_number}`;
+
+    const classes = [];
+
+    if (entry.class?.name) {
+      classes.push(entry.class.name);
+    } else if (classSubject.class?.name) {
+      classes.push(classSubject.class.name);
+    } else {
+      (courseGroup.participants || []).forEach(item => {
+        if (item.class?.name) {
+          classes.push(item.class.name);
+        }
+      });
+    }
+
+    const classText = [...new Set(classes)].join(", ") ||
+      course.course_name ||
+      "—";
+
+    const subjectText =
+      classSubject.subject?.name ||
+      courseGroup.subject?.name ||
+      course.course_name ||
+      "—";
+
+    const absentTeacher = item.absent_teacher
+      ? `${item.absent_teacher.first_name} ${item.absent_teacher.last_name}`
+      : "—";
+
+    const substituteTeacher = item.substitute_teacher
+      ? `${item.substitute_teacher.first_name} ${item.substitute_teacher.last_name}`
+      : "Noch offen";
+
+    const originalRoom =
+      entry.original_room?.name ||
+      course.course_room?.name ||
+      "—";
+
+    const newRoom =
+      item.new_room?.name ||
+      "—";
+
+    const row = document.createElement("tr");
+
     [
       item.substitution_number,
       date,
+      periodText,
+      classText,
+      subjectText,
+      absentTeacher,
+      substituteTeacher,
+      originalRoom,
+      newRoom,
       item.substitution_type,
-      item.status
+      item.status,
+      item.note || "—"
     ].forEach(value => {
 
       const cell = document.createElement("td");
