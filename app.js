@@ -9528,7 +9528,8 @@ if (suggestSubstituteTeacherButton) {
 
       suggestions.sort((a, b) => b.score - a.score);
 
-      // Vorschläge anzeigen
+      
+      // Vorschläge kompakt und farbig anzeigen
 
       substituteTeacherSuggestions.innerHTML = "";
 
@@ -9536,48 +9537,113 @@ if (suggestSubstituteTeacherButton) {
       heading.textContent = "Lehrervorschläge";
       substituteTeacherSuggestions.appendChild(heading);
 
+      const legend = document.createElement("p");
+      legend.textContent =
+        "🟢 Gut geeignet · 🟡 Eingeschränkt · 🔴 Nicht verfügbar";
+      legend.style.fontSize = "12px";
+      legend.style.margin = "4px 0 10px";
+      substituteTeacherSuggestions.appendChild(legend);
+
       suggestions.forEach(teacher => {
 
         const card = document.createElement("div");
-        card.className = "teacher-entry";
+
+        const isGreen =
+          teacher.knowsSubject &&
+          teacher.knowsClass &&
+          !teacher.hasConflict;
+
+        const isYellow =
+          !teacher.hasConflict && !isGreen;
+
+        const color = teacher.hasConflict
+          ? "#dc2626"
+          : isGreen
+            ? "#16a34a"
+            : "#d69e00";
+
+        const background = teacher.hasConflict
+          ? "rgba(220,38,38,0.08)"
+          : isGreen
+            ? "rgba(22,163,74,0.08)"
+            : "rgba(214,158,0,0.10)";
+
+        card.style.cssText = `
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 8px 10px;
+          margin: 5px 0;
+          border: 1px solid ${color};
+          border-left: 4px solid ${color};
+          border-radius: 7px;
+          background: ${background};
+          font-size: 13px;
+        `;
+
+        const information = document.createElement("div");
+        information.style.cssText = `
+          min-width: 0;
+          flex: 1;
+        `;
 
         const name = document.createElement("strong");
         name.textContent =
           `${teacher.last_name}, ${teacher.first_name}`;
+        name.style.fontSize = "13px";
 
-        const rating = document.createElement("p");
-
-        rating.textContent =
-          `Eignung: ${teacher.score}/100 · ` +
+        const details = document.createElement("div");
+        details.textContent =
           teacher.reasons.join(" · ");
+        details.style.cssText = `
+          font-size: 11px;
+          margin-top: 3px;
+          opacity: 0.85;
+        `;
 
-        const status = document.createElement("p");
-
+        const status = document.createElement("div");
         status.textContent = teacher.hasConflict
-          ? "Nicht verfügbar – Überschneidung im Stundenplan"
-          : teacher.knowsSubject
+          ? "Nicht verfügbar"
+          : isGreen
             ? "Gut geeignet"
-            : "Fachkenntnis nicht hinterlegt";
+            : "Eingeschränkt geeignet";
+
+        status.style.cssText = `
+          color: ${color};
+          font-size: 11px;
+          font-weight: 600;
+          margin-top: 3px;
+        `;
+
+        information.appendChild(name);
+        information.appendChild(details);
+        information.appendChild(status);
 
         const chooseButton = document.createElement("button");
         chooseButton.type = "button";
-        chooseButton.textContent = "Diese Lehrkraft auswählen";
-
+        chooseButton.textContent = "Auswählen";
         chooseButton.disabled = teacher.hasConflict;
+
+        chooseButton.style.cssText = `
+          padding: 5px 8px;
+          font-size: 11px;
+          white-space: nowrap;
+          flex-shrink: 0;
+        `;
 
         chooseButton.addEventListener("click", () => {
           document.getElementById("editSubstituteTeacher").value =
             teacher.id;
         });
 
-        card.appendChild(name);
-        card.appendChild(rating);
-        card.appendChild(status);
+        card.appendChild(information);
         card.appendChild(chooseButton);
 
         substituteTeacherSuggestions.appendChild(card);
 
       });
+
 
     } catch (error) {
 
