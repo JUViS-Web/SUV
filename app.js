@@ -8704,3 +8704,230 @@ if (substitutionLoadDay) {
     loadSubstitutionDay
   );
 }
+
+
+// ==========================================
+// SUV – Offene Vertretungen automatisch erzeugen
+// ==========================================
+
+const substitutionCreateOpen = document.getElementById(
+  "substitutionCreateOpen"
+);
+
+async function createOpenSubstitutions() {
+
+  const selectedDate = substitutionDate.value;
+
+  if (!selectedDate) {
+    substitutionOpenLessons.textContent =
+      "Bitte zuerst einen Schultag auswählen.";
+    return;
+  }
+
+  if (!activeTimetableVersionId) {
+    substitutionOpenLessons.textContent =
+      "Keine aktive Stundenplanversion vorhanden.";
+    return;
+  }
+
+  substitutionCreateOpen.disabled = true;
+  substitutionCreateOpen.textContent =
+    "Vertretungen werden erzeugt ...";
+
+  try {
+
+    const date = new Date(selectedDate + "T12:00:00");
+    const weekday = date.getDay() === 0 ? 7 : date.getDay();
+
+    // Schuljahr der aktiven Stundenplanversion ermitteln
+
+    const { data: version, error: versionError } =
+      await suvDb
+        .from("timetable_versions")
+        .select("school_year_id")
+        .eq("id", activeTimetableVersionId)
+        .single();
+
+    if (versionError) throw versionError;
+
+    // Abwesenheiten für den ausgewählten Tag laden
+
+    const { data: absences, error: absenceError } =
+      await suvDb
+        .from("teacher_absences")
+        .select("id, teacher_id")
+        .lte("start_date", selectedDate)
+        .gte("end_date", selectedDate);
+
+    if (absenceError) throw absenceError;
+
+    if (!absences || absences.length === 0) {
+      substitutionOpenLessons.textContent =
+        "Für diesen Tag sind keine Abwesenheiten eingetragen.";
+      return;
+    }
+
+    const absenceByTeacher = new Map(
+      absences.map(item => [item.teacher_id, item])
+    );
+
+    // Unterrichtseinheiten des Tages laden
+
+    const { data: entries, error: entriesError } =
+      await suvDb
+        .from("timetable_entries")
+        .select(`
+          id,
+          teacher_id,
+          weekday,
+          period_number,
+          lesson_block_requirement_id,
+          lesson_block_requirements (
+            periods_count
+          ),
+          grade_courses (
+            teachers (
+              id
+            )
+          ),
+          timetable_entry_teachers (
+            teacher_id
+          )
+        `)
+        .eq("timetable_version_id", activeTimetableVersionId)
+        .eq("weekday", weekday)
+        .order("period_number");
+
+    if (entriesError) throw entriesError;
+
+    // Nur Unterricht mit abwesenden Lehrkräften behalten
+
+    const affected = [];
+
+    (entries || []).forEach(entry => {
+
+      const teacherIds = [
+        entry.teacher_id,
+        ...(entry.timetable_entry_teachers || [])
+          .map(item => item.teacher_id),
+        entry.grade_courses?.teachers?.id
+      ].filter(Boolean);
+
+      const absentTeacherId = teacherIds.find(id =>
+        absenceByTeacher.has(id)
+      );
+
+      if (absentTeacherId) {
+        affected.push({
+          entry,
+          absentTeacherId,
+          absence: absenceByTeacher.get(absentTeacherId)
+        });
+      }
+
+    });
+
+    if (affected.length === 0) {
+      substitutionOpenLessons.textContent =
+        "Keine betroffenen Unterrichtsstunden gefunden.";
+      return;
+    }
+
+    // Doppelstunden zu einer Vertretungseinheit zusammenfassen
+
+    const grouped = new Map();
+
+    affected.forEach(item => {
+
+      const entry = item.entry;
+
+      const groupKey =
+        entry.lesson_block_requirement_id
+          ? "block-" + entry.lesson_block_requirement_id
+          : "entry-" + entry.id;
+
+      if (!grouped.has(groupKey)) {
+        grouped.set(groupKey, item);
+      }
+
+    });
+
+    // Bereits vorhandene Vertretungen berücksichtigen
+
+    const { data: existing, error: existingError } =
+      await suvDb
+        .from("lesson_substitutions")
+        .select("timetable_entry_id")
+        .eq("lesson_date", selectedDate);
+
+    if (existingError) throw existingError;
+
+    const existingIds = new Set(
+      (existing || []).map(item => item.timetable_entry_id)
+    );
+
+    const newRecords = [];
+
+    grouped.forEach(item => {
+
+      const entry = item.entry;
+
+      if (existingIds.has(entry.id)) return;
+
+      newRecords.push({
+        school_year_id: version.school_year_id,
+        timetable_version_id: activeTimetableVersionId,
+        timetable_entry_id: entry.id,
+        lesson_block_requirement_id:
+          entry.lesson_block_requirement_id || null,
+        absence_id: item.absence.id,
+        absent_teacher_id: item.absentTeacherId,
+        lesson_date: selectedDate,
+        substitution_type: "Vertretung",
+        status: "offen"
+      });
+
+    });
+
+    if (newRecords.length === 0) {
+      substitutionOpenLessons.textContent =
+        "Alle betroffenen Unterrichtseinheiten wurden bereits als Vertretungen angelegt.";
+      return;
+    }
+
+    // Neue offene Vertretungen speichern.
+    // Die Vertretungsnummer wird automatisch vergeben.
+
+    const { error: insertError } =
+      await suvDb
+        .from("lesson_substitutions")
+        .insert(newRecords);
+
+    if (insertError) throw insertError;
+
+    substitutionOpenLessons.textContent =
+      newRecords.length +
+      " offene Vertretungseinheit(en) wurden erfolgreich erzeugt.";
+
+  } catch (error) {
+
+    substitutionOpenLessons.textContent =
+      "Fehler beim Erzeugen der Vertretungen: " +
+      error.message;
+
+  } finally {
+
+    substitutionCreateOpen.disabled = false;
+    substitutionCreateOpen.textContent =
+      "Offene Vertretungen erzeugen";
+
+  }
+
+}
+
+if (substitutionCreateOpen) {
+  substitutionCreateOpen.addEventListener(
+    "click",
+    createOpenSubstitutions
+  );
+}
