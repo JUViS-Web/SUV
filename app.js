@@ -9323,8 +9323,10 @@ if (suggestSubstituteTeacherButton) {
             weekday,
             period_number,
             teacher_id,
+            room_id,
             class_id,
             class_subject_id,
+            grade_course_id,
             grade_course_id,
             lesson_block_requirement_id,
             lesson_block_requirements(periods_count)
