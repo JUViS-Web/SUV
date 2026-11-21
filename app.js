@@ -9395,6 +9395,60 @@ if (suggestSubstituteTeacherButton) {
 
       const uniqueClassIds = [...new Set(classIds)];
 
+
+      // Ursprünglichen Unterrichtsraum ermitteln
+
+      let originalRoomId = entry.room_id || null;
+
+      if (entry.grade_course_id) {
+        const { data: courseRoom, error: courseRoomError } =
+          await suvDb
+            .from("grade_courses")
+            .select("room_id")
+            .eq("id", entry.grade_course_id)
+            .single();
+
+        if (courseRoomError) throw courseRoomError;
+
+        originalRoomId = courseRoom.room_id || originalRoomId;
+      }
+
+      let originalRoom = null;
+      let roomPermissionTeacherIds = new Set();
+      let roomPermissionConfigured = false;
+
+      if (originalRoomId) {
+
+        const { data: room, error: roomError } =
+          await suvDb
+            .from("rooms")
+            .select("id, name, room_type")
+            .eq("id", originalRoomId)
+            .single();
+
+        if (roomError) throw roomError;
+
+        originalRoom = room;
+
+        if (room.room_type !== "Klassenraum") {
+
+          const { data: permissions, error: permissionError } =
+            await suvDb
+              .from("teacher_room_permissions")
+              .select("teacher_id")
+              .eq("room_id", originalRoomId);
+
+          if (permissionError) throw permissionError;
+
+          roomPermissionConfigured =
+            (permissions || []).length > 0;
+
+          roomPermissionTeacherIds = new Set(
+            (permissions || []).map(item => item.teacher_id)
+          );
+        }
+      }
+      
       // Lehrkräfte laden
 
       const { data: teachers, error: teachersError } =
