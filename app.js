@@ -2840,72 +2840,81 @@ async function loadTimetableViewGrid(type, selectedId) {
     return;
   }
 
-  const { data: entries, error: entriesError } = await suvDb
-    .from("timetable_entries")
-    .select(`
-      id,
-      class_id,
-      room_id,
-      weekday,
-      period_number,
-      lesson_block_requirement_id,
-      parallel_group_id,
-      lesson_block_requirements (
-        periods_count
+  
+const { data: entries, error: entriesError } = await suvDb
+  .from("timetable_entries")
+  .select(`
+    id,
+    class_id,
+    class_subject_id,
+    grade_course_id,
+    room_id,
+    classes (
+      name
+    ),
+    weekday,
+    period_number,
+    lesson_block_requirement_id,
+    lesson_block_requirements (
+      block_number,
+      periods_count
+    ),
+    parallel_group_id,
+    class_subjects (
+      weekly_periods,
+      subjects (
+        name,
+        short_code,
+        color
+      )
+    ),
+    grade_courses (
+      course_name,
+      teachers (
+        first_name,
+        last_name,
+        short_code
       ),
-      classes (
+      rooms (
         name
       ),
-      class_subjects (
+      grade_course_groups (
+        offering_id,
         subjects (
-          id,
           name,
           short_code,
           color
-        )
-      ),
-      grade_courses (
-        course_name,
-        teachers (
-          id,
-          first_name,
-          last_name,
-          short_code
         ),
-        rooms (
-          id,
-          name
-        ),
-        grade_course_groups (
-          subjects (
-            id,
-            name,
-            short_code,
-            color
-          ),
-          grade_course_group_classes (
-            class_id,
-            classes (
-              name
-            )
+        grade_course_group_classes (
+          class_id,
+          classes (
+            name
           )
         )
-      ),
-      timetable_entry_teachers (
-        teacher_id,
-        teachers (
-          id,
-          first_name,
-          last_name,
-          short_code
-        )
-      ),
-      rooms (
-        id,
-        name
       )
-    `)
-    .eq("timetable_version_id", activeTimetableVersionId);
+    ),
+    timetable_entry_teachers (
+      teacher_id,
+      teachers (
+        first_name,
+        last_name,
+        short_code
+      )
+    ),
+    rooms (
+      name
+    )
+  `)
+  .eq("timetable_version_id", activeTimetableVersionId);
+
+if (entriesError) {
+  timetableGrid.textContent =
+    "Unterrichtseinheiten konnten nicht geladen werden: " +
+    entriesError.message;
+
+  console.error("Fehler beim Laden der Unterrichtseinheiten:", entriesError);
+  return;
+}
 
 // Klassen der neuen Jahrgangs-Kursangebote laden
 
@@ -2936,7 +2945,9 @@ if (offeringIds.length > 0) {
 
   if (offeringClassesError) {
     timetableGrid.textContent =
-      "Klassen der Jahrgangs-Kursangebote konnten nicht geladen werden.";
+      "Klassen der Jahrgangs-Kursangebote konnten nicht geladen werden: " +
+      offeringClassesError.message;
+
     console.error(offeringClassesError);
     return;
   }
