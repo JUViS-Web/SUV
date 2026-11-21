@@ -8931,3 +8931,89 @@ if (substitutionCreateOpen) {
     createOpenSubstitutions
   );
 }
+
+// ==========================================
+// SUV – Gespeicherte Vertretungen anzeigen
+// ==========================================
+
+async function loadSubstitutionRecords() {
+
+  const selectedDate = substitutionDate.value;
+
+  if (!selectedDate) {
+    substitutionDailyPlan.textContent =
+      "Bitte zuerst einen Schultag auswählen.";
+    return;
+  }
+
+  substitutionDailyPlan.textContent =
+    "Vertretungen werden geladen ...";
+
+  const { data, error } = await suvDb
+    .from("lesson_substitutions")
+    .select(`
+      substitution_number,
+      lesson_date,
+      substitution_type,
+      status
+    `)
+    .eq("lesson_date", selectedDate)
+    .order("substitution_number");
+
+  if (error) {
+    substitutionDailyPlan.textContent =
+      "Fehler beim Laden: " + error.message;
+    return;
+  }
+
+  substitutionDailyPlan.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    substitutionDailyPlan.textContent =
+      "Für diesen Tag wurden noch keine Vertretungen angelegt.";
+    return;
+  }
+
+  const table = document.createElement("table");
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Nr.</th>
+        <th>Datum</th>
+        <th>Art</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+
+  const tbody = table.querySelector("tbody");
+
+  data.forEach(item => {
+
+    const row = document.createElement("tr");
+
+    const date = new Date(
+      item.lesson_date + "T00:00:00"
+    ).toLocaleDateString("de-DE");
+
+    [
+      item.substitution_number,
+      date,
+      item.substitution_type,
+      item.status
+    ].forEach(value => {
+
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.appendChild(cell);
+
+    });
+
+    tbody.appendChild(row);
+
+  });
+
+  substitutionDailyPlan.appendChild(table);
+}
