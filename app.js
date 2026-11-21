@@ -5880,6 +5880,7 @@ async function loadTimetableGrid() {
   // Unterrichtseinheiten laden
 
   
+
 const { data: entries, error: entriesError } = await suvDb
   .from("timetable_entries")
   .select(`
@@ -5888,16 +5889,14 @@ const { data: entries, error: entriesError } = await suvDb
     class_subject_id,
     grade_course_id,
     room_id,
-    classes (
-  name
-),
+    classes (name),
     weekday,
-period_number,
-lesson_block_requirement_id,
-lesson_block_requirements (
-  block_number,
-  periods_count
-),
+    period_number,
+    lesson_block_requirement_id,
+    lesson_block_requirements (
+      block_number,
+      periods_count
+    ),
     parallel_group_id,
     class_subjects (
       weekly_periods,
@@ -5914,9 +5913,7 @@ lesson_block_requirements (
         last_name,
         short_code
       ),
-      rooms (
-        name
-      ),
+      rooms (name),
       grade_course_groups (
         offering_id,
         subjects (
@@ -5926,16 +5923,8 @@ lesson_block_requirements (
         ),
         grade_course_group_classes (
           class_id,
-          classes (
-            name
-          )
+          classes (name)
         )
-      )
-  class_id,
-  classes (
-    name
-  )
-)
       )
     ),
     timetable_entry_teachers (
@@ -5946,19 +5935,18 @@ lesson_block_requirements (
         short_code
       )
     ),
-    rooms (
-      name
-    )
+    rooms (name)
   `)
   .eq("timetable_version_id", activeTimetableVersionId);
 
 if (entriesError) {
+  console.error("Fehler beim Laden des Stundenplans:", entriesError);
   timetableGrid.textContent =
-    "Unterrichtseinheiten konnten nicht geladen werden.";
+    "Unterrichtseinheiten konnten nicht geladen werden: " +
+    entriesError.message;
   return;
 }
 
-  
 const offeringIds = [
   ...new Set(
     (entries || [])
