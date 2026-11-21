@@ -2909,13 +2909,51 @@ const { data: entries, error: entriesError } = await suvDb
   `)
   .eq("timetable_version_id", activeTimetableVersionId);
 
+
 if (entriesError) {
-  timetableGrid.textContent =
+  timetableViewGrid.textContent =
     "Unterrichtseinheiten konnten nicht geladen werden: " +
     entriesError.message;
-
-  console.error("Fehler beim Laden des Stundenplans:", entriesError);
+  console.error("Fehler beim Laden der Stundenplan-Anzeige:", entriesError);
   return;
+}
+
+// Klassen der jahrgangsweiten Parallelkurs-Angebote laden
+const offeringIds = [
+  ...new Set(
+    (entries || [])
+      .map(entry => entry.grade_courses?.grade_course_groups?.offering_id)
+      .filter(Boolean)
+  )
+];
+
+const offeringClassesById = {};
+
+if (offeringIds.length > 0) {
+  const { data: offeringClasses, error: offeringClassesError } =
+    await suvDb
+      .from("grade_course_offering_classes")
+      .select(`
+        grade_course_offering_id,
+        class_id,
+        classes (name)
+      `)
+      .in("grade_course_offering_id", offeringIds);
+
+  if (offeringClassesError) {
+    timetableViewGrid.textContent =
+      "Kursklassen konnten nicht geladen werden: " +
+      offeringClassesError.message;
+    console.error("Fehler beim Laden der Kursklassen:", offeringClassesError);
+    return;
+  }
+
+  (offeringClasses || []).forEach(item => {
+    if (!offeringClassesById[item.grade_course_offering_id]) {
+      offeringClassesById[item.grade_course_offering_id] = [];
+    }
+    offeringClassesById[item.grade_course_offering_id].push(item);
+  });
 }
 
   const filteredEntries = (entries || []).filter(entry => {
