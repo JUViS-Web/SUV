@@ -1143,6 +1143,68 @@
     </div>
   </div>
 
+  <div id="substitutionEditModal" class="panel" hidden>
+    <h3>Vertretung bearbeiten</h3>
+
+    <input type="hidden" id="editSubstitutionId">
+
+    <p id="editSubstitutionInfo"></p>
+
+    <div>
+      <label for="editSubstitutionType">Vertretungsart</label>
+      <select id="editSubstitutionType">
+        <option value="Vertretung">Vertretung</option>
+        <option value="Entfall">Entfall</option>
+        <option value="Raumänderung">Raumänderung</option>
+        <option value="EVA">EVA-Unterricht</option>
+        <option value="Sondereinsatz">Sondereinsatz</option>
+        <option value="Veranstaltung">Veranstaltung</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="editSubstituteTeacher">Vertretungslehrkraft</label>
+      <select id="editSubstituteTeacher">
+        <option value="">Noch nicht ausgewählt</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="editSubstitutionRoom">Neuer Raum</label>
+      <select id="editSubstitutionRoom">
+        <option value="">Kein neuer Raum</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="editSubstitutionNote">Zusätzlicher Hinweis</label>
+      <textarea
+        id="editSubstitutionNote"
+        rows="3"
+        placeholder="Hinweise zur Vertretung ..."
+      ></textarea>
+    </div>
+
+    <div>
+      <label for="editSubstitutionStatus">Planungsstatus</label>
+      <select id="editSubstitutionStatus">
+        <option value="offen">Offen</option>
+        <option value="geplant">Geplant</option>
+        <option value="veroeffentlicht">Veröffentlicht</option>
+      </select>
+    </div>
+
+    <button type="button" id="saveSubstitutionEdit">
+      Änderungen speichern
+    </button>
+
+    <button type="button" id="cancelSubstitutionEdit">
+      Abbrechen
+    </button>
+
+    <div id="substitutionEditMessage"></div>
+  </div>
+
 </div>
         
         <div id="administration" class="page">
