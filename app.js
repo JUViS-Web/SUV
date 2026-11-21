@@ -3170,13 +3170,21 @@ if (
         const room =
           entry.rooms || gradeCourse?.rooms;
 
-        const gradeClasses =
-          gradeCourse?.grade_course_groups
-            ?.grade_course_group_classes || [];
+        
+const gradeClasses =
+  gradeCourse?.grade_course_groups
+    ?.grade_course_group_classes || [];
 
-        const classNames = gradeClasses
-          .map(item => item.classes?.name)
-          .filter(Boolean);
+const offeringId =
+  gradeCourse?.grade_course_groups?.offering_id;
+
+const offeringClasses =
+  offeringClassesById[offeringId] || [];
+
+const classNames = [
+  ...gradeClasses.map(item => item.classes?.name),
+  ...offeringClasses.map(item => item.classes?.name)
+].filter(Boolean);
 
         if (entry.classes?.name) {
           classNames.push(entry.classes.name);
