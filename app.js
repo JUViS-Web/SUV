@@ -9017,3 +9017,12 @@ async function loadSubstitutionRecords() {
 
   substitutionDailyPlan.appendChild(table);
 }
+
+// Vertretungsplan beim Laden des Tages aktualisieren
+
+if (substitutionLoadDay) {
+  substitutionLoadDay.addEventListener(
+    "click",
+    loadSubstitutionRecords
+  );
+}
