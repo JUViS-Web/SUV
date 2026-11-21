@@ -1163,11 +1163,19 @@
     </div>
 
     <div>
-      <label for="editSubstituteTeacher">Vertretungslehrkraft</label>
-      <select id="editSubstituteTeacher">
-        <option value="">Noch nicht ausgewählt</option>
-      </select>
-    </div>
+  <label for="editSubstituteTeacher">Vertretungslehrkraft</label>
+
+  <select id="editSubstituteTeacher">
+    <option value="">Noch nicht ausgewählt</option>
+  </select>
+
+  <button type="button" id="suggestSubstituteTeacher">
+    🎓 Lehrervorschlag anzeigen
+  </button>
+
+  <div id="substituteTeacherSuggestions" hidden>
+  </div>
+</div>
 
     <div>
       <label for="editSubstitutionRoom">Neuer Raum</label>
