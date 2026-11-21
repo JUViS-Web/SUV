@@ -9624,6 +9624,19 @@ const maxVisiblePeriod = Math.max(
       heading.textContent = "Lehrervorschläge";
       substituteTeacherSuggestions.appendChild(heading);
 
+const timetableLegend = document.createElement("p");
+
+timetableLegend.textContent =
+  "🟢 Frei · 🔴 Bereits Unterricht · 🔵 Vertretungsstunde";
+
+timetableLegend.style.cssText = `
+  font-size: 10px;
+  margin: 0 0 8px;
+  opacity: 0.8;
+`;
+
+substituteTeacherSuggestions.appendChild(timetableLegend);
+      
       const legend = document.createElement("p");
       legend.textContent =
         "🟢 Gut geeignet · 🟡 Eingeschränkt · 🔴 Nicht verfügbar";
