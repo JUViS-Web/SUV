@@ -8909,6 +8909,8 @@ async function createOpenSubstitutions() {
       newRecords.length +
       " offene Vertretungseinheit(en) wurden erfolgreich erzeugt.";
 
+    await loadSubstitutionRecords();
+    
   } catch (error) {
 
     substitutionOpenLessons.textContent =
