@@ -9514,6 +9514,19 @@ if (suggestSubstituteTeacherButton) {
         affectedPeriods.push(entry.period_number + p);
       }
 
+// Maximale Stundenzahl für die Tagesübersicht ermitteln
+
+const maxVisiblePeriod = Math.max(
+  8,
+  ...affectedPeriods,
+  ...(dayEntries || []).map(dayEntry => {
+    const count =
+      dayEntry.lesson_block_requirements?.periods_count || 1;
+
+    return dayEntry.period_number + count - 1;
+  })
+);
+      
       // Eignung berechnen
 
       const suggestions = teachers.map(teacher => {
