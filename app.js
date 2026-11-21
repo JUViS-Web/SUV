@@ -5954,6 +5954,48 @@ if (entriesError) {
   return;
 }
 
+  
+const offeringIds = [
+  ...new Set(
+    (entries || [])
+      .map(entry =>
+        entry.grade_courses?.grade_course_groups?.offering_id
+      )
+      .filter(Boolean)
+  )
+];
+
+const offeringClassesById = {};
+
+if (offeringIds.length > 0) {
+  const { data: offeringClasses, error: offeringClassesError } =
+    await suvDb
+      .from("grade_course_offering_classes")
+      .select(`
+        grade_course_offering_id,
+        class_id,
+        classes (name)
+      `)
+      .in("grade_course_offering_id", offeringIds);
+
+  if (offeringClassesError) {
+    timetableGrid.textContent =
+      "Kursklassen konnten nicht geladen werden: " +
+      offeringClassesError.message;
+
+    console.error(offeringClassesError);
+    return;
+  }
+
+  (offeringClasses || []).forEach(item => {
+    if (!offeringClassesById[item.grade_course_offering_id]) {
+      offeringClassesById[item.grade_course_offering_id] = [];
+    }
+
+    offeringClassesById[item.grade_course_offering_id].push(item);
+  });
+}
+
 timetableEntries = (entries || []).filter(entry => {
   // Normaler Klassenunterricht
   if (entry.class_id === selectedTimetableClassId) {
