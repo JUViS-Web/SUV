@@ -7160,20 +7160,18 @@ if (periodsError || !availablePeriods ||
       .eq("class_subject_id", timetableSubject.value)
       .single();
 
-  if (blockError || !selectedBlock) {
+  if (classBlockError || !selectedClassSubjectBlock) {
   timetableMessage.textContent =
     "Blockfehler: " +
-    (blockError?.message || "Kein Datensatz gefunden.") +
-    " | Typ: " + selectedGradeCoursePlanType +
-    " | Kurs-ID: " + selectedGradeCourseGroupId +
-    " | Block-ID: " + selectedGradeCourseBlockId;
+    (classBlockError?.message || "Kein Datensatz gefunden.") +
+    " | Fach-ID: " + timetableSubject.value +
+    " | Block-ID: " + selectedClassSubjectBlockId;
 
   console.error("Unterrichtsblock-Fehler:", {
-    blockError,
-    selectedBlock,
-    planType: selectedGradeCoursePlanType,
-    groupId: selectedGradeCourseGroupId,
-    blockId: selectedGradeCourseBlockId
+    classBlockError,
+    selectedClassSubjectBlock,
+    subjectId: timetableSubject.value,
+    blockId: selectedClassSubjectBlockId
   });
 
   return;
