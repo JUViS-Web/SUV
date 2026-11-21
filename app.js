@@ -8955,6 +8955,7 @@ async function loadSubstitutionRecords() {
   const { data, error } = await suvDb
     .from("lesson_substitutions")
     .select(`
+      id,
       substitution_number,
       lesson_date,
       substitution_type,
