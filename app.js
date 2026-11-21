@@ -9363,7 +9363,7 @@ if (suggestSubstituteTeacherButton) {
         const { data: course, error: courseError } =
           await suvDb
             .from("grade_courses")
-            .select("grade_course_group_id")
+            .select("grade_course_group_id, room_id")
             .eq("id", entry.grade_course_id)
             .single();
 
