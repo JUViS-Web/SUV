@@ -9711,6 +9711,58 @@ const maxVisiblePeriod = Math.max(
         information.appendChild(details);
         information.appendChild(status);
 
+// Kompakte Tagesübersicht der Lehrkraft
+
+const miniTimetable = document.createElement("div");
+
+miniTimetable.style.cssText = `
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 6px;
+`;
+
+for (let period = 1; period <= maxVisiblePeriod; period++) {
+
+  const chip = document.createElement("span");
+
+  const isOccupied =
+    teacher.occupiedPeriods.includes(period);
+
+  const isAffected =
+    affectedPeriods.includes(period);
+
+  chip.textContent = period;
+
+  chip.style.cssText = `
+    min-width: 21px;
+    padding: 3px 4px;
+    text-align: center;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    border: 1px solid;
+  `;
+
+  if (isOccupied) {
+    chip.style.background = "rgba(220,38,38,0.15)";
+    chip.style.borderColor = "#dc2626";
+    chip.style.color = "#dc2626";
+  } else if (isAffected) {
+    chip.style.background = "rgba(37,99,235,0.15)";
+    chip.style.borderColor = "#2563eb";
+    chip.style.color = "#2563eb";
+  } else {
+    chip.style.background = "rgba(22,163,74,0.10)";
+    chip.style.borderColor = "#16a34a";
+    chip.style.color = "#16a34a";
+  }
+
+  miniTimetable.appendChild(chip);
+}
+
+information.appendChild(miniTimetable);
+        
         const chooseButton = document.createElement("button");
         chooseButton.type = "button";
         chooseButton.textContent = "Auswählen";
