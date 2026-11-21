@@ -9527,6 +9527,14 @@ if (suggestSubstituteTeacherButton) {
         const knowsClass =
           knownClassTeacherIds.has(teacher.id);
 
+        const roomAllowed =
+          !originalRoom ||
+          originalRoom.room_type === "Klassenraum"
+            ? true
+            : roomPermissionConfigured
+              ? roomPermissionTeacherIds.has(teacher.id)
+              : null;
+        
         const occupiedPeriods = [];
 
         (dayEntries || []).forEach(dayEntry => {
@@ -9563,11 +9571,20 @@ if (suggestSubstituteTeacherButton) {
           reasons.push("Kennt die Klasse");
         }
 
-        if (!hasConflict) {
+                if (!hasConflict) {
           score += 30;
           reasons.push("Zeitlich verfügbar");
         } else {
           reasons.push("Bereits Unterricht");
+        }
+
+        if (roomAllowed === true) {
+          score += 10;
+          reasons.push("Raumfreigabe");
+        } else if (roomAllowed === false) {
+          reasons.push("Keine Raumfreigabe");
+        } else {
+          reasons.push("Raumfreigabe nicht hinterlegt");
         }
 
         return {
@@ -9576,6 +9593,7 @@ if (suggestSubstituteTeacherButton) {
           knowsSubject,
           knowsClass,
           hasConflict,
+          roomAllowed,
           occupiedPeriods,
           reasons
         };
@@ -9604,21 +9622,24 @@ if (suggestSubstituteTeacherButton) {
 
         const card = document.createElement("div");
 
-        const isGreen =
+                const isGreen =
           teacher.knowsSubject &&
           teacher.knowsClass &&
-          !teacher.hasConflict;
+          !teacher.hasConflict &&
+          teacher.roomAllowed === true;
 
         const isYellow =
           !teacher.hasConflict && !isGreen;
 
-        const color = teacher.hasConflict
+        const color =
+          teacher.hasConflict || teacher.roomAllowed === false
           ? "#dc2626"
           : isGreen
             ? "#16a34a"
             : "#d69e00";
 
-        const background = teacher.hasConflict
+        const background =
+          teacher.hasConflict || teacher.roomAllowed === false
           ? "rgba(220,38,38,0.08)"
           : isGreen
             ? "rgba(22,163,74,0.08)"
@@ -9659,8 +9680,9 @@ if (suggestSubstituteTeacherButton) {
         `;
 
         const status = document.createElement("div");
-        status.textContent = teacher.hasConflict
-          ? "Nicht verfügbar"
+          status.textContent =
+          teacher.hasConflict || teacher.roomAllowed === false
+          ? "Nicht geeignet"
           : isGreen
             ? "Gut geeignet"
             : "Eingeschränkt geeignet";
@@ -9679,7 +9701,8 @@ if (suggestSubstituteTeacherButton) {
         const chooseButton = document.createElement("button");
         chooseButton.type = "button";
         chooseButton.textContent = "Auswählen";
-        chooseButton.disabled = teacher.hasConflict;
+        chooseButton.disabled =
+          teacher.hasConflict || teacher.roomAllowed === false;
 
         chooseButton.style.cssText = `
           padding: 5px 8px;
