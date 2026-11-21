@@ -9152,3 +9152,46 @@ if (substitutionLoadDay) {
     loadSubstitutionRecords
   );
 }
+
+// Vertretung durch Antippen der Tabellenzeile bearbeiten
+
+const substitutionEditModal = document.getElementById(
+  "substitutionEditModal"
+);
+
+const editSubstitutionId = document.getElementById(
+  "editSubstitutionId"
+);
+
+const editSubstitutionInfo = document.getElementById(
+  "editSubstitutionInfo"
+);
+
+if (substitutionDailyPlan) {
+  substitutionDailyPlan.addEventListener("click", event => {
+
+    const row = event.target.closest("tr[data-substitution-id]");
+
+    if (!row) return;
+
+    editSubstitutionId.value = row.dataset.substitutionId;
+
+    const cells = row.querySelectorAll("td");
+
+    editSubstitutionInfo.textContent =
+      "Vertretung Nr. " + cells[0].textContent +
+      " · " + cells[1].textContent +
+      " · " + cells[3].textContent +
+      " · " + cells[4].textContent;
+
+    substitutionEditModal.hidden = false;
+
+  });
+}
+
+// Bearbeitungsfenster schließen
+
+document.getElementById("cancelSubstitutionEdit")
+  .addEventListener("click", () => {
+    substitutionEditModal.hidden = true;
+  });
