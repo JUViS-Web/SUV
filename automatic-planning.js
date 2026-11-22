@@ -369,13 +369,21 @@ async function runAutoPlanningCheck() {
 
   const status = document.createElement("p");
 
-  if (classes.length === 0) {
+    if (classes.length === 0) {
+    autoPlanningCheckPassed = false;
+
     status.textContent =
       "Prüfung nicht bestanden: Für diesen Jahrgang existieren keine Klassen.";
+
   } else if (weeklyPeriods === 0) {
+    autoPlanningCheckPassed = false;
+
     status.textContent =
       "Prüfung nicht bestanden: Es wurden noch keine Wochenstunden festgelegt.";
+
   } else {
+    autoPlanningCheckPassed = true;
+
     status.textContent =
       "Grundprüfung bestanden: Klassen und Unterrichtsvorgaben sind vorhanden.";
   }
