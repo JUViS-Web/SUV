@@ -9606,6 +9606,33 @@ const teacherDailyLessons = [];
           occupiedPeriods.includes(period)
         );
 
+// Unterricht unmittelbar vor und nach der Vertretung prüfen
+
+const firstAffectedPeriod = Math.min(...affectedPeriods);
+const lastAffectedPeriod = Math.max(...affectedPeriods);
+
+const adjacentBefore = teacherDailyLessons.find(lesson =>
+  lesson.end === firstAffectedPeriod - 1
+);
+
+const adjacentAfter = teacherDailyLessons.find(lesson =>
+  lesson.start === lastAffectedPeriod + 1
+);
+
+// Raumwechsel erkennen
+
+const roomChangeBefore =
+  adjacentBefore &&
+  originalRoomId &&
+  adjacentBefore.roomId &&
+  adjacentBefore.roomId !== originalRoomId;
+
+const roomChangeAfter =
+  adjacentAfter &&
+  originalRoomId &&
+  adjacentAfter.roomId &&
+  adjacentAfter.roomId !== originalRoomId;
+        
         if (knowsSubject) {
           score += 50;
           reasons.push("Kennfach");
