@@ -1035,22 +1035,51 @@
 
 </div>
 
+
 <!-- Automatische Planung -->
 
 <div id="automaticPlanning" class="page">
 
   <div class="panel">
-    <h3>Automatische Planung</h3>
-
-    <p>
-      Hier kannst du die automatische Erstellung
-      der Stundenpläne vorbereiten.
-    </p>
+    <h3>1. Planungsgrundlage</h3>
 
     <p class="muted">
-      Die Eingabe der Wochenstunden und die automatische
-      Verteilung werden schrittweise ergänzt.
+      Wähle das Schuljahr und den Jahrgang aus,
+      für den du die Unterrichtsvorgaben festlegen möchtest.
     </p>
+
+    <div class="form-group">
+      <label for="autoPlanningSchoolYear">Schuljahr</label>
+      <select id="autoPlanningSchoolYear">
+        <option value="">Schuljahr auswählen</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="autoPlanningGrade">Jahrgang</label>
+      <select id="autoPlanningGrade" disabled>
+        <option value="">Jahrgang auswählen</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>2. Unterrichtsvorgaben</h3>
+
+    <p class="muted">
+      Lege fest, wie viele Wochenstunden jedes Fach
+      im ausgewählten Jahrgang unterrichtet werden soll.
+      Die Angaben gelten zunächst für alle Klassen
+      dieses Jahrgangs.
+    </p>
+
+    <div id="autoPlanningRequirements">
+      <p class="muted">
+        Bitte zuerst ein Schuljahr und einen Jahrgang auswählen.
+      </p>
+    </div>
+
+    <div id="autoPlanningMessage" class="muted"></div>
   </div>
 
 </div>
