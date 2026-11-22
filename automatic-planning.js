@@ -298,10 +298,11 @@ requirements.forEach(requirement => {
 
   // Planungsprüfung bei Änderungen aktualisieren
 
-container.querySelectorAll(".auto-planning-periods")
-  .forEach(input => {
-    input.addEventListener("input", runAutoPlanningCheck);
-  });
+container.querySelectorAll(
+  ".auto-planning-periods, .auto-planning-blocks"
+).forEach(input => {
+  input.addEventListener("input", runAutoPlanningCheck);
+});
 
   const saveButton = document.createElement("button");
   saveButton.type = "button";
