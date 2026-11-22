@@ -209,6 +209,13 @@ async function loadAutoPlanningRequirements() {
   table.append(thead, tbody);
   container.appendChild(table);
 
+  // Planungsprüfung bei Änderungen aktualisieren
+
+container.querySelectorAll(".auto-planning-periods")
+  .forEach(input => {
+    input.addEventListener("input", runAutoPlanningCheck);
+  });
+
   const saveButton = document.createElement("button");
   saveButton.type = "button";
   saveButton.textContent = "Unterrichtsvorgaben speichern";
