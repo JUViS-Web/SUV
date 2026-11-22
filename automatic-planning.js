@@ -66,6 +66,16 @@ async function loadAutoPlanningGrades() {
 
   autoPlanningGrade.disabled = true;
 
+  // Alte Planungsprüfung zurücksetzen
+
+  autoPlanningCheckPassed = false;
+
+  document.getElementById("autoPlanningCheck").innerHTML =
+    '<p class="muted">Bitte einen Jahrgang auswählen.</p>';
+
+  document.getElementById("autoPlanningRequirements").innerHTML =
+    '<p class="muted">Bitte zuerst einen Jahrgang auswählen.</p>';
+  
   if (!schoolYearId) {
     autoPlanningMessage.textContent =
       "Bitte zuerst ein Schuljahr auswählen.";
