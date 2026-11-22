@@ -9549,12 +9549,7 @@ const maxVisiblePeriod = Math.max(
               ? roomPermissionTeacherIds.has(teacher.id)
               : null;
         
-        const occupiedPeriods = [];
-
-        (dayEntries || []).forEach(dayEntry => {
-
-// Belegte Stunden und Räume der Lehrkraft erfassen
-
+      const occupiedPeriods = [];
 const teacherDailyLessons = [];
 
 (dayEntries || []).forEach(dayEntry => {
@@ -9582,25 +9577,11 @@ const teacherDailyLessons = [];
     roomId
   });
 
+  for (let p = 0; p < count; p++) {
+    occupiedPeriods.push(dayEntry.period_number + p);
+  }
+
 });
-          
-          const assignedIds = [
-            dayEntry.teacher_id,
-            dayEntry.grade_courses?.teacher_id,
-            ...(dayEntry.timetable_entry_teachers || [])
-              .map(item => item.teacher_id)
-          ].filter(Boolean);
-
-          if (!assignedIds.includes(teacher.id)) return;
-
-          const count =
-            dayEntry.lesson_block_requirements?.periods_count || 1;
-
-          for (let p = 0; p < count; p++) {
-            occupiedPeriods.push(dayEntry.period_number + p);
-          }
-
-        });
 
         const hasConflict = affectedPeriods.some(period =>
           occupiedPeriods.includes(period)
