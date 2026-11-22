@@ -223,9 +223,34 @@ async function loadAutoPlanningRequirements() {
     input.className = "auto-planning-periods";
     input.style.width = "90px";
 
-    periodsCell.appendChild(input);
+        periodsCell.appendChild(input);
 
-    row.append(nameCell, codeCell, periodsCell);
+    const blocksCell = document.createElement("td");
+    const blocksInput = document.createElement("input");
+
+    blocksInput.type = "text";
+    blocksInput.placeholder = "z. B. 2+3";
+    blocksInput.value =
+      Number(input.value) === 0
+        ? ""
+        : Number(input.value) === 1
+          ? "1"
+          : Number(input.value) % 2 === 0
+            ? Array(Number(input.value) / 2).fill(2).join(" + ")
+            : Number(input.value) === 3
+              ? "3"
+              : [
+                  ...Array((Number(input.value) - 3) / 2).fill(2),
+                  3
+                ].join(" + ");
+
+    blocksInput.dataset.subjectId = subject.id;
+    blocksInput.className = "auto-planning-blocks";
+    blocksInput.style.width = "130px";
+
+    blocksCell.appendChild(blocksInput);
+
+    row.append(nameCell, codeCell, periodsCell, blocksCell);
     tbody.appendChild(row);
   });
 
