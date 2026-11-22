@@ -159,11 +159,11 @@ async function loadAutoPlanningRequirements() {
   }
 
   const { data: requirements, error: requirementError } =
-    await suvDb
-      .from("grade_subject_requirements")
-      .select("subject_id, weekly_periods")
-      .eq("school_year_id", schoolYearId)
-      .eq("grade_level_id", gradeLevelId);
+  await suvDb
+    .from("grade_subject_requirements")
+    .select("id, subject_id, weekly_periods")
+    .eq("school_year_id", schoolYearId)
+    .eq("grade_level_id", gradeLevelId);
 
   if (requirementError) {
     container.textContent =
@@ -172,6 +172,42 @@ async function loadAutoPlanningRequirements() {
     return;
   }
 
+const requirementIds = requirements.map(item => item.id);
+
+let existingBlocks = [];
+
+if (requirementIds.length > 0) {
+  const { data: blocks, error: blockError } = await suvDb
+    .from("lesson_block_requirements")
+    .select("grade_subject_requirement_id, block_number, periods_count")
+    .in("grade_subject_requirement_id", requirementIds)
+    .order("block_number");
+
+  if (blockError) {
+    container.textContent =
+      "Fehler beim Laden der Unterrichtsblöcke: " +
+      blockError.message;
+    return;
+  }
+
+  existingBlocks = blocks || [];
+}
+
+const blocksByRequirement = new Map();
+
+requirements.forEach(requirement => {
+  const subjectBlocks = existingBlocks
+    .filter(block =>
+      block.grade_subject_requirement_id === requirement.id
+    )
+    .sort((a, b) => a.block_number - b.block_number);
+
+  blocksByRequirement.set(
+    requirement.subject_id,
+    subjectBlocks.map(block => block.periods_count).join(" + ")
+  );
+});
+  
   const existingValues = new Map(
     requirements.map(item => [
       item.subject_id,
