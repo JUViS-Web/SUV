@@ -192,7 +192,7 @@ async function loadAutoPlanningRequirements() {
   const thead = document.createElement("thead");
   const headerRow = document.createElement("tr");
 
-  ["Fach", "Kürzel", "Wochenstunden"].forEach(title => {
+  ["Fach", "Kürzel", "Wochenstunden", "Unterrichtsblöcke"].forEach(title => {
     const th = document.createElement("th");
     th.textContent = title;
     headerRow.appendChild(th);
