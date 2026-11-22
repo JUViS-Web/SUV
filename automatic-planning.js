@@ -220,6 +220,8 @@ async function loadAutoPlanningRequirements() {
 
   autoPlanningMessage.textContent =
     subjects.length + " Fächer für den ausgewählten Jahrgang geladen.";
+
+  await runAutoPlanningCheck();
 }
 
 
@@ -288,6 +290,91 @@ async function saveAutoPlanningRequirements() {
   saveButton.textContent = "Unterrichtsvorgaben speichern";
 }
 
+// Planungsgrundlage prüfen
+
+async function runAutoPlanningCheck() {
+  const schoolYearId = autoPlanningSchoolYear.value;
+  const gradeLevelId = autoPlanningGrade.value;
+
+  const container = document.getElementById(
+    "autoPlanningCheck"
+  );
+
+  if (!schoolYearId || !gradeLevelId) return;
+
+  container.textContent = "Planungsgrundlage wird geprüft ...";
+
+  const { data: classes, error } = await suvDb
+    .from("classes")
+    .select("id, name")
+    .eq("school_year_id", schoolYearId)
+    .eq("grade_level_id", gradeLevelId)
+    .order("name");
+
+  if (error) {
+    container.textContent =
+      "Fehler bei der Klassenprüfung: " + error.message;
+    return;
+  }
+
+  const inputs = document.querySelectorAll(
+    ".auto-planning-periods"
+  );
+
+  let weeklyPeriods = 0;
+  let activeSubjects = 0;
+
+  inputs.forEach(input => {
+    const value = Number(input.value) || 0;
+
+    weeklyPeriods += value;
+
+    if (value > 0) {
+      activeSubjects++;
+    }
+  });
+
+  container.innerHTML = "";
+
+  const classInfo = document.createElement("p");
+  classInfo.textContent =
+    "Vorhandene Klassen: " + classes.length;
+
+  const subjectInfo = document.createElement("p");
+  subjectInfo.textContent =
+    "Fächer mit Unterricht: " + activeSubjects;
+
+  const hoursInfo = document.createElement("p");
+  hoursInfo.textContent =
+    "Wochenstunden je Klasse: " + weeklyPeriods;
+
+  const totalInfo = document.createElement("p");
+  totalInfo.textContent =
+    "Unterrichtsstunden im gesamten Jahrgang: " +
+    (weeklyPeriods * classes.length);
+
+  container.append(
+    classInfo,
+    subjectInfo,
+    hoursInfo,
+    totalInfo
+  );
+
+  const status = document.createElement("p");
+
+  if (classes.length === 0) {
+    status.textContent =
+      "Prüfung nicht bestanden: Für diesen Jahrgang existieren keine Klassen.";
+  } else if (weeklyPeriods === 0) {
+    status.textContent =
+      "Prüfung nicht bestanden: Es wurden noch keine Wochenstunden festgelegt.";
+  } else {
+    status.textContent =
+      "Grundprüfung bestanden: Klassen und Unterrichtsvorgaben sind vorhanden.";
+  }
+
+  container.appendChild(status);
+}
 
 // Jahrgang ausgewählt
 
