@@ -357,57 +357,6 @@ async function saveAutoPlanningRequirements() {
       }
     }
 
-        const blocksInput = document.querySelector(
-      '.auto-planning-blocks[data-subject-id="' +
-      input.dataset.subjectId + '"]'
-    );
-
-    if (!blocksInput) {
-      autoPlanningMessage.textContent =
-        "Fehler: Unterrichtsblöcke wurden nicht gefunden.";
-      return;
-    }
-
-    const blockText = blocksInput.value.trim();
-
-    if (value === 0 && blockText !== "") {
-      autoPlanningMessage.textContent =
-        "Bei 0 Wochenstunden dürfen keine Blöcke eingetragen sein.";
-      blocksInput.focus();
-      return;
-    }
-
-    if (value > 0) {
-      const blocks = blockText.split("+").map(block =>
-        Number(block.trim())
-      );
-
-      if (
-        blockText === "" ||
-        blocks.some(block =>
-          !Number.isInteger(block) || block < 1
-        )
-      ) {
-        autoPlanningMessage.textContent =
-          "Bitte gültige Unterrichtsblöcke eingeben, z. B. 2+3.";
-        blocksInput.focus();
-        return;
-      }
-
-      const blockTotal = blocks.reduce(
-        (sum, block) => sum + block,
-        0
-      );
-
-      if (blockTotal !== value) {
-        autoPlanningMessage.textContent =
-          "Die Blöcke müssen zusammen genau " +
-          value + " Wochenstunden ergeben.";
-        blocksInput.focus();
-        return;
-      }
-    }
-
     entries.push({
       school_year_id: schoolYearId,
       grade_level_id: gradeLevelId,
