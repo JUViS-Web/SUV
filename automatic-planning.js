@@ -110,22 +110,191 @@ autoPlanningSchoolYear.addEventListener(
 );
 
 
-// Jahrgang ausgewählt
 
-autoPlanningGrade.addEventListener("change", () => {
-  if (!autoPlanningGrade.value) {
+// Unterrichtsvorgaben eines Jahrgangs laden
+
+async function loadAutoPlanningRequirements() {
+  const schoolYearId = autoPlanningSchoolYear.value;
+  const gradeLevelId = autoPlanningGrade.value;
+  const container = document.getElementById(
+    "autoPlanningRequirements"
+  );
+
+  if (!schoolYearId || !gradeLevelId) return;
+
+  container.textContent = "Fächer werden geladen ...";
+
+  const { data: subjects, error: subjectError } = await suvDb
+    .from("subjects")
+    .select("id, name, short_code")
+    .order("name");
+
+  if (subjectError) {
+    container.textContent =
+      "Fehler beim Laden der Fächer: " + subjectError.message;
+    return;
+  }
+
+  const { data: requirements, error: requirementError } =
+    await suvDb
+      .from("grade_subject_requirements")
+      .select("subject_id, weekly_periods")
+      .eq("school_year_id", schoolYearId)
+      .eq("grade_level_id", gradeLevelId);
+
+  if (requirementError) {
+    container.textContent =
+      "Fehler beim Laden der Unterrichtsvorgaben: " +
+      requirementError.message;
+    return;
+  }
+
+  const existingValues = new Map(
+    requirements.map(item => [
+      item.subject_id,
+      item.weekly_periods
+    ])
+  );
+
+  container.innerHTML = "";
+
+  if (!subjects || subjects.length === 0) {
+    container.textContent = "Es sind keine Fächer vorhanden.";
+    return;
+  }
+
+  const table = document.createElement("table");
+  table.className = "data-table";
+
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+
+  ["Fach", "Kürzel", "Wochenstunden"].forEach(title => {
+    const th = document.createElement("th");
+    th.textContent = title;
+    headerRow.appendChild(th);
+  });
+
+  thead.appendChild(headerRow);
+
+  const tbody = document.createElement("tbody");
+
+  subjects.forEach(subject => {
+    const row = document.createElement("tr");
+
+    const nameCell = document.createElement("td");
+    nameCell.textContent = subject.name;
+
+    const codeCell = document.createElement("td");
+    codeCell.textContent = subject.short_code || "–";
+
+    const periodsCell = document.createElement("td");
+    const input = document.createElement("input");
+
+    input.type = "number";
+    input.min = "0";
+    input.max = "40";
+    input.step = "1";
+    input.value = existingValues.get(subject.id) ?? 0;
+    input.dataset.subjectId = subject.id;
+    input.className = "auto-planning-periods";
+    input.style.width = "90px";
+
+    periodsCell.appendChild(input);
+
+    row.append(nameCell, codeCell, periodsCell);
+    tbody.appendChild(row);
+  });
+
+  table.append(thead, tbody);
+  container.appendChild(table);
+
+  const saveButton = document.createElement("button");
+  saveButton.type = "button";
+  saveButton.textContent = "Unterrichtsvorgaben speichern";
+  saveButton.className = "primary-button";
+
+  saveButton.addEventListener("click", saveAutoPlanningRequirements);
+
+  container.appendChild(saveButton);
+
+  autoPlanningMessage.textContent =
+    subjects.length + " Fächer für den ausgewählten Jahrgang geladen.";
+}
+
+
+// Unterrichtsvorgaben speichern
+
+async function saveAutoPlanningRequirements() {
+  const schoolYearId = autoPlanningSchoolYear.value;
+  const gradeLevelId = autoPlanningGrade.value;
+
+  const inputs = document.querySelectorAll(
+    ".auto-planning-periods"
+  );
+
+  const saveButton = document.querySelector(
+    "#autoPlanningRequirements button"
+  );
+
+  const entries = [];
+
+  for (const input of inputs) {
+    const value = Number(input.value);
+
+    if (
+      !Number.isInteger(value) ||
+      value < 0 ||
+      value > 40
+    ) {
+      autoPlanningMessage.textContent =
+        "Bitte nur ganze Zahlen zwischen 0 und 40 eingeben.";
+      input.focus();
+      return;
+    }
+
+    entries.push({
+      school_year_id: schoolYearId,
+      grade_level_id: gradeLevelId,
+      subject_id: input.dataset.subjectId,
+      weekly_periods: value,
+      is_active: true,
+      updated_at: new Date().toISOString()
+    });
+  }
+
+  saveButton.disabled = true;
+  saveButton.textContent = "Speichern läuft ...";
+
+  const { error } = await suvDb
+    .from("grade_subject_requirements")
+    .upsert(entries, {
+      onConflict: "school_year_id,grade_level_id,subject_id"
+    });
+
+  if (error) {
     autoPlanningMessage.textContent =
-      "Bitte einen Jahrgang auswählen.";
+      "Speichern fehlgeschlagen: " + error.message;
+
+    saveButton.disabled = false;
+    saveButton.textContent = "Unterrichtsvorgaben speichern";
     return;
   }
 
   autoPlanningMessage.textContent =
-    "Ausgewählter Jahrgang: " +
-    autoPlanningGrade.options[
-      autoPlanningGrade.selectedIndex
-    ].textContent +
-    ". Die Unterrichtsvorgaben werden im nächsten Schritt ergänzt.";
-});
+    "Unterrichtsvorgaben erfolgreich gespeichert.";
+
+  saveButton.disabled = false;
+  saveButton.textContent = "Unterrichtsvorgaben speichern";
+}
+
+
+// Jahrgang ausgewählt
+
+autoPlanningGrade.addEventListener(
+  "change",
+  loadAutoPlanningRequirements
+);
 
 
 // Automatische Planung öffnen
