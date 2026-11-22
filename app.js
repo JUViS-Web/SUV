@@ -9616,7 +9616,7 @@ const roomChangeAfter =
         
         if (knowsSubject) {
           score += 50;
-          reasons.push("Kennfach");
+          reasons.push("Fachvertretung (Kennfach)");
         }
 
         if (knowsClass) {
