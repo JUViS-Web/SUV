@@ -130,6 +130,19 @@ async function loadAutoPlanningRequirements() {
     "autoPlanningRequirements"
   );
 
+  // Alte Ergebnisse beim Jahrgangswechsel zurücksetzen
+
+  autoPlanningCheckPassed = false;
+
+  document.getElementById("autoPlanningCheck").innerHTML =
+    '<p class="muted">Bitte einen Jahrgang auswählen.</p>';
+
+  if (!schoolYearId || !gradeLevelId) {
+    container.innerHTML =
+      '<p class="muted">Bitte zuerst ein Schuljahr und einen Jahrgang auswählen.</p>';
+    return;
+  }
+  
   if (!schoolYearId || !gradeLevelId) return;
 
   container.textContent = "Fächer werden geladen ...";
