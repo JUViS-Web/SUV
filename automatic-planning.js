@@ -282,6 +282,7 @@ container.querySelectorAll(".auto-planning-periods")
 
 // Unterrichtsvorgaben speichern
 
+
 async function saveAutoPlanningRequirements() {
   const schoolYearId = autoPlanningSchoolYear.value;
   const gradeLevelId = autoPlanningGrade.value;
@@ -295,6 +296,7 @@ async function saveAutoPlanningRequirements() {
   );
 
   const entries = [];
+  const blockEntries = [];
 
   for (const input of inputs) {
     const value = Number(input.value);
@@ -310,26 +312,31 @@ async function saveAutoPlanningRequirements() {
       return;
     }
 
-        const blocksInput = document.querySelector(
+    const blocksInput = document.querySelector(
       '.auto-planning-blocks[data-subject-id="' +
       input.dataset.subjectId + '"]'
     );
 
-    const blockText = blocksInput.value.trim();
+    if (!blocksInput) {
+      autoPlanningMessage.textContent =
+        "Unterrichtsblöcke wurden nicht gefunden.";
+      return;
+    }
 
+    const blockText = blocksInput.value.trim();
     let blocks = [];
 
     if (value === 0 && blockText !== "") {
       autoPlanningMessage.textContent =
-        "Bei 0 Wochenstunden dürfen keine Unterrichtsblöcke eingetragen sein.";
+        "Bei 0 Wochenstunden dürfen keine Blöcke eingetragen sein.";
       blocksInput.focus();
       return;
     }
 
     if (value > 0) {
-      blocks = blockText
-        .split("+")
-        .map(block => Number(block.trim()));
+      blocks = blockText.split("+").map(block =>
+        Number(block.trim())
+      );
 
       if (
         blockText === "" ||
@@ -338,7 +345,7 @@ async function saveAutoPlanningRequirements() {
         )
       ) {
         autoPlanningMessage.textContent =
-          "Bitte gib gültige Unterrichtsblöcke ein, z. B. 2+3.";
+          "Bitte gültige Unterrichtsblöcke eingeben.";
         blocksInput.focus();
         return;
       }
@@ -350,7 +357,7 @@ async function saveAutoPlanningRequirements() {
 
       if (blockTotal !== value) {
         autoPlanningMessage.textContent =
-          "Die Unterrichtsblöcke müssen zusammen genau " +
+          "Die Blöcke müssen zusammen genau " +
           value + " Wochenstunden ergeben.";
         blocksInput.focus();
         return;
@@ -365,32 +372,117 @@ async function saveAutoPlanningRequirements() {
       is_active: true,
       updated_at: new Date().toISOString()
     });
+
+    blocks.forEach((periodsCount, index) => {
+      blockEntries.push({
+        subject_id: input.dataset.subjectId,
+        block_number: index + 1,
+        periods_count: periodsCount
+      });
+    });
   }
 
   saveButton.disabled = true;
   saveButton.textContent = "Speichern läuft ...";
 
-  const { error } = await suvDb
+  const { error: requirementError } = await suvDb
     .from("grade_subject_requirements")
     .upsert(entries, {
       onConflict: "school_year_id,grade_level_id,subject_id"
     });
 
-  if (error) {
+  if (requirementError) {
     autoPlanningMessage.textContent =
-      "Speichern fehlgeschlagen: " + error.message;
+      "Speichern der Unterrichtsvorgaben fehlgeschlagen: " +
+      requirementError.message;
 
     saveButton.disabled = false;
     saveButton.textContent = "Unterrichtsvorgaben speichern";
     return;
   }
 
+  const { data: requirements, error: loadError } = await suvDb
+    .from("grade_subject_requirements")
+    .select("id, subject_id")
+    .eq("school_year_id", schoolYearId)
+    .eq("grade_level_id", gradeLevelId);
+
+  if (loadError) {
+    autoPlanningMessage.textContent =
+      "Unterrichtsvorgaben gespeichert, aber IDs konnten nicht geladen werden: " +
+      loadError.message;
+
+    saveButton.disabled = false;
+    saveButton.textContent = "Unterrichtsvorgaben speichern";
+    return;
+  }
+
+  const requirementIds = new Map(
+    requirements.map(item => [item.subject_id, item.id])
+  );
+
+  const databaseBlocks = blockEntries.map(block => ({
+    grade_subject_requirement_id:
+      requirementIds.get(block.subject_id),
+    block_number: block.block_number,
+    periods_count: block.periods_count
+  }));
+
+  if (databaseBlocks.length > 0) {
+    const { error: blockError } = await suvDb
+      .from("lesson_block_requirements")
+      .upsert(databaseBlocks, {
+        onConflict: "grade_subject_requirement_id,block_number"
+      });
+
+    if (blockError) {
+      autoPlanningMessage.textContent =
+        "Wochenstunden gespeichert, aber Blockverteilung fehlgeschlagen: " +
+        blockError.message;
+
+      saveButton.disabled = false;
+      saveButton.textContent = "Unterrichtsvorgaben speichern";
+      return;
+    }
+  }
+
+  for (const requirement of requirements) {
+    const subjectBlocks = blockEntries.filter(
+      block => block.subject_id === requirement.subject_id
+    );
+
+    let deleteQuery = suvDb
+      .from("lesson_block_requirements")
+      .delete()
+      .eq("grade_subject_requirement_id", requirement.id);
+
+    if (subjectBlocks.length > 0) {
+      deleteQuery = deleteQuery.gt(
+        "block_number",
+        subjectBlocks.length
+      );
+    }
+
+    const { error: cleanupError } = await deleteQuery;
+
+    if (cleanupError) {
+      autoPlanningMessage.textContent =
+        "Blockverteilung gespeichert, aber alte Blöcke konnten nicht bereinigt werden: " +
+        cleanupError.message;
+
+      saveButton.disabled = false;
+      saveButton.textContent = "Unterrichtsvorgaben speichern";
+      return;
+    }
+  }
+
   autoPlanningMessage.textContent =
-    "Unterrichtsvorgaben erfolgreich gespeichert.";
+    "Unterrichtsvorgaben und Unterrichtsblöcke erfolgreich gespeichert.";
 
   saveButton.disabled = false;
   saveButton.textContent = "Unterrichtsvorgaben speichern";
 }
+
 
 // Planungsgrundlage prüfen
 
