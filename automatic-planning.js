@@ -12,7 +12,7 @@ const autoPlanningMessage =
   document.getElementById("autoPlanningMessage");
 
 let automaticPlanningLoaded = false;
-
+let autoPlanningCheckPassed = false;
 
 // Schuljahre laden
 
