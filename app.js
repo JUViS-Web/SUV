@@ -9493,13 +9493,14 @@ if (suggestSubstituteTeacherButton) {
         await suvDb
           .from("timetable_entries")
           .select(`
-            id,
-            period_number,
-            teacher_id,
-            lesson_block_requirements(periods_count),
-            grade_courses(teacher_id),
-            timetable_entry_teachers(teacher_id)
-          `)
+  id,
+  period_number,
+  teacher_id,
+  room_id,
+  lesson_block_requirements(periods_count),
+  grade_courses(teacher_id, room_id),
+  timetable_entry_teachers(teacher_id)
+`)
           .eq("timetable_version_id", substitution.timetable_version_id)
           .eq("weekday", entry.weekday);
 
