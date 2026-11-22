@@ -307,6 +307,8 @@ async function runAutoPlanningCheck() {
     "autoPlanningCheck"
   );
 
+  autoPlanningCheckPassed = false;
+  
   if (!schoolYearId || !gradeLevelId) return;
 
   container.textContent = "Planungsgrundlage wird geprüft ...";
@@ -318,7 +320,9 @@ async function runAutoPlanningCheck() {
     .eq("grade_level_id", gradeLevelId)
     .order("name");
 
-  if (error) {
+    if (error) {
+    autoPlanningCheckPassed = false;
+
     container.textContent =
       "Fehler bei der Klassenprüfung: " + error.message;
     return;
