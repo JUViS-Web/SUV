@@ -525,6 +525,7 @@ async function saveAutoPlanningRequirements() {
 
 // Planungsgrundlage prüfen
 
+
 async function runAutoPlanningCheck() {
   const schoolYearId = autoPlanningSchoolYear.value;
   const gradeLevelId = autoPlanningGrade.value;
@@ -534,7 +535,7 @@ async function runAutoPlanningCheck() {
   );
 
   autoPlanningCheckPassed = false;
-  
+
   if (!schoolYearId || !gradeLevelId) return;
 
   container.textContent = "Planungsgrundlage wird geprüft ...";
@@ -546,9 +547,7 @@ async function runAutoPlanningCheck() {
     .eq("grade_level_id", gradeLevelId)
     .order("name");
 
-    if (error) {
-    autoPlanningCheckPassed = false;
-
+  if (error) {
     container.textContent =
       "Fehler bei der Klassenprüfung: " + error.message;
     return;
@@ -560,14 +559,74 @@ async function runAutoPlanningCheck() {
 
   let weeklyPeriods = 0;
   let activeSubjects = 0;
+  const invalidSubjects = [];
 
   inputs.forEach(input => {
-    const value = Number(input.value) || 0;
+    const row = input.closest("tr");
+    const subjectName =
+      row?.cells[0]?.textContent || "Unbekanntes Fach";
 
-    weeklyPeriods += value;
+    const rawValue = input.value.trim();
+    const value = Number(rawValue);
 
-    if (value > 0) {
-      activeSubjects++;
+    const blocksInput = document.querySelector(
+      '.auto-planning-blocks[data-subject-id="' +
+      input.dataset.subjectId + '"]'
+    );
+
+    let valid = true;
+
+    if (
+      rawValue === "" ||
+      !Number.isInteger(value) ||
+      value < 0 ||
+      value > 40
+    ) {
+      valid = false;
+    } else {
+      weeklyPeriods += value;
+
+      if (value > 0) {
+        activeSubjects++;
+      }
+    }
+
+    if (!blocksInput) {
+      valid = false;
+    } else {
+      const blockText = blocksInput.value.trim();
+
+      if (value === 0 && blockText !== "") {
+        valid = false;
+      }
+
+      if (value > 0) {
+        const parts = blockText.split("+").map(part =>
+          part.trim()
+        );
+
+        const blocksValid =
+          blockText !== "" &&
+          parts.every(part => /^\d+$/.test(part)) &&
+          parts.every(part => Number(part) >= 1);
+
+        if (!blocksValid) {
+          valid = false;
+        } else {
+          const blockTotal = parts.reduce(
+            (sum, part) => sum + Number(part),
+            0
+          );
+
+          if (blockTotal !== value) {
+            valid = false;
+          }
+        }
+      }
+    }
+
+    if (!valid) {
+      invalidSubjects.push(subjectName);
     }
   });
 
@@ -599,15 +658,16 @@ async function runAutoPlanningCheck() {
 
   const status = document.createElement("p");
 
-    if (classes.length === 0) {
-    autoPlanningCheckPassed = false;
-
+  if (classes.length === 0) {
     status.textContent =
       "Prüfung nicht bestanden: Für diesen Jahrgang existieren keine Klassen.";
 
-  } else if (weeklyPeriods === 0) {
-    autoPlanningCheckPassed = false;
+  } else if (invalidSubjects.length > 0) {
+    status.textContent =
+      "Prüfung nicht bestanden: Bei folgenden Fächern sind die Wochenstunden oder Unterrichtsblöcke ungültig: " +
+      invalidSubjects.join(", ");
 
+  } else if (weeklyPeriods === 0) {
     status.textContent =
       "Prüfung nicht bestanden: Es wurden noch keine Wochenstunden festgelegt.";
 
@@ -615,11 +675,12 @@ async function runAutoPlanningCheck() {
     autoPlanningCheckPassed = true;
 
     status.textContent =
-      "Grundprüfung bestanden: Klassen und Unterrichtsvorgaben sind vorhanden.";
+      "Grundprüfung bestanden: Klassen, Wochenstunden und Unterrichtsblöcke sind gültig.";
   }
 
   container.appendChild(status);
 }
+
 
 // Jahrgang ausgewählt
 
