@@ -390,6 +390,12 @@ autoPlanningGrade.addEventListener(
   loadAutoPlanningRequirements
 );
 
+// Schuljahr ausgewählt
+
+autoPlanningSchoolYear.addEventListener(
+  "change",
+  loadAutoPlanningGrades
+);
 
 // Automatische Planung öffnen
 
