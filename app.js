@@ -9659,6 +9659,28 @@ const roomChangeAfter =
           reasons.push("Raumfreigabe nicht hinterlegt");
         }
 
+// Angrenzende Unterrichtsstunden bewerten
+
+if (adjacentBefore) {
+  if (roomChangeBefore) {
+    score -= 5;
+    reasons.push("Raumwechsel vor der Vertretung");
+  } else if (adjacentBefore.roomId === originalRoomId) {
+    score += 5;
+    reasons.push("Vorherige Stunde im gleichen Raum");
+  }
+}
+
+if (adjacentAfter) {
+  if (roomChangeAfter) {
+    score -= 5;
+    reasons.push("Raumwechsel nach der Vertretung");
+  } else if (adjacentAfter.roomId === originalRoomId) {
+    score += 5;
+    reasons.push("Folgestunde im gleichen Raum");
+  }
+}
+        
         return {
           ...teacher,
           score,
