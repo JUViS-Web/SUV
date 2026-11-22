@@ -9710,11 +9710,10 @@ substituteTeacherSuggestions.appendChild(timetableLegend);
 
         const card = document.createElement("div");
 
-                const isGreen =
-          teacher.knowsSubject &&
-          teacher.knowsClass &&
-          !teacher.hasConflict &&
-          teacher.roomAllowed === true;
+        const isGreen =
+         teacher.knowsSubject &&
+         !teacher.hasConflict &&
+         teacher.roomAllowed === true;
 
         const isYellow =
           !teacher.hasConflict && !isGreen;
