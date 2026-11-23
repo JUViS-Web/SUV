@@ -509,6 +509,17 @@ if (teacherForm) {
     const weeklyHours =
       Number(document.getElementById("teacherWeeklyHours").value);
 
+const selectedSubjectIds = Array.from(
+  document.querySelectorAll(".teacher-subject-checkbox:checked")
+).map(checkbox => checkbox.value);
+
+if (selectedSubjectIds.length < 2) {
+  teacherMessage.textContent =
+    "Bitte mindestens 2 Unterrichtsfächer auswählen.";
+
+  return;
+}
+    
     const saveButton =
       document.getElementById("teacherSaveButton");
 
