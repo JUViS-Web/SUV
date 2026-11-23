@@ -332,7 +332,7 @@ async function loadTeacherSubjectOptions(selectedSubjectIds = []) {
   const container = document.getElementById("teacherSubjectOptions");
   if (!container) return;
 
-  container.textContent = "Fächer werden geladen ...";
+  container.innerHTML = "Fächer werden geladen ...";
 
   const { data, error } = await suvDb
     .from("subjects")
@@ -340,8 +340,7 @@ async function loadTeacherSubjectOptions(selectedSubjectIds = []) {
     .order("name", { ascending: true });
 
   if (error) {
-    container.textContent =
-      "Fehler beim Laden der Fächer: " + error.message;
+    container.textContent = "Fehler beim Laden: " + error.message;
     return;
   }
 
@@ -352,26 +351,73 @@ async function loadTeacherSubjectOptions(selectedSubjectIds = []) {
     return;
   }
 
+  const toggleButton = document.createElement("button");
+  toggleButton.type = "button";
+  toggleButton.style.width = "100%";
+
+  const subjectList = document.createElement("div");
+  subjectList.style.display = "none";
+  subjectList.style.marginTop = "10px";
+  subjectList.style.padding = "12px";
+  subjectList.style.border = "1px solid #ccc";
+  subjectList.style.borderRadius = "12px";
+  subjectList.style.maxHeight = "300px";
+  subjectList.style.overflowY = "auto";
+
+  const hint = document.createElement("p");
+  hint.textContent = "Mindestens 2 Fächer auswählen.";
+  hint.style.fontSize = "14px";
+
+  function updateButtonText() {
+    const count = subjectList.querySelectorAll(
+      ".teacher-subject-checkbox:checked"
+    ).length;
+
+    toggleButton.textContent =
+      count === 0
+        ? "Unterrichtsfächer auswählen"
+        : `${count} Fächer ausgewählt`;
+  }
+
+  toggleButton.addEventListener("click", () => {
+    subjectList.style.display =
+      subjectList.style.display === "none" ? "block" : "none";
+  });
+
   data.forEach(subject => {
     const label = document.createElement("label");
-    label.style.display = "block";
+    label.style.display = "flex";
+    label.style.alignItems = "center";
+    label.style.gap = "12px";
+    label.style.padding = "12px 4px";
+    label.style.borderBottom = "1px solid #ddd";
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.value = subject.id;
     checkbox.className = "teacher-subject-checkbox";
     checkbox.checked = selectedSubjectIds.includes(subject.id);
+    checkbox.style.width = "24px";
+    checkbox.style.height = "24px";
+    checkbox.style.flexShrink = "0";
+
+    checkbox.addEventListener("change", updateButtonText);
+
+    const text = document.createElement("span");
+    text.textContent =
+      subject.name +
+      (subject.short_code ? ` (${subject.short_code})` : "");
 
     label.appendChild(checkbox);
-    label.appendChild(
-      document.createTextNode(
-        " " + subject.name +
-        (subject.short_code ? " (" + subject.short_code + ")" : "")
-      )
-    );
-
-    container.appendChild(label);
+    label.appendChild(text);
+    subjectList.appendChild(label);
   });
+
+  container.appendChild(toggleButton);
+  container.appendChild(hint);
+  container.appendChild(subjectList);
+
+  updateButtonText();
 }
 
 loadTeacherSubjectOptions();
