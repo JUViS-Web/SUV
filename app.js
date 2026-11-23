@@ -560,12 +560,6 @@ if (result.error) {
   return;
 }
 
-// Ausgewählte Fächer auslesen
-
-const selectedSubjectIds = Array.from(
-  document.querySelectorAll(".teacher-subject-checkbox:checked")
-).map(checkbox => checkbox.value);
-
 // Bisherige Fachzuordnungen entfernen
 
 const { error: deleteSubjectError } = await suvDb
