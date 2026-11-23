@@ -10,6 +10,8 @@ let parallelTrackSubjects = [];
 let parallelTrackClasses = [];
 let parallelTrackTeachers = [];
 let parallelTrackRooms = [];
+let parallelTrackTeacherSubjects = [];
+let parallelTrackTeacherRoomPermissions = [];
 
 function escapeParallelTrackHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
