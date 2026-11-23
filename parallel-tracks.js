@@ -340,6 +340,88 @@ subjectInfo.textContent =
       classList.appendChild(line);
     });
 
+    const instanceArea = document.createElement("div");
+    instanceArea.className = "teacher-actions";
+
+    const instanceTitle = document.createElement("strong");
+    instanceTitle.textContent = "Lehrkräfte- und Raumzuordnung:";
+    instanceArea.appendChild(instanceTitle);
+
+    const instances = courseInstances.filter(
+      instance => instance.course_id === course.id
+    );
+
+    instances.forEach(instance => {
+      const instanceBox = document.createElement("div");
+      instanceBox.className = "teacher-entry";
+
+      const instanceHeading = document.createElement("strong");
+      instanceHeading.textContent =
+        course.course_name + " – Kurs " + instance.course_number;
+
+      const teacherSelect = document.createElement("select");
+
+      const teacherPlaceholder = document.createElement("option");
+      teacherPlaceholder.value = "";
+      teacherPlaceholder.textContent = "Lehrkraft auswählen";
+      teacherSelect.appendChild(teacherPlaceholder);
+
+      parallelTrackTeachers.forEach(teacher => {
+        const option = document.createElement("option");
+        option.value = teacher.id;
+        option.textContent =
+          `${teacher.short_code} – ${teacher.first_name} ${teacher.last_name}`;
+        teacherSelect.appendChild(option);
+      });
+
+      teacherSelect.value = instance.teacher_id || "";
+
+      const roomSelect = document.createElement("select");
+
+      const roomPlaceholder = document.createElement("option");
+      roomPlaceholder.value = "";
+      roomPlaceholder.textContent = "Raum auswählen";
+      roomSelect.appendChild(roomPlaceholder);
+
+      parallelTrackRooms.forEach(room => {
+        const option = document.createElement("option");
+        option.value = room.id;
+        option.textContent =
+          room.name + (room.room_type ? " – " + room.room_type : "");
+        roomSelect.appendChild(option);
+      });
+
+      roomSelect.value = instance.room_id || "";
+
+      const saveButton = document.createElement("button");
+      saveButton.type = "button";
+      saveButton.textContent = "Zuordnung speichern";
+
+      saveButton.addEventListener("click", () => {
+        saveParallelCourseInstance(
+          instance.id,
+          teacherSelect.value || null,
+          roomSelect.value || null
+        );
+      });
+
+      instanceBox.appendChild(instanceHeading);
+      instanceBox.appendChild(teacherSelect);
+      instanceBox.appendChild(roomSelect);
+      instanceBox.appendChild(saveButton);
+
+      instanceArea.appendChild(instanceBox);
+    });
+
+    if (instances.length === 0) {
+      const emptyInstances = document.createElement("p");
+      emptyInstances.textContent =
+        "Für dieses Angebot sind noch keine Kursinstanzen angelegt.";
+      instanceArea.appendChild(emptyInstances);
+    }
+
+    courseBox.appendChild(instanceArea);
+    
     const deleteCourseButton = document.createElement("button");
     deleteCourseButton.type = "button";
     deleteCourseButton.textContent = "Kursangebot löschen";
