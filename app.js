@@ -437,8 +437,10 @@ searchInput.addEventListener("input", () => {
   });
 
   container.appendChild(toggleButton);
-  container.appendChild(hint);
-  container.appendChild(subjectList);
+container.appendChild(hint);
+container.appendChild(subjectList);
+
+subjectList.prepend(searchInput);
 
   updateButtonText();
 }
