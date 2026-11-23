@@ -370,13 +370,21 @@ subjectInfo.textContent =
       teacherPlaceholder.textContent = "Lehrkraft auswählen";
       teacherSelect.appendChild(teacherPlaceholder);
 
-      parallelTrackTeachers.forEach(teacher => {
-        const option = document.createElement("option");
-        option.value = teacher.id;
-        option.textContent =
-          `${teacher.short_code} – ${teacher.first_name} ${teacher.last_name}`;
-        teacherSelect.appendChild(option);
-      });
+      const qualifiedTeachers = parallelTrackTeachers.filter(teacher =>
+  parallelTrackTeacherSubjects.some(
+    assignment =>
+      assignment.teacher_id === teacher.id &&
+      assignment.subject_id === course.subject_id
+  )
+);
+
+qualifiedTeachers.forEach(teacher => {
+  const option = document.createElement("option");
+  option.value = teacher.id;
+  option.textContent =
+    `${teacher.short_code || ""} – ${teacher.first_name} ${teacher.last_name}`;
+  teacherSelect.appendChild(option);
+});
 
       teacherSelect.value = instance.teacher_id || "";
 
