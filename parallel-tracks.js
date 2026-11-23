@@ -41,8 +41,8 @@ async function loadParallelTrackData() {
       .order("name", { ascending: false }),
 
     suvDb.from("subjects")
-      .select("id, name, short_code")
-      .order("name"),
+     .select("id, name, short_code, required_room_type")
+     .order("name"),
 
     suvDb.from("classes")
       .select("id, name, school_year_id, grade_levels(name)")
