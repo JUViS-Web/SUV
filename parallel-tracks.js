@@ -407,12 +407,21 @@ courseCountInput.placeholder = "Anzahl der Kurse";
     const courseName =
       courseNameInput.value.trim() || subject.name;
 
+const courseCount = Number(courseCountInput.value);
+
+if (!Number.isInteger(courseCount) || courseCount < 1 || courseCount > 50) {
+  parallelTracksMessage.textContent =
+    "Bitte gib eine Kursanzahl zwischen 1 und 50 ein.";
+  return;
+}
+    
     addParallelCourse(
-      track,
-      subjectSelect.value,
-      courseName,
-      selectedClassIds
-    );
+  track,
+  subjectSelect.value,
+  courseName,
+  courseCount,
+  selectedClassIds
+);
   });
 
   addCourseArea.appendChild(courseForm);
@@ -433,7 +442,7 @@ courseCountInput.placeholder = "Anzahl der Kurse";
   parallelTrackList.appendChild(entry);
 }
 
-async function addParallelCourse(track, subjectId, courseName, classIds) {
+async function addParallelCourse(track, subjectId, courseName, courseCount, classIds) {
   parallelTracksMessage.textContent =
     "Kursangebot wird gespeichert ...";
 
