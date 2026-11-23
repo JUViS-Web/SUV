@@ -55,10 +55,12 @@ async function loadParallelTrackData() {
       .order("name")
   ]);
 
-  const error =
+    const error =
     yearsResult.error ||
     subjectsResult.error ||
-    classesResult.error;
+    classesResult.error ||
+    teachersResult.error ||
+    roomsResult.error;
 
   if (error) {
     parallelTrackForm.textContent =
@@ -69,6 +71,8 @@ async function loadParallelTrackData() {
   parallelTrackSchoolYears = yearsResult.data || [];
   parallelTrackSubjects = subjectsResult.data || [];
   parallelTrackClasses = classesResult.data || [];
+  parallelTrackTeachers = teachersResult.data || [];
+  parallelTrackRooms = roomsResult.data || [];
 
   renderParallelTrackForm();
   await loadParallelTracks();
