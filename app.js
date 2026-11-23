@@ -368,6 +368,16 @@ async function loadTeacherSubjectOptions(selectedSubjectIds = []) {
   hint.textContent = "Mindestens 2 Fächer auswählen.";
   hint.style.fontSize = "14px";
 
+const searchInput = document.createElement("input");
+searchInput.type = "search";
+searchInput.placeholder = "Fach suchen ...";
+searchInput.style.width = "100%";
+searchInput.style.boxSizing = "border-box";
+searchInput.style.marginBottom = "10px";
+searchInput.style.padding = "12px";
+searchInput.style.borderRadius = "10px";
+searchInput.style.border = "1px solid #ccc";
+  
   function updateButtonText() {
     const count = subjectList.querySelectorAll(
       ".teacher-subject-checkbox:checked"
