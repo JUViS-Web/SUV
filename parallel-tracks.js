@@ -409,8 +409,6 @@ subjectInfo.textContent =
         "Für dieses Angebot sind noch keine Kursinstanzen angelegt.";
       instanceArea.appendChild(emptyInstances);
     }
-
-    courseBox.appendChild(instanceArea);
     
     const deleteCourseButton = document.createElement("button");
     deleteCourseButton.type = "button";
@@ -422,6 +420,7 @@ subjectInfo.textContent =
     courseBox.appendChild(courseHeading);
     courseBox.appendChild(subjectInfo);
     courseBox.appendChild(classList);
+    courseBox.appendChild(instanceArea);
     courseBox.appendChild(deleteCourseButton);
 
     courseArea.appendChild(courseBox);
