@@ -120,6 +120,153 @@ autoPlanningSchoolYear.addEventListener(
 );
 
 
+// Schienen und parallele Kursangebote laden
+
+async function loadAutoPlanningParallelTracks(schoolYearId) {
+  const container = document.getElementById(
+    "autoPlanningParallelTracks"
+  );
+
+  container.textContent = "Schienen werden geladen ...";
+
+  if (!schoolYearId) {
+    container.textContent = "Bitte zuerst ein Schuljahr auswählen.";
+    return;
+  }
+
+  const { data: tracks, error: trackError } = await suvDb
+    .from("timetable_parallel_groups")
+    .select("id, name, weekly_periods")
+    .eq("school_year_id", schoolYearId)
+    .order("name");
+
+  if (trackError) {
+    container.textContent =
+      "Fehler beim Laden der Schienen: " + trackError.message;
+    return;
+  }
+
+  if (!tracks || tracks.length === 0) {
+    container.textContent =
+      "Für dieses Schuljahr wurden noch keine Schienen angelegt.";
+    return;
+  }
+
+  const { data: courses, error: courseError } = await suvDb
+    .from("timetable_parallel_courses")
+    .select(`
+      id,
+      parallel_group_id,
+      course_name,
+      course_count,
+      subjects(name, short_code)
+    `)
+    .eq("school_year_id", schoolYearId)
+    .order("course_name");
+
+  if (courseError) {
+    container.textContent =
+      "Fehler beim Laden der Kursangebote: " + courseError.message;
+    return;
+  }
+
+  const { data: classLinks, error: classError } = await suvDb
+    .from("timetable_parallel_course_classes")
+    .select(`
+      course_id,
+      classes(name, grade_levels(name))
+    `)
+    .eq("school_year_id", schoolYearId);
+
+  if (classError) {
+    container.textContent =
+      "Fehler beim Laden der Klassenzuordnungen: " +
+      classError.message;
+    return;
+  }
+
+  container.innerHTML = "";
+
+  tracks.forEach(track => {
+    const trackBox = document.createElement("div");
+    trackBox.className = "teacher-entry";
+
+    const heading = document.createElement("h4");
+    heading.textContent = track.name;
+
+    const info = document.createElement("p");
+    info.textContent =
+      track.weekly_periods + " Wochenstunden · Alle Kurse parallel";
+
+    trackBox.append(heading, info);
+
+    const trackCourses = (courses || []).filter(
+      course => course.parallel_group_id === track.id
+    );
+
+    if (trackCourses.length === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = "Keine Kursangebote vorhanden.";
+      trackBox.appendChild(empty);
+    }
+
+    trackCourses.forEach(course => {
+      const courseBox = document.createElement("div");
+      courseBox.className = "teacher-entry";
+
+      const courseHeading = document.createElement("strong");
+      courseHeading.textContent =
+        course.course_name + " · " +
+        (course.subjects?.name || "Unbekanntes Fach");
+
+      courseBox.appendChild(courseHeading);
+
+      const countInfo = document.createElement("p");
+      countInfo.textContent =
+        "Einzuplanende Kurse: " + course.course_count;
+
+      courseBox.appendChild(countInfo);
+
+      const assignedClasses = (classLinks || []).filter(
+        link => link.course_id === course.id
+      );
+
+      const classInfo = document.createElement("p");
+      classInfo.textContent =
+        "Beteiligte Klassen: " +
+        (assignedClasses.length
+          ? assignedClasses.map(link => {
+              const grade =
+                link.classes?.grade_levels?.name || "Jahrgang ?";
+              const name =
+                link.classes?.name || "Unbekannte Klasse";
+
+              return grade + " · " + name;
+            }).join(", ")
+          : "Keine Klassen zugeordnet.");
+
+      courseBox.appendChild(classInfo);
+
+      const units = document.createElement("p");
+      units.textContent = "Einzelne Planungseinheiten:";
+
+      courseBox.appendChild(units);
+
+      for (let i = 1; i <= course.course_count; i++) {
+        const unit = document.createElement("p");
+        unit.textContent =
+          course.course_name + " – Kurs " +
+          i + " von " + course.course_count;
+
+        courseBox.appendChild(unit);
+      }
+
+      trackBox.appendChild(courseBox);
+    });
+
+    container.appendChild(trackBox);
+  });
+}
 
 // Unterrichtsvorgaben eines Jahrgangs laden
 
