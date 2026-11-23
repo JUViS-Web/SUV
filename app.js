@@ -326,6 +326,56 @@ const teacherForm = document.getElementById("teacherForm");
 const teacherList = document.getElementById("teacherList");
 const teacherMessage = document.getElementById("teacherMessage");
 
+// Fächerauswahl für Lehrkraft-Stammdaten
+
+async function loadTeacherSubjectOptions(selectedSubjectIds = []) {
+  const container = document.getElementById("teacherSubjectOptions");
+  if (!container) return;
+
+  container.textContent = "Fächer werden geladen ...";
+
+  const { data, error } = await suvDb
+    .from("subjects")
+    .select("id, name, short_code")
+    .order("name", { ascending: true });
+
+  if (error) {
+    container.textContent =
+      "Fehler beim Laden der Fächer: " + error.message;
+    return;
+  }
+
+  container.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    container.textContent = "Noch keine Fächer angelegt.";
+    return;
+  }
+
+  data.forEach(subject => {
+    const label = document.createElement("label");
+    label.style.display = "block";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = subject.id;
+    checkbox.className = "teacher-subject-checkbox";
+    checkbox.checked = selectedSubjectIds.includes(subject.id);
+
+    label.appendChild(checkbox);
+    label.appendChild(
+      document.createTextNode(
+        " " + subject.name +
+        (subject.short_code ? " (" + subject.short_code + ")" : "")
+      )
+    );
+
+    container.appendChild(label);
+  });
+}
+
+loadTeacherSubjectOptions();
+
 async function loadTeachers() {
   if (!teacherList) return;
 
