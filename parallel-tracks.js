@@ -390,20 +390,53 @@ qualifiedTeachers.forEach(teacher => {
 
       const roomSelect = document.createElement("select");
 
-      const roomPlaceholder = document.createElement("option");
-      roomPlaceholder.value = "";
-      roomPlaceholder.textContent = "Raum auswählen";
-      roomSelect.appendChild(roomPlaceholder);
+const subject = parallelTrackSubjects.find(
+  item => item.id === course.subject_id
+);
 
-      parallelTrackRooms.forEach(room => {
-        const option = document.createElement("option");
-        option.value = room.id;
-        option.textContent =
-          room.name + (room.room_type ? " – " + room.room_type : "");
-        roomSelect.appendChild(option);
-      });
+function updateRoomOptions() {
+  const selectedTeacherId = teacherSelect.value;
+  const previousRoomId = roomSelect.value || instance.room_id || "";
 
-      roomSelect.value = instance.room_id || "";
+  roomSelect.innerHTML = "";
+
+  const roomPlaceholder = document.createElement("option");
+  roomPlaceholder.value = "";
+  roomPlaceholder.textContent = "Raum auswählen";
+  roomSelect.appendChild(roomPlaceholder);
+
+  const eligibleRooms = parallelTrackRooms.filter(room => {
+    const correctRoomType =
+      !subject?.required_room_type ||
+      room.room_type === subject.required_room_type;
+
+    const teacherHasPermission =
+      !selectedTeacherId ||
+      parallelTrackTeacherRoomPermissions.some(
+        permission =>
+          permission.teacher_id === selectedTeacherId &&
+          permission.room_id === room.id
+      );
+
+    return correctRoomType && teacherHasPermission;
+  });
+
+  eligibleRooms.forEach(room => {
+    const option = document.createElement("option");
+    option.value = room.id;
+    option.textContent =
+      room.name + (room.room_type ? " – " + room.room_type : "");
+    roomSelect.appendChild(option);
+  });
+
+  if (eligibleRooms.some(room => room.id === previousRoomId)) {
+    roomSelect.value = previousRoomId;
+  }
+}
+
+updateRoomOptions();
+
+teacherSelect.addEventListener("change", updateRoomOptions);
 
       const saveButton = document.createElement("button");
       saveButton.type = "button";
