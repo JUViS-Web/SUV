@@ -8,6 +8,8 @@ const parallelTracksMessage = document.getElementById("parallelTracksMessage");
 let parallelTrackSchoolYears = [];
 let parallelTrackSubjects = [];
 let parallelTrackClasses = [];
+let parallelTrackTeachers = [];
+let parallelTrackRooms = [];
 
 function escapeParallelTrackHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
