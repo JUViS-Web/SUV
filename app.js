@@ -477,25 +477,75 @@ if (teacherForm) {
     };
 
     let result;
+let teacherId = id;
 
-    if (id) {
-      result = await suvDb
-        .from("teachers")
-        .update(teacherData)
-        .eq("id", id);
-    } else {
-      result = await suvDb
-        .from("teachers")
-        .insert(teacherData);
-    }
+if (id) {
+  result = await suvDb
+    .from("teachers")
+    .update(teacherData)
+    .eq("id", id);
+} else {
+  result = await suvDb
+    .from("teachers")
+    .insert(teacherData)
+    .select("id")
+    .single();
 
+  if (!result.error) {
+    teacherId = result.data.id;
+  }
+}
+
+if (result.error) {
+  saveButton.disabled = false;
+  teacherMessage.textContent =
+    "Fehler beim Speichern der Lehrkraft: " + result.error.message;
+  return;
+}
+
+// Ausgewählte Fächer auslesen
+
+const selectedSubjectIds = Array.from(
+  document.querySelectorAll(".teacher-subject-checkbox:checked")
+).map(checkbox => checkbox.value);
+
+// Bisherige Fachzuordnungen entfernen
+
+const { error: deleteSubjectError } = await suvDb
+  .from("teacher_subjects")
+  .delete()
+  .eq("teacher_id", teacherId);
+
+if (deleteSubjectError) {
+  saveButton.disabled = false;
+  teacherMessage.textContent =
+    "Lehrkraft gespeichert, aber alte Fächer konnten nicht entfernt werden: " +
+    deleteSubjectError.message;
+  return;
+}
+
+// Neue Fachzuordnungen speichern
+
+if (selectedSubjectIds.length > 0) {
+  const subjectRows = selectedSubjectIds.map(subjectId => ({
+    teacher_id: teacherId,
+    subject_id: subjectId
+  }));
+
+  const { error: insertSubjectError } = await suvDb
+    .from("teacher_subjects")
+    .insert(subjectRows);
+
+  if (insertSubjectError) {
     saveButton.disabled = false;
+    teacherMessage.textContent =
+      "Lehrkraft gespeichert, aber Fächer konnten nicht zugeordnet werden: " +
+      insertSubjectError.message;
+    return;
+  }
+}
 
-    if (result.error) {
-      teacherMessage.textContent =
-        "Fehler: " + result.error.message;
-      return;
-    }
+saveButton.disabled = false;
 
     teacherMessage.textContent = id
       ? "Lehrkraft erfolgreich aktualisiert."
