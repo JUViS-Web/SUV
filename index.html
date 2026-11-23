@@ -714,11 +714,47 @@
     <div id="teacherSubjectMatrixMessage"></div>
   </div>
 
-  <div class="panel">
-    <div id="teacherSubjectMatrix">
-      Fachzuordnungen werden geladen ...
-    </div>
+  
+<div class="panel">
+  <h3>Lehrbefähigungen gesammelt importieren</h3>
+
+  <p>
+    Füge deine Tabelle mit Lehrkraft-Kürzel und Lehrbefähigungen hier ein.
+    Mehrere Fachgruppen werden durch Kommas getrennt.
+  </p>
+
+  <textarea
+    id="teacherSubjectImportText"
+    rows="10"
+    placeholder="Kürzel    Lehrbefähigung&#10;Al    Fran, ???&#10;An    Sp, Ma, En&#10;At    Deu, Ku"
+    style="width:100%;"
+  ></textarea>
+
+  <button
+    type="button"
+    id="teacherSubjectImportPreviewButton"
+    class="primary-button"
+  >
+    Importvorschau erstellen
+  </button>
+
+  <div id="teacherSubjectImportPreview"></div>
+
+  <button
+    type="button"
+    id="teacherSubjectImportSaveButton"
+    class="primary-button"
+    disabled
+  >
+    Alle Zuordnungen übernehmen
+  </button>
+</div>
+
+<div class="panel">
+  <div id="teacherSubjectMatrix">
+    Fachzuordnungen werden geladen ...
   </div>
+</div>
 
 </div>
         
