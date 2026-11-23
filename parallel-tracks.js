@@ -696,4 +696,30 @@ async function deleteParallelTrack(trackId, trackName) {
   await loadParallelTracks();
 }
 
+async function saveParallelCourseInstance(
+  instanceId,
+  teacherId,
+  roomId
+) {
+  parallelTracksMessage.textContent =
+    "Kurszuordnung wird gespeichert ...";
+
+  const { error } = await suvDb
+    .from("timetable_parallel_course_instances")
+    .update({
+      teacher_id: teacherId,
+      room_id: roomId
+    })
+    .eq("id", instanceId);
+
+  if (error) {
+    parallelTracksMessage.textContent =
+      "Fehler beim Speichern der Zuordnung: " + error.message;
+    return;
+  }
+
+  parallelTracksMessage.textContent =
+    "Lehrkraft und Raum wurden erfolgreich gespeichert.";
+}
+
 loadParallelTrackData();
