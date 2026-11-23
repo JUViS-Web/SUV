@@ -206,16 +206,20 @@ async function loadParallelTracks() {
 }
 
 async function renderParallelTrack(track) {
-  const [coursesResult, classesResult] = await Promise.all([
+    const [
+    coursesResult,
+    classesResult,
+    instancesResult
+  ] = await Promise.all([
     suvDb.from("timetable_parallel_courses")
       .select(`
         id,
-parallel_group_id,
-school_year_id,
-subject_id,
-course_name,
-course_count,
-subjects(name, short_code)
+        parallel_group_id,
+        school_year_id,
+        subject_id,
+        course_name,
+        course_count,
+        subjects(name, short_code)
       `)
       .eq("parallel_group_id", track.id)
       .order("course_name"),
@@ -227,8 +231,38 @@ subjects(name, short_code)
         class_id,
         classes(name, grade_levels(name))
       `)
+      .eq("school_year_id", track.school_year_id),
+
+    suvDb.from("timetable_parallel_course_instances")
+      .select(`
+        id,
+        course_id,
+        course_number,
+        teacher_id,
+        room_id
+      `)
       .eq("school_year_id", track.school_year_id)
+      .order("course_number")
   ]);
+
+  if (
+    coursesResult.error ||
+    classesResult.error ||
+    instancesResult.error
+  ) {
+    const error =
+      coursesResult.error ||
+      classesResult.error ||
+      instancesResult.error;
+
+    parallelTrackList.textContent =
+      "Fehler beim Laden der Kursdaten: " + error.message;
+    return;
+  }
+
+  const courses = coursesResult.data || [];
+  const classLinks = classesResult.data || [];
+  const courseInstances = instancesResult.data || [];
 
   if (coursesResult.error || classesResult.error) {
     const error = coursesResult.error || classesResult.error;
