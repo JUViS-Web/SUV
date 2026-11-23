@@ -449,11 +449,12 @@ async function addParallelCourse(track, subjectId, courseName, courseCount, clas
   const { data: course, error } = await suvDb
     .from("timetable_parallel_courses")
     .insert({
-      parallel_group_id: track.id,
-      school_year_id: track.school_year_id,
-      subject_id: subjectId,
-      course_name: courseName
-    })
+  parallel_group_id: track.id,
+  school_year_id: track.school_year_id,
+  subject_id: subjectId,
+  course_name: courseName,
+  course_count: courseCount
+})
     .select("id")
     .single();
 
