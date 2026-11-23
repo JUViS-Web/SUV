@@ -25,7 +25,13 @@ async function loadParallelTrackData() {
   parallelTrackForm.innerHTML = "<p>Daten werden geladen ...</p>";
   parallelTrackList.textContent = "Schienen werden geladen ...";
 
-  const [yearsResult, subjectsResult, classesResult] = await Promise.all([
+    const [
+    yearsResult,
+    subjectsResult,
+    classesResult,
+    teachersResult,
+    roomsResult
+  ] = await Promise.all([
     suvDb.from("school_years")
       .select("id, name, is_active")
       .order("name", { ascending: false }),
@@ -36,6 +42,16 @@ async function loadParallelTrackData() {
 
     suvDb.from("classes")
       .select("id, name, school_year_id, grade_levels(name)")
+      .order("name"),
+
+    suvDb.from("teachers")
+      .select("id, first_name, last_name, short_code")
+      .eq("is_active", true)
+      .order("last_name"),
+
+    suvDb.from("rooms")
+      .select("id, name, room_type")
+      .eq("is_active", true)
       .order("name")
   ]);
 
