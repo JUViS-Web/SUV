@@ -188,11 +188,12 @@ async function renderParallelTrack(track) {
     suvDb.from("timetable_parallel_courses")
       .select(`
         id,
-        parallel_group_id,
-        school_year_id,
-        subject_id,
-        course_name,
-        subjects(name, short_code)
+parallel_group_id,
+school_year_id,
+subject_id,
+course_name,
+course_count,
+subjects(name, short_code)
       `)
       .eq("parallel_group_id", track.id)
       .order("course_name"),
@@ -247,8 +248,8 @@ async function renderParallelTrack(track) {
     courseHeading.textContent = course.course_name;
 
     const subjectInfo = document.createElement("p");
-    subjectInfo.textContent =
-      `Fach: ${course.subjects?.name || "Unbekannt"}`;
+subjectInfo.textContent =
+  `Fach: ${course.subjects?.name || "Unbekannt"} · Anzahl der Kurse: ${course.course_count}`;
 
     const assignedClasses = classLinks.filter(
       link => link.course_id === course.id
