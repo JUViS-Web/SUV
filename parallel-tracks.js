@@ -264,16 +264,6 @@ async function renderParallelTrack(track) {
   const classLinks = classesResult.data || [];
   const courseInstances = instancesResult.data || [];
 
-  if (coursesResult.error || classesResult.error) {
-    const error = coursesResult.error || classesResult.error;
-    parallelTrackList.textContent =
-      "Fehler beim Laden der Kursangebote: " + error.message;
-    return;
-  }
-
-  const courses = coursesResult.data || [];
-  const classLinks = classesResult.data || [];
-
   const entry = document.createElement("div");
   entry.className = "teacher-entry";
 
