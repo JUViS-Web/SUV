@@ -28,12 +28,14 @@ async function loadParallelTrackData() {
   parallelTrackList.textContent = "Schienen werden geladen ...";
 
     const [
-    yearsResult,
-    subjectsResult,
-    classesResult,
-    teachersResult,
-    roomsResult
-  ] = await Promise.all([
+  yearsResult,
+  subjectsResult,
+  classesResult,
+  teachersResult,
+  roomsResult,
+  teacherSubjectsResult,
+  teacherRoomPermissionsResult
+] = await Promise.all([
     suvDb.from("school_years")
       .select("id, name, is_active")
       .order("name", { ascending: false }),
@@ -55,6 +57,12 @@ async function loadParallelTrackData() {
       .select("id, name, room_type")
       .eq("is_active", true)
       .order("name")
+
+    suvDb.from("teacher_subjects")
+      .select("teacher_id, subject_id"),
+
+    suvDb.from("teacher_room_permissions")
+      .select("teacher_id, room_id")
   ]);
 
     const error =
@@ -62,6 +70,8 @@ async function loadParallelTrackData() {
     subjectsResult.error ||
     classesResult.error ||
     teachersResult.error ||
+    teacherSubjectsResult.error ||
+    teacherRoomPermissionsResult.error ||
     roomsResult.error;
 
   if (error) {
@@ -75,7 +85,9 @@ async function loadParallelTrackData() {
   parallelTrackClasses = classesResult.data || [];
   parallelTrackTeachers = teachersResult.data || [];
   parallelTrackRooms = roomsResult.data || [];
-
+  parallelTrackTeacherSubjects = teacherSubjectsResult.data || [];
+  parallelTrackTeacherRoomPermissions = teacherRoomPermissionsResult.data || [];
+  
   renderParallelTrackForm();
   await loadParallelTracks();
 }
