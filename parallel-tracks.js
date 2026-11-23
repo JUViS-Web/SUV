@@ -603,6 +603,31 @@ async function addParallelCourse(track, subjectId, courseName, courseCount, clas
     return;
   }
 
+    const instanceRows = Array.from(
+    { length: courseCount },
+    (_, index) => ({
+      course_id: course.id,
+      school_year_id: track.school_year_id,
+      course_number: index + 1
+    })
+  );
+
+  const { error: instanceError } = await suvDb
+    .from("timetable_parallel_course_instances")
+    .insert(instanceRows);
+
+  if (instanceError) {
+    await suvDb
+      .from("timetable_parallel_courses")
+      .delete()
+      .eq("id", course.id);
+
+    parallelTracksMessage.textContent =
+      "Fehler beim Erstellen der Kursinstanzen: " +
+      instanceError.message;
+    return;
+  }
+
   const classRows = classIds.map(classId => ({
     course_id: course.id,
     school_year_id: track.school_year_id,
