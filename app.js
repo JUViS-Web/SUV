@@ -568,7 +568,7 @@ loadTeachers();
 
 // Lehrkraft bearbeiten
 
-function editTeacher(teacher) {
+async function editTeacher(teacher) {
   document.getElementById("teacherId").value = teacher.id;
 
   document.getElementById("teacherFirstName").value =
@@ -582,6 +582,25 @@ function editTeacher(teacher) {
 
   document.getElementById("teacherWeeklyHours").value =
     teacher.weekly_required_hours ?? "";
+
+  // Zugeordnete Fächer laden
+
+  const { data, error } = await suvDb
+    .from("teacher_subjects")
+    .select("subject_id")
+    .eq("teacher_id", teacher.id);
+
+  if (error) {
+    teacherMessage.textContent =
+      "Fehler beim Laden der Fachzuordnungen: " + error.message;
+    return;
+  }
+
+  const selectedSubjectIds = (data || []).map(
+    item => item.subject_id
+  );
+
+  await loadTeacherSubjectOptions(selectedSubjectIds);
 
   document.getElementById("teacherSaveButton").textContent =
     "Änderungen speichern";
