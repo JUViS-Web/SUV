@@ -326,6 +326,14 @@ async function renderParallelTrack(track) {
   courseNameInput.type = "text";
   courseNameInput.placeholder = "Kursname (optional)";
 
+const courseCountInput = document.createElement("input");
+courseCountInput.type = "number";
+courseCountInput.min = "1";
+courseCountInput.max = "50";
+courseCountInput.value = "1";
+courseCountInput.required = true;
+courseCountInput.placeholder = "Anzahl der Kurse";
+  
   const classTitle = document.createElement("p");
   classTitle.textContent = "Beteiligte Klassen auswählen:";
 
