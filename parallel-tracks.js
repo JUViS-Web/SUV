@@ -56,7 +56,7 @@ async function loadParallelTrackData() {
     suvDb.from("rooms")
       .select("id, name, room_type")
       .eq("is_active", true)
-      .order("name")
+      .order("name"),
 
     suvDb.from("teacher_subjects")
       .select("teacher_id, subject_id"),
