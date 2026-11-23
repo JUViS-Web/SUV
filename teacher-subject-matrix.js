@@ -1,4 +1,5 @@
 
+
 /* SUV – Zentrale Fach-Lehrkraft-Zuordnung */
 
 window.suvTeacherSubjectMatrix = {
@@ -85,7 +86,7 @@ function renderTeacherSubjectMatrix() {
 
   const visibleTeachers = state.teachers.filter(teacher => {
     const fullName =
-      `${teacher.first_name} ${teacher.last_name} ${teacher.short_code || ""}`
+      `${teacher.first_name || ""} ${teacher.last_name || ""} ${teacher.short_code || ""}`
         .toLowerCase();
 
     return fullName.includes(search);
@@ -117,6 +118,7 @@ function renderTeacherSubjectMatrix() {
     font-size: 13px;
   `;
 
+  const thead = document.createElement("thead");
   const header = document.createElement("tr");
 
   const teacherHeading = document.createElement("th");
@@ -134,22 +136,43 @@ function renderTeacherSubjectMatrix() {
 
   visibleSubjects.forEach(subject => {
     const heading = document.createElement("th");
-    heading.textContent =
-      subject.name +
-      (subject.short_code ? ` (${subject.short_code})` : "");
-
     heading.style.cssText = `
-      padding: 10px;
+      padding: 8px;
       background: #17243a;
       color: white;
       text-align: center;
-      min-width: 90px;
+      min-width: 115px;
     `;
 
+    const title = document.createElement("div");
+    title.textContent =
+      subject.name +
+      (subject.short_code ? ` (${subject.short_code})` : "");
+
+    const assignAllButton = document.createElement("button");
+    assignAllButton.type = "button";
+    assignAllButton.textContent = "Alle zuordnen";
+    assignAllButton.style.cssText = `
+      display: block;
+      margin: 7px auto 0;
+      padding: 5px 8px;
+      font-size: 11px;
+      cursor: pointer;
+    `;
+
+    assignAllButton.addEventListener("click", () => {
+      assignSubjectToAllTeachers(subject, assignAllButton);
+    });
+
+    heading.appendChild(title);
+    heading.appendChild(assignAllButton);
     header.appendChild(heading);
   });
 
-  table.appendChild(header);
+  thead.appendChild(header);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
 
   visibleTeachers.forEach(teacher => {
     const row = document.createElement("tr");
@@ -171,10 +194,6 @@ function renderTeacherSubjectMatrix() {
 
     row.appendChild(nameCell);
 
-    const teacherAssignments = state.assignments.filter(
-      item => item.teacher_id === teacher.id
-    );
-
     visibleSubjects.forEach(subject => {
       const cell = document.createElement("td");
       cell.style.cssText = `
@@ -185,8 +204,10 @@ function renderTeacherSubjectMatrix() {
 
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
-      checkbox.checked = teacherAssignments.some(
-        item => item.subject_id === subject.id
+      checkbox.checked = state.assignments.some(
+        item =>
+          item.teacher_id === teacher.id &&
+          item.subject_id === subject.id
       );
 
       checkbox.style.cssText = `
@@ -196,76 +217,125 @@ function renderTeacherSubjectMatrix() {
       `;
 
       checkbox.addEventListener("change", async () => {
-        checkbox.disabled = true;
-
-        const currentAssignments =
-          window.suvTeacherSubjectMatrix.assignments;
-
-        const teacherCount = currentAssignments.filter(
-          item => item.teacher_id === teacher.id
-        ).length;
-
-        if (!checkbox.checked && teacherCount <= 2) {
-          checkbox.checked = true;
-          checkbox.disabled = false;
-
-          document.getElementById(
-            "teacherSubjectMatrixMessage"
-          ).textContent =
-            "Mindestens 2 Fächer pro Lehrkraft müssen zugeordnet bleiben.";
-
-          return;
-        }
-
-        document.getElementById(
-          "teacherSubjectMatrixMessage"
-        ).textContent = "Änderung wird gespeichert ...";
-
-        let result;
-
-        if (checkbox.checked) {
-          result = await suvDb
-            .from("teacher_subjects")
-            .insert({
-              teacher_id: teacher.id,
-              subject_id: subject.id
-            });
-        } else {
-          result = await suvDb
-            .from("teacher_subjects")
-            .delete()
-            .eq("teacher_id", teacher.id)
-            .eq("subject_id", subject.id);
-        }
-
-        if (result.error) {
-          checkbox.checked = !checkbox.checked;
-          checkbox.disabled = false;
-
-          document.getElementById(
-            "teacherSubjectMatrixMessage"
-          ).textContent =
-            "Fehler beim Speichern: " + result.error.message;
-
-          return;
-        }
-
-        await loadTeacherSubjectMatrix();
-
-        document.getElementById(
-          "teacherSubjectMatrixMessage"
-        ).textContent = "Änderung erfolgreich gespeichert.";
+        await changeTeacherSubject(teacher, subject, checkbox);
       });
 
       cell.appendChild(checkbox);
       row.appendChild(cell);
     });
 
-    table.appendChild(row);
+    tbody.appendChild(row);
   });
 
+  table.appendChild(tbody);
   wrapper.appendChild(table);
   container.appendChild(wrapper);
+}
+
+async function changeTeacherSubject(teacher, subject, checkbox) {
+  const state = window.suvTeacherSubjectMatrix;
+  const message = document.getElementById("teacherSubjectMatrixMessage");
+
+  const wasChecked = !checkbox.checked;
+
+  const teacherAssignments = state.assignments.filter(
+    item => item.teacher_id === teacher.id
+  );
+
+  if (!checkbox.checked && teacherAssignments.length <= 2) {
+    checkbox.checked = true;
+    message.textContent =
+      "Mindestens 2 Fächer pro Lehrkraft müssen zugeordnet bleiben.";
+    return;
+  }
+
+  checkbox.disabled = true;
+  message.textContent = "Änderung wird gespeichert ...";
+
+  let result;
+
+  if (checkbox.checked) {
+    result = await suvDb
+      .from("teacher_subjects")
+      .insert({
+        teacher_id: teacher.id,
+        subject_id: subject.id
+      });
+  } else {
+    result = await suvDb
+      .from("teacher_subjects")
+      .delete()
+      .eq("teacher_id", teacher.id)
+      .eq("subject_id", subject.id);
+  }
+
+  if (result.error) {
+    checkbox.checked = wasChecked;
+    checkbox.disabled = false;
+    message.textContent = "Fehler beim Speichern: " + result.error.message;
+    return;
+  }
+
+  if (checkbox.checked) {
+    state.assignments.push({
+      teacher_id: teacher.id,
+      subject_id: subject.id
+    });
+  } else {
+    state.assignments = state.assignments.filter(
+      item =>
+        !(item.teacher_id === teacher.id &&
+          item.subject_id === subject.id)
+    );
+  }
+
+  checkbox.disabled = false;
+  message.textContent = "Änderung erfolgreich gespeichert.";
+}
+
+async function assignSubjectToAllTeachers(subject, button) {
+  const state = window.suvTeacherSubjectMatrix;
+  const message = document.getElementById("teacherSubjectMatrixMessage");
+
+  const missingAssignments = state.teachers
+    .filter(teacher =>
+      !state.assignments.some(
+        item =>
+          item.teacher_id === teacher.id &&
+          item.subject_id === subject.id
+      )
+    )
+    .map(teacher => ({
+      teacher_id: teacher.id,
+      subject_id: subject.id
+    }));
+
+  if (!missingAssignments.length) {
+    message.textContent = "Dieses Fach ist bereits allen Lehrkräften zugeordnet.";
+    return;
+  }
+
+  button.disabled = true;
+  message.textContent =
+    `Ordne ${subject.name} allen Lehrkräften zu ...`;
+
+  const { error } = await suvDb
+    .from("teacher_subjects")
+    .insert(missingAssignments);
+
+  if (error) {
+    button.disabled = false;
+    message.textContent =
+      "Fehler beim Zuordnen: " + error.message;
+    return;
+  }
+
+  state.assignments.push(...missingAssignments);
+
+  renderTeacherSubjectMatrix();
+
+  message.textContent =
+    `${subject.name} wurde ${missingAssignments.length} weiteren Lehrkräften zugeordnet.`;
 }
 
 // Suche und Fachfilter
@@ -278,9 +348,10 @@ document
   .getElementById("teacherSubjectMatrixFilter")
   .addEventListener("change", renderTeacherSubjectMatrix);
 
-// Matrix beim Öffnen der Seite laden
+// Matrix beim Öffnen laden
 
 document
   .querySelector('[data-page="teacherSubjects"]')
   .addEventListener("click", loadTeacherSubjectMatrix);
+
 
