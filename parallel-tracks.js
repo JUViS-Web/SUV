@@ -373,6 +373,7 @@ courseCountInput.placeholder = "Anzahl der Kurse";
   addButton.textContent = "Kursangebot hinzufügen";
 
   courseForm.appendChild(subjectSelect);
+  courseForm.appendChild(courseCountInput);
   courseForm.appendChild(courseNameInput);
   courseForm.appendChild(classTitle);
   courseForm.appendChild(classSelection);
