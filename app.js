@@ -389,6 +389,19 @@ searchInput.style.border = "1px solid #ccc";
         : `${count} Fächer ausgewählt`;
   }
 
+searchInput.addEventListener("input", () => {
+  const searchTerm = searchInput.value
+    .trim()
+    .toLowerCase();
+
+  subjectList.querySelectorAll("label").forEach(label => {
+    const subjectText = label.textContent.toLowerCase();
+
+    label.style.display =
+      subjectText.includes(searchTerm) ? "flex" : "none";
+  });
+});
+  
   toggleButton.addEventListener("click", () => {
     subjectList.style.display =
       subjectList.style.display === "none" ? "block" : "none";
