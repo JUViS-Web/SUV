@@ -7,43 +7,47 @@ const parallelTracksMessage = document.getElementById("parallelTracksMessage");
 
 let parallelTrackSchoolYears = [];
 let parallelTrackGrades = [];
-let parallelTrackCourseGroups = [];
+let parallelTrackRequirements = [];
+let parallelTrackAssignments = [];
 
 async function loadParallelTrackData() {
   parallelTrackForm.innerHTML = "<p>Daten werden geladen ...</p>";
   parallelTrackList.textContent = "Schienen werden geladen ...";
 
-  const [yearsResult, gradesResult, groupsResult] = await Promise.all([
-    suvDb.from("school_years")
-      .select("id, name, is_active")
-      .order("name", { ascending: false }),
+  const [yearsResult, gradesResult, requirementsResult] =
+    await Promise.all([
+      suvDb.from("school_years")
+        .select("id, name, is_active")
+        .order("name", { ascending: false }),
 
-    suvDb.from("grade_levels")
-      .select("id, name, sort_order")
-      .order("sort_order"),
+      suvDb.from("grade_levels")
+        .select("id, name, sort_order")
+        .order("sort_order"),
 
-    suvDb.from("grade_course_groups")
-      .select(`
-        id,
-        school_year_id,
-        grade_level_id,
-        subject_id,
-        weekly_periods,
-        subjects(name, short_code)
-      `)
-      .order("created_at")
-  ]);
+      suvDb.from("grade_subject_requirements")
+        .select(`
+          id,
+          school_year_id,
+          grade_level_id,
+          weekly_periods,
+          is_active,
+          subjects(name, short_code)
+        `)
+        .eq("is_active", true)
+        .order("created_at")
+    ]);
 
-  if (yearsResult.error || gradesResult.error || groupsResult.error) {
+  if (yearsResult.error || gradesResult.error || requirementsResult.error) {
     parallelTrackForm.textContent =
       "Fehler beim Laden: " +
-      (yearsResult.error || gradesResult.error || groupsResult.error).message;
+      (yearsResult.error || gradesResult.error ||
+       requirementsResult.error).message;
     return;
   }
 
   parallelTrackSchoolYears = yearsResult.data || [];
   parallelTrackGrades = gradesResult.data || [];
-  parallelTrackCourseGroups = groupsResult.data || [];
+  parallelTrackRequirements = requirementsResult.data || [];
 
   renderParallelTrackForm();
   await loadParallelTracks();
@@ -53,46 +57,39 @@ function renderParallelTrackForm() {
   parallelTrackForm.innerHTML = `
     <form id="createParallelTrackForm">
 
-      <div>
-        <label for="parallelTrackSchoolYear">Schuljahr</label>
-        <select id="parallelTrackSchoolYear" required>
-          <option value="">Schuljahr auswählen</option>
-          ${parallelTrackSchoolYears.map(year => `
-            <option value="${year.id}" ${year.is_active ? "selected" : ""}>
-              ${year.name}
-            </option>
-          `).join("")}
-        </select>
-      </div>
+      <label for="parallelTrackSchoolYear">Schuljahr</label>
+      <select id="parallelTrackSchoolYear" required>
+        <option value="">Schuljahr auswählen</option>
+        ${parallelTrackSchoolYears.map(year => `
+          <option value="${year.id}"
+            ${year.is_active ? "selected" : ""}>
+            ${year.name}
+          </option>
+        `).join("")}
+      </select>
 
-      <div>
-        <label for="parallelTrackGrade">Jahrgang</label>
-        <select id="parallelTrackGrade" required>
-          <option value="">Jahrgang auswählen</option>
-          ${parallelTrackGrades.map(grade => `
-            <option value="${grade.id}">${grade.name}</option>
-          `).join("")}
-        </select>
-      </div>
+      <label for="parallelTrackGrade">Jahrgang</label>
+      <select id="parallelTrackGrade" required>
+        <option value="">Jahrgang auswählen</option>
+        ${parallelTrackGrades.map(grade => `
+          <option value="${grade.id}">${grade.name}</option>
+        `).join("")}
+      </select>
 
-      <div>
-        <label for="parallelTrackName">Name der Schiene</label>
-        <input
-          type="text"
-          id="parallelTrackName"
-          placeholder="z. B. Religion / Werte und Normen"
-          required
-        >
-      </div>
+      <label for="parallelTrackName">Name der Schiene</label>
+      <input
+        type="text"
+        id="parallelTrackName"
+        placeholder="z. B. Religion / Werte und Normen"
+        required
+      >
 
-      <div>
-        <label for="parallelTrackNotes">Beschreibung</label>
-        <textarea
-          id="parallelTrackNotes"
-          rows="3"
-          placeholder="Optionale Beschreibung"
-        ></textarea>
-      </div>
+      <label for="parallelTrackNotes">Beschreibung</label>
+      <textarea
+        id="parallelTrackNotes"
+        rows="3"
+        placeholder="Optionale Beschreibung"
+      ></textarea>
 
       <button type="submit">Schiene erstellen</button>
 
@@ -145,48 +142,47 @@ async function createParallelTrack(event) {
 }
 
 async function loadParallelTracks() {
-  const { data, error } = await suvDb
-    .from("timetable_parallel_groups")
-    .select(`
-      id,
-      name,
-      notes,
-      is_active,
-      school_year_id,
-      grade_level_id,
-      school_years(name),
-      grade_levels(name),
-      timetable_parallel_group_members(
+  const [tracksResult, assignmentsResult] = await Promise.all([
+    suvDb.from("timetable_parallel_groups")
+      .select(`
         id,
-        grade_course_group_id,
-        grade_course_groups(
-          id,
-          weekly_periods,
-          subjects(name, short_code)
-        )
-      )
-    `)
-    .order("name");
+        name,
+        notes,
+        school_year_id,
+        grade_level_id,
+        school_years(name),
+        grade_levels(name)
+      `)
+      .order("name"),
 
-  if (error) {
+    suvDb.from("timetable_parallel_group_subjects")
+      .select(`
+        id,
+        parallel_group_id,
+        grade_subject_requirement_id
+      `)
+  ]);
+
+  if (tracksResult.error || assignmentsResult.error) {
     parallelTrackList.textContent =
-      "Fehler beim Laden der Schienen: " + error.message;
+      "Fehler beim Laden: " +
+      (tracksResult.error || assignmentsResult.error).message;
     return;
   }
 
-  if (!data || data.length === 0) {
-    parallelTrackList.textContent =
-      "Noch keine Schienen vorhanden.";
+  const tracks = tracksResult.data || [];
+  parallelTrackAssignments = assignmentsResult.data || [];
+
+  if (tracks.length === 0) {
+    parallelTrackList.textContent = "Noch keine Schienen vorhanden.";
     return;
   }
 
   parallelTrackList.innerHTML = "";
 
-  data.forEach(track => {
+  tracks.forEach(track => {
     const entry = document.createElement("div");
     entry.className = "teacher-entry";
-
-    const details = document.createElement("div");
 
     const title = document.createElement("strong");
     title.textContent = track.name;
@@ -195,69 +191,81 @@ async function loadParallelTracks() {
     info.textContent =
       `${track.school_years?.name || "–"} · Jahrgang ${track.grade_levels?.name || "–"}`;
 
-    const memberList = document.createElement("div");
+    const subjectArea = document.createElement("div");
 
-    const memberTitle = document.createElement("strong");
-    memberTitle.textContent = "Zugeordnete Kursgruppen:";
-    memberList.appendChild(memberTitle);
+    const subjectTitle = document.createElement("strong");
+    subjectTitle.textContent = "Zugeordnete Fächer:";
+    subjectArea.appendChild(subjectTitle);
 
-    const members = track.timetable_parallel_group_members || [];
+    const assignments = parallelTrackAssignments.filter(
+      item => item.parallel_group_id === track.id
+    );
 
-    if (members.length === 0) {
+    const assignedIds = assignments.map(
+      item => item.grade_subject_requirement_id
+    );
+
+    if (assignments.length === 0) {
       const empty = document.createElement("p");
-      empty.textContent = "Noch keine Kursgruppen zugeordnet.";
-      memberList.appendChild(empty);
-    } else {
-      members.forEach(member => {
-        const group = member.grade_course_groups;
-        const subject = group?.subjects;
-
-        const line = document.createElement("p");
-        line.textContent =
-          `${subject?.name || "Unbekanntes Fach"} · ${group?.weekly_periods || 0} Wochenstunden`;
-
-        const removeButton = document.createElement("button");
-        removeButton.type = "button";
-        removeButton.textContent = "Entfernen";
-        removeButton.addEventListener("click", () => {
-          removeParallelTrackMember(member.id);
-        });
-
-        line.appendChild(document.createTextNode(" "));
-        line.appendChild(removeButton);
-        memberList.appendChild(line);
-      });
+      empty.textContent = "Noch keine Fächer zugeordnet.";
+      subjectArea.appendChild(empty);
     }
+
+    assignments.forEach(assignment => {
+      const requirement = parallelTrackRequirements.find(
+        item => item.id === assignment.grade_subject_requirement_id
+      );
+
+      const subject = requirement?.subjects;
+
+      const line = document.createElement("p");
+      line.textContent =
+        `${subject?.name || "Unbekanntes Fach"} · ${requirement?.weekly_periods ?? "–"} Wochenstunden`;
+
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.textContent = "Entfernen";
+      removeButton.addEventListener("click", () => {
+        removeParallelTrackSubject(assignment.id);
+      });
+
+      line.appendChild(document.createTextNode(" "));
+      line.appendChild(removeButton);
+      subjectArea.appendChild(line);
+    });
 
     const actions = document.createElement("div");
     actions.className = "teacher-actions";
 
-    const groupSelect = document.createElement("select");
-    groupSelect.innerHTML =
-      '<option value="">Kursgruppe hinzufügen</option>';
+    const subjectSelect = document.createElement("select");
 
-    parallelTrackCourseGroups
-      .filter(group =>
-        group.school_year_id === track.school_year_id &&
-        group.grade_level_id === track.grade_level_id &&
-        !members.some(member =>
-          member.grade_course_group_id === group.id
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Fach hinzufügen";
+    subjectSelect.appendChild(placeholder);
+
+    parallelTrackRequirements
+      .filter(requirement =>
+        requirement.school_year_id === track.school_year_id &&
+        requirement.grade_level_id === track.grade_level_id &&
+        !parallelTrackAssignments.some(item =>
+          item.grade_subject_requirement_id === requirement.id
         )
       )
-      .forEach(group => {
+      .forEach(requirement => {
         const option = document.createElement("option");
-        option.value = group.id;
+        option.value = requirement.id;
         option.textContent =
-          `${group.subjects?.name || "Unbekanntes Fach"} · ${group.weekly_periods} Wochenstunden`;
-        groupSelect.appendChild(option);
+          `${requirement.subjects?.name || "Unbekanntes Fach"} · ${requirement.weekly_periods} Wochenstunden`;
+        subjectSelect.appendChild(option);
       });
 
     const addButton = document.createElement("button");
     addButton.type = "button";
     addButton.textContent = "Hinzufügen";
     addButton.addEventListener("click", () => {
-      if (groupSelect.value) {
-        addParallelTrackMember(track.id, groupSelect.value);
+      if (subjectSelect.value) {
+        addParallelTrackSubject(track.id, subjectSelect.value);
       }
     });
 
@@ -268,26 +276,39 @@ async function loadParallelTracks() {
       deleteParallelTrack(track.id, track.name);
     });
 
-    actions.appendChild(groupSelect);
+    actions.appendChild(subjectSelect);
     actions.appendChild(addButton);
     actions.appendChild(deleteButton);
 
-    details.appendChild(title);
-    details.appendChild(info);
-    details.appendChild(memberList);
-    details.appendChild(actions);
+    entry.appendChild(title);
+    entry.appendChild(info);
+    entry.appendChild(subjectArea);
+    entry.appendChild(actions);
 
-    entry.appendChild(details);
     parallelTrackList.appendChild(entry);
   });
 }
 
-async function addParallelTrackMember(trackId, courseGroupId) {
+async function addParallelTrackSubject(trackId, requirementId) {
+  const track = await suvDb
+    .from("timetable_parallel_groups")
+    .select("school_year_id, grade_level_id")
+    .eq("id", trackId)
+    .single();
+
+  if (track.error) {
+    parallelTracksMessage.textContent =
+      "Fehler beim Laden der Schiene: " + track.error.message;
+    return;
+  }
+
   const { error } = await suvDb
-    .from("timetable_parallel_group_members")
+    .from("timetable_parallel_group_subjects")
     .insert({
       parallel_group_id: trackId,
-      grade_course_group_id: courseGroupId
+      grade_subject_requirement_id: requirementId,
+      school_year_id: track.data.school_year_id,
+      grade_level_id: track.data.grade_level_id
     });
 
   if (error) {
@@ -297,22 +318,20 @@ async function addParallelTrackMember(trackId, courseGroupId) {
   }
 
   parallelTracksMessage.textContent =
-    "Kursgruppe erfolgreich hinzugefügt.";
+    "Fach erfolgreich hinzugefügt.";
 
   await loadParallelTracks();
 }
 
-async function removeParallelTrackMember(memberId) {
-  const confirmed = confirm(
-    "Möchtest du diese Kursgruppe aus der Schiene entfernen?"
-  );
-
-  if (!confirmed) return;
+async function removeParallelTrackSubject(assignmentId) {
+  if (!confirm("Möchtest du dieses Fach aus der Schiene entfernen?")) {
+    return;
+  }
 
   const { error } = await suvDb
-    .from("timetable_parallel_group_members")
+    .from("timetable_parallel_group_subjects")
     .delete()
-    .eq("id", memberId);
+    .eq("id", assignmentId);
 
   if (error) {
     parallelTracksMessage.textContent =
@@ -320,18 +339,15 @@ async function removeParallelTrackMember(memberId) {
     return;
   }
 
-  parallelTracksMessage.textContent =
-    "Kursgruppe wurde entfernt.";
+  parallelTracksMessage.textContent = "Fach wurde entfernt.";
 
   await loadParallelTracks();
 }
 
 async function deleteParallelTrack(trackId, trackName) {
-  const confirmed = confirm(
-    `Möchtest du die Schiene "${trackName}" wirklich löschen?`
-  );
-
-  if (!confirmed) return;
+  if (!confirm(`Möchtest du die Schiene "${trackName}" wirklich löschen?`)) {
+    return;
+  }
 
   const { error } = await suvDb
     .from("timetable_parallel_groups")
