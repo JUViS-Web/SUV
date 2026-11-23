@@ -109,6 +109,8 @@ async function loadAutoPlanningGrades() {
 
   autoPlanningMessage.textContent =
     "Schuljahr und Jahrgänge wurden erfolgreich geladen.";
+
+await loadAutoPlanningParallelTracks(schoolYearId);
 }
 
 
