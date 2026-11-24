@@ -690,6 +690,42 @@
     </div>
   </div>
 
+
+  <div class="panel">
+    <h3>Zeitwünsche der Lehrkräfte</h3>
+    <p>
+      Lege die zeitliche Verfügbarkeit und die bevorzugten
+      Unterrichtszeiten der Lehrkräfte fest.
+    </p>
+
+    <div>
+      <label for="teacherTimePreferenceSelect">Lehrkraft auswählen</label>
+      <select id="teacherTimePreferenceSelect">
+        <option value="">Lehrkraft auswählen ...</option>
+      </select>
+    </div>
+
+    <div id="teacherTimePreferenceLegend"
+         style="display:flex; flex-wrap:wrap; gap:10px; margin:16px 0;">
+      <span>🟩 Bevorzugt</span>
+      <span>🟥 Nicht verfügbar</span>
+      <span>🟨 Möglichst vermeiden</span>
+      <span>🟦 Fest eingeplant</span>
+      <span>⬜ Keine Vorgabe</span>
+    </div>
+
+    <p>
+      Tippe eine Zelle wiederholt an, um den Zeitwunsch zu ändern.
+    </p>
+
+    <div id="teacherTimePreferenceMatrix">
+      Bitte zuerst eine Lehrkraft auswählen.
+    </div>
+
+    <div id="teacherTimePreferenceMessage"></div>
+  </div>
+
+          
 </div>
 
 <div id="teacherSubjects" class="page">
