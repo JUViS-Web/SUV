@@ -179,6 +179,29 @@ async function loadPlanningRules() {
     data.length + " Planungsregeln erfolgreich geladen.";
 }
 
+// Planungsregel aktivieren oder deaktivieren
+
+async function togglePlanningRule(ruleId, newStatus) {
+  planningRulesMessage.textContent =
+    "Regelstatus wird gespeichert ...";
+
+  const { error } = await suvDb
+    .from("planning_rules")
+    .update({
+      is_active: newStatus,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", ruleId);
+
+  if (error) {
+    planningRulesMessage.textContent =
+      "Fehler beim Ändern des Regelstatus: " +
+      error.message;
+    return;
+  }
+
+  await loadPlanningRules();
+}
 
 // Schuljahr wechseln
 
