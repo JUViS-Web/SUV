@@ -886,6 +886,41 @@
     <div id="subjectList">Fächer werden geladen ...</div>
   </div>
 
+<div class="panel">
+  <h3>Zeitwünsche der Fächer</h3>
+  <p>
+    Lege fest, an welchen Tagen und Stunden ein Fach bevorzugt,
+    unerwünscht oder fest eingeplant werden soll.
+  </p>
+
+  <div>
+    <label for="subjectTimePreferenceSelect">
+      Fach auswählen
+    </label>
+    <select id="subjectTimePreferenceSelect">
+      <option value="">Fach auswählen ...</option>
+    </select>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:10px; margin:16px 0;">
+    <span>🟩 Bevorzugt</span>
+    <span>🟥 Nicht verfügbar</span>
+    <span>🟨 Möglichst vermeiden</span>
+    <span>🟦 Fest eingeplant</span>
+    <span>⬜ Keine Vorgabe</span>
+  </div>
+
+  <p>
+    Tippe eine Zelle wiederholt an, um den Zeitwunsch zu ändern.
+  </p>
+
+  <div id="subjectTimePreferenceMatrix">
+    Bitte zuerst ein Fach auswählen.
+  </div>
+
+  <div id="subjectTimePreferenceMessage"></div>
+</div>
+
 </div>
 
         <div id="rooms" class="page">
