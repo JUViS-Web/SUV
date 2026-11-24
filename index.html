@@ -989,6 +989,42 @@
     <div id="roomList">Räume werden geladen ...</div>
   </div>
 
+<div class="panel">
+  <h3>Zeitwünsche der Räume</h3>
+  <p>
+    Lege fest, wann ein Raum bevorzugt genutzt werden soll,
+    wann er nicht verfügbar ist und wann seine Nutzung
+    möglichst vermieden werden soll.
+  </p>
+
+  <div>
+    <label for="roomTimePreferenceSelect">
+      Raum auswählen
+    </label>
+    <select id="roomTimePreferenceSelect">
+      <option value="">Raum auswählen ...</option>
+    </select>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:10px; margin:16px 0;">
+    <span>🟩 Bevorzugt</span>
+    <span>🟥 Nicht verfügbar</span>
+    <span>🟨 Möglichst vermeiden</span>
+    <span>🟦 Fest eingeplant</span>
+    <span>⬜ Keine Vorgabe</span>
+  </div>
+
+  <p>
+    Tippe eine Zelle wiederholt an, um den Zeitwunsch zu ändern.
+  </p>
+
+  <div id="roomTimePreferenceMatrix">
+    Bitte zuerst einen Raum auswählen.
+  </div>
+
+  <div id="roomTimePreferenceMessage"></div>
+</div>
+
 </div>
 
         <div id="classes" class="page">
@@ -1595,6 +1631,7 @@
 <script src="teacher-time-preferences.js"></script>
 <script src="class-time-preferences.js"></script>
 <script src="subject-time-preferences.js"></script>
+<script src="room-time-preferences.js"></script>
   
 </body>
 </html>
