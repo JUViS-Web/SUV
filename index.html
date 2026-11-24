@@ -1040,6 +1040,42 @@
     <div id="classList">Klassen werden geladen ...</div>
   </div>
 
+<div class="panel">
+  <h3>Zeitwünsche der Klassen</h3>
+  <p>
+    Lege fest, wann eine Klasse Unterricht haben darf,
+    wann Zeiten bevorzugt werden und wann Unterricht
+    möglichst vermieden werden soll.
+  </p>
+
+  <div>
+    <label for="classTimePreferenceSelect">
+      Klasse auswählen
+    </label>
+    <select id="classTimePreferenceSelect">
+      <option value="">Klasse auswählen ...</option>
+    </select>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:10px; margin:16px 0;">
+    <span>🟩 Bevorzugt</span>
+    <span>🟥 Nicht verfügbar</span>
+    <span>🟨 Möglichst vermeiden</span>
+    <span>🟦 Fest eingeplant</span>
+    <span>⬜ Keine Vorgabe</span>
+  </div>
+
+  <p>
+    Tippe eine Zelle wiederholt an, um den Zeitwunsch zu ändern.
+  </p>
+
+  <div id="classTimePreferenceMatrix">
+    Bitte zuerst eine Klasse auswählen.
+  </div>
+
+  <div id="classTimePreferenceMessage"></div>
+</div>
+
 </div>
 
         <div id="times" class="page">
