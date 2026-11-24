@@ -157,8 +157,21 @@ async function loadPlanningRules() {
     valueCell.appendChild(valueDetails);
 
     const statusCell = document.createElement("td");
-    statusCell.textContent =
-      rule.is_active ? "Aktiv" : "Inaktiv";
+
+const statusText = document.createElement("span");
+statusText.textContent =
+  rule.is_active ? "Aktiv" : "Inaktiv";
+
+const statusButton = document.createElement("button");
+statusButton.type = "button";
+statusButton.textContent =
+  rule.is_active ? "Deaktivieren" : "Aktivieren";
+
+statusButton.addEventListener("click", () => {
+  togglePlanningRule(rule.id, !rule.is_active);
+});
+
+statusCell.append(statusText, statusButton);
 
     row.append(
       codeCell,
