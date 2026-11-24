@@ -137,7 +137,31 @@ async function loadPlanningRules() {
         : "Optimierung";
 
     const priorityCell = document.createElement("td");
-    priorityCell.textContent = rule.priority;
+
+const prioritySelect = document.createElement("select");
+
+[
+  { value: 1, label: "1 – Niedrig" },
+  { value: 2, label: "2 – Mittel" },
+  { value: 3, label: "3 – Hoch" }
+].forEach(item => {
+  const option = document.createElement("option");
+  option.value = item.value;
+  option.textContent = item.label;
+
+  prioritySelect.appendChild(option);
+});
+
+prioritySelect.value = String(rule.priority);
+
+prioritySelect.addEventListener("change", () => {
+  updatePlanningRulePriority(
+    rule.id,
+    prioritySelect.value
+  );
+});
+
+priorityCell.appendChild(prioritySelect);
 
     const descriptionCell = document.createElement("td");
     descriptionCell.textContent =
