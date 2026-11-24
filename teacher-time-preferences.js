@@ -257,6 +257,9 @@ function renderTeacherTimePreferenceMatrix() {
       const button = document.createElement("button");
       button.type = "button";
 
+      button.dataset.day = day.day_number;
+button.dataset.lesson = lesson.lesson_number;
+
       button.textContent = info ? "●" : "–";
       button.title =
         `${day.day_name}, Stunde ${lesson.lesson_number}: ` +
@@ -281,35 +284,47 @@ function renderTeacherTimePreferenceMatrix() {
         touch-action:manipulation;
       `;
 
-      button.addEventListener("click", async () => {
-        if (state.saving) return;
+      
+button.addEventListener("click", async () => {
+  if (state.saving) return;
 
-        if (rangeRule) {
-          document.getElementById(
-            "teacherTimePreferenceMessage"
-          ).textContent =
-            "Diese Zelle gehört zu einer bestehenden " +
-            "mehrstündigen Zeitregel. Bitte diese Regel " +
-            "zunächst separat bearbeiten.";
+  const currentRules = state.rules.filter(rule =>
+    rule.weekday === day.day_number &&
+    rule.period_from <= lesson.lesson_number &&
+    rule.period_to >= lesson.lesson_number
+  );
 
-          return;
-        }
+  const exactRule = currentRules.find(rule =>
+    rule.period_from === lesson.lesson_number &&
+    rule.period_to === lesson.lesson_number
+  );
 
-        const currentIndex =
-          teacherTimeStates.indexOf(currentType);
+  const rangeRule = currentRules.find(rule =>
+    rule.period_from !== rule.period_to
+  );
 
-        const nextIndex =
-          (currentIndex + 1) % teacherTimeStates.length;
+  if (rangeRule) {
+    document.getElementById(
+      "teacherTimePreferenceMessage"
+    ).textContent =
+      "Diese Zelle gehört zu einer mehrstündigen Zeitregel.";
+    return;
+  }
 
-        const nextType = teacherTimeStates[nextIndex];
+  const currentType = exactRule?.rule_type || null;
+  const currentIndex = teacherTimeStates.indexOf(currentType);
+  const nextType =
+    teacherTimeStates[
+      (currentIndex + 1) % teacherTimeStates.length
+    ];
 
-        await saveTeacherTimeCell(
-          day.day_number,
-          lesson.lesson_number,
-          nextType,
-          exactRule
-        );
-      });
+  await saveTeacherTimeCell(
+    day.day_number,
+    lesson.lesson_number,
+    nextType,
+    exactRule
+  );
+});
 
       cell.appendChild(button);
       row.appendChild(cell);
@@ -323,6 +338,7 @@ function renderTeacherTimePreferenceMatrix() {
   container.appendChild(wrapper);
 }
 
+
 async function saveTeacherTimeCell(
   weekday,
   lessonNumber,
@@ -335,9 +351,10 @@ async function saveTeacherTimeCell(
   );
 
   state.saving = true;
-  message.textContent = "Zeitwunsch wird gespeichert ...";
+  message.textContent = "Speichere ...";
 
   let result;
+  let savedRule = null;
 
   if (ruleType === null) {
     if (existingRule) {
@@ -366,11 +383,19 @@ async function saveTeacherTimeCell(
       result = await suvDb
         .from("time_rules")
         .update(ruleData)
-        .eq("id", existingRule.id);
+        .eq("id", existingRule.id)
+        .select()
+        .single();
     } else {
       result = await suvDb
         .from("time_rules")
-        .insert(ruleData);
+        .insert(ruleData)
+        .select()
+        .single();
+    }
+
+    if (!result.error) {
+      savedRule = result.data;
     }
   }
 
@@ -382,10 +407,52 @@ async function saveTeacherTimeCell(
     return;
   }
 
-  await loadTeacherTimeRules();
+  if (ruleType === null) {
+    state.rules = state.rules.filter(rule =>
+      rule.id !== existingRule?.id
+    );
+  } else if (existingRule) {
+    state.rules = state.rules.map(rule =>
+      rule.id === existingRule.id ? savedRule : rule
+    );
+  } else {
+    state.rules.push(savedRule);
+  }
 
-  message.textContent =
-    "Zeitwunsch erfolgreich gespeichert.";
+  updateTeacherTimeCellButton(
+    weekday,
+    lessonNumber,
+    ruleType
+  );
+
+  message.textContent = "Zeitwunsch gespeichert.";
+}
+
+function updateTeacherTimeCellButton(
+  weekday,
+  lessonNumber,
+  ruleType
+) {
+  const button = document.querySelector(
+    `#teacherTimePreferenceMatrix button[data-day="${weekday}"][data-lesson="${lessonNumber}"]`
+  );
+
+  if (!button) return;
+
+  const info = teacherTimeStateInfo[ruleType];
+
+  button.textContent = info ? "●" : "–";
+  button.title = info
+    ? info.label
+    : "Keine Vorgabe";
+
+  button.setAttribute("aria-label", button.title);
+
+  button.style.background =
+    info ? info.color : "#f1f5f9";
+
+  button.style.color =
+    info ? info.text : "#64748b";
 }
 
 initTeacherTimePreferences();
