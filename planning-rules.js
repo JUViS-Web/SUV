@@ -216,6 +216,38 @@ async function togglePlanningRule(ruleId, newStatus) {
   await loadPlanningRules();
 }
 
+// Priorität einer Planungsregel ändern
+
+async function updatePlanningRulePriority(ruleId, newPriority) {
+  const priority = Number(newPriority);
+
+  if (![1, 2, 3].includes(priority)) {
+    planningRulesMessage.textContent =
+      "Ungültige Priorität.";
+    return;
+  }
+
+  planningRulesMessage.textContent =
+    "Priorität wird gespeichert ...";
+
+  const { error } = await suvDb
+    .from("planning_rules")
+    .update({
+      priority: priority,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", ruleId);
+
+  if (error) {
+    planningRulesMessage.textContent =
+      "Fehler beim Speichern der Priorität: " +
+      error.message;
+    return;
+  }
+
+  await loadPlanningRules();
+}
+
 // Schuljahr wechseln
 
 planningRulesSchoolYear.addEventListener(
