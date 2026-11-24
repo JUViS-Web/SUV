@@ -95,6 +95,10 @@
   <span>⚙</span> Automatische Planung
 </button>
 
+<button class="nav-item" data-page="planningRules">
+  <span>☷</span> Planungsregeln
+</button>
+        
 <button class="nav-item" data-page="parallelTracks">
   <span>⇄</span> Schienenverwaltung
 </button>
@@ -1337,6 +1341,46 @@
   
 </div>
 
+<!-- Planungsregeln -->
+
+<div id="planningRules" class="page">
+
+  <div class="panel">
+    <h3>Allgemeine Planungsregeln</h3>
+
+    <p>
+      Hier werden die Regeln für die automatische
+      Stundenplanerstellung verwaltet.
+    </p>
+
+    <div>
+      <label for="planningRulesSchoolYear">
+        Schuljahr
+      </label>
+
+      <select id="planningRulesSchoolYear">
+        <option value="">Schuljahr wird geladen ...</option>
+      </select>
+    </div>
+
+    <div id="planningRulesMessage"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Hinterlegte Regeln</h3>
+
+    <p>
+      Die Regeln des ausgewählten Schuljahres
+      werden hier angezeigt und später bearbeitbar sein.
+    </p>
+
+    <div id="planningRulesList">
+      Planungsregeln werden geladen ...
+    </div>
+  </div>
+
+</div>
+        
 <!-- Schienenverwaltung -->
 
 <div id="parallelTracks" class="page">
