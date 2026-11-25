@@ -458,7 +458,13 @@ const periodsCell = document.createElement("td");
 
     blocksCell.appendChild(blocksInput);
 
-    row.append(nameCell, codeCell, periodsCell, blocksCell);
+    row.append(
+  nameCell,
+  codeCell,
+  teachersCell,
+  periodsCell,
+  blocksCell
+);
     tbody.appendChild(row);
   });
 
