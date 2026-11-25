@@ -118,6 +118,9 @@ function resetPlanningTeacherWorkload() {
 
 // Eine geplante Unterrichtsstunde registrieren
 
+// Unterrichtszuteilung nur verbuchen,
+// wenn die Wochenstunden-Obergrenze eingehalten wird
+
 function recordPlanningTeacherAssignment(
   teacherId,
   periodsCount = 1
@@ -134,8 +137,9 @@ function recordPlanningTeacherAssignment(
   }
 
   if (
-    !state.teachers.some(teacher =>
-      teacher.id === teacherId
+    !hasPlanningTeacherCapacity(
+      teacherId,
+      periodsCount
     )
   ) {
     return false;
