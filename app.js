@@ -4148,10 +4148,11 @@ async function updateGradeCourseOffering(data) {
       const { error } = await suvDb
         .from("grade_course_groups")
         .update({
-          school_year_id: data.schoolYearId,
-          grade_level_id: data.gradeId,
-          weekly_periods: data.weeklyPeriods
-        })
+  school_year_id: data.schoolYearId,
+  grade_level_id: data.gradeId,
+  weekly_periods: data.weeklyPeriods,
+  course_count: offer.courseCount
+})
         .eq("id", group.id);
 
       if (error) throw error;
