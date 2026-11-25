@@ -4744,7 +4744,7 @@ async function editGradeCourseOffering(offeringId) {
 
       groupOffers.push({
         subjectId: group.subject_id,
-        courseCount: courses.length
+        courseCount: group.course_count
       });
 
     }
