@@ -4,7 +4,8 @@
 
 window.suvPlanningTeacherData = {
   teachers: [],
-  assignments: []
+  assignments: [],
+  assignedPeriods: {}
 };
 
 
@@ -59,10 +60,9 @@ async function loadPlanningTeacherData() {
   return true;
 }
 
+// Geeignete Lehrkräfte ermitteln und nach Belastung sortieren
 
-// Fachlich geeignete Lehrkräfte ermitteln
-
-function getQualifiedTeachersForSubject(subjectId) {
+function getPlanningTeacherCandidates(subjectId) {
   const state = window.suvPlanningTeacherData;
 
   const qualifiedTeacherIds = new Set(
@@ -71,7 +71,30 @@ function getQualifiedTeachersForSubject(subjectId) {
       .map(item => item.teacher_id)
   );
 
-  return state.teachers.filter(teacher =>
-    qualifiedTeacherIds.has(teacher.id)
-  );
+  return state.teachers
+    .filter(teacher =>
+      qualifiedTeacherIds.has(teacher.id)
+    )
+    .map(teacher => {
+      const assignedPeriods =
+        Number(state.assignedPeriods[teacher.id] || 0);
+
+      const requiredHours =
+        Number(teacher.weekly_required_hours || 0);
+
+      const workloadRatio =
+        requiredHours > 0
+          ? assignedPeriods / requiredHours
+          : assignedPeriods;
+
+      return {
+        ...teacher,
+        assignedPeriods,
+        requiredHours,
+        workloadRatio
+      };
+    })
+    .sort((a, b) =>
+      a.workloadRatio - b.workloadRatio
+    );
 }
