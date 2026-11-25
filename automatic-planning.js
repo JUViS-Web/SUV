@@ -851,14 +851,13 @@ autoPlanningSchoolYear.addEventListener(
 document
   .querySelector('[data-page="automaticPlanning"]')
   .addEventListener("click", async () => {
-
     if (automaticPlanningLoaded) return;
 
     const { data } = await suvDb.auth.getSession();
-
     if (!data.session) return;
 
     await loadAutoPlanningSchoolYears();
+    await loadPlanningTeacherData();
 
     automaticPlanningLoaded = true;
   });
