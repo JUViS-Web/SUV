@@ -400,9 +400,23 @@ requirements.forEach(requirement => {
     nameCell.textContent = subject.name;
 
     const codeCell = document.createElement("td");
-    codeCell.textContent = subject.short_code || "–";
+codeCell.textContent = subject.short_code || "–";
 
-    const periodsCell = document.createElement("td");
+// Fachlich geeignete Lehrkräfte anzeigen
+const teachersCell = document.createElement("td");
+
+const qualifiedTeachers =
+  getQualifiedTeachersForSubject(subject.id);
+
+teachersCell.textContent =
+  qualifiedTeachers.length > 0
+    ? qualifiedTeachers.map(teacher =>
+        teacher.short_code ||
+        `${teacher.first_name || ""} ${teacher.last_name || ""}`.trim()
+      ).join(", ")
+    : "Keine Zuordnung";
+
+const periodsCell = document.createElement("td");
     const input = document.createElement("input");
 
     input.type = "number";
