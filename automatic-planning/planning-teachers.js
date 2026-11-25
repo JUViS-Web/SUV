@@ -98,3 +98,42 @@ function getPlanningTeacherCandidates(subjectId) {
       a.workloadRatio - b.workloadRatio
     );
 }
+
+// Belastungswerte für einen neuen Planungslauf zurücksetzen
+
+function resetPlanningTeacherWorkload() {
+  window.suvPlanningTeacherData.assignedPeriods = {};
+}
+
+
+// Eine geplante Unterrichtsstunde registrieren
+
+function recordPlanningTeacherAssignment(
+  teacherId,
+  periodsCount = 1
+) {
+  const state = window.suvPlanningTeacherData;
+
+  if (!teacherId) return false;
+
+  if (
+    !Number.isInteger(periodsCount) ||
+    periodsCount < 1
+  ) {
+    return false;
+  }
+
+  if (
+    !state.teachers.some(teacher =>
+      teacher.id === teacherId
+    )
+  ) {
+    return false;
+  }
+
+  state.assignedPeriods[teacherId] =
+    Number(state.assignedPeriods[teacherId] || 0) +
+    periodsCount;
+
+  return true;
+}
