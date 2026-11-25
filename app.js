@@ -4518,13 +4518,14 @@ if (editingGradeCourseOfferingId) {
     // 4. Alle Fachangebote als einzelne Kursgruppen erstellen
 
     const groupRows = subjectOffers.map(offer => ({
-      school_year_id: schoolYearId,
-      grade_level_id: gradeId,
-      subject_id: offer.subjectId,
-      weekly_periods: weeklyPeriods,
-      notes: null,
-      offering_id: newOfferingId
-    }));
+  school_year_id: schoolYearId,
+  grade_level_id: gradeId,
+  subject_id: offer.subjectId,
+  weekly_periods: weeklyPeriods,
+  course_count: offer.courseCount,
+  notes: null,
+  offering_id: newOfferingId
+}));
 
     const { data: newGroups, error: groupsError } = await suvDb
       .from("grade_course_groups")
