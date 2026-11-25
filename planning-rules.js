@@ -320,6 +320,48 @@ async function updatePlanningRuleDescription(ruleId, newDescription) {
     "Beschreibung erfolgreich gespeichert.";
 }
 
+// Tagesziel der Unterrichtsstunden bearbeiten
+
+async function updateDailyTargetRule(ruleId, target, minimum) {
+  const targetValue = Number(target);
+  const minimumValue = Number(minimum);
+
+  if (
+    !Number.isInteger(targetValue) ||
+    !Number.isInteger(minimumValue) ||
+    targetValue < 1 ||
+    minimumValue < 1 ||
+    minimumValue > targetValue
+  ) {
+    planningRulesMessage.textContent =
+      "Ungültige Stundenwerte. Bitte Eingaben prüfen.";
+    return;
+  }
+
+  planningRulesMessage.textContent =
+    "Tagesstunden werden gespeichert ...";
+
+  const { error } = await suvDb
+    .from("planning_rules")
+    .update({
+      rule_value: {
+        target: targetValue,
+        acceptable_minimum: minimumValue,
+        ganztag_periods_excluded: true
+      },
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", ruleId);
+
+  if (error) {
+    planningRulesMessage.textContent =
+      "Fehler beim Speichern: " + error.message;
+    return;
+  }
+
+  await loadPlanningRules();
+}
+
 // Schuljahr wechseln
 
 planningRulesSchoolYear.addEventListener(
