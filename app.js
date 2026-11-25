@@ -4690,7 +4690,7 @@ async function editGradeCourseOffering(offeringId) {
 
     const { data: groups, error: groupsError } = await suvDb
       .from("grade_course_groups")
-      .select("id, subject_id, weekly_periods, notes")
+      .select("id, subject_id, weekly_periods, course_count, notes")
       .eq("offering_id", offeringId);
 
     if (groupsError) throw groupsError;
