@@ -406,7 +406,7 @@ codeCell.textContent = subject.short_code || "–";
 const teachersCell = document.createElement("td");
 
 const qualifiedTeachers =
-  getQualifiedTeachersForSubject(subject.id);
+  getPlanningTeacherCandidates(subject.id);
 
 teachersCell.textContent =
   qualifiedTeachers.length > 0
