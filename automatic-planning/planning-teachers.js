@@ -137,3 +137,30 @@ function recordPlanningTeacherAssignment(
 
   return true;
 }
+
+// Prüfen, ob eine Lehrkraft noch Wochenstunden-Kapazität hat
+
+function hasPlanningTeacherCapacity(
+  teacherId,
+  periodsCount = 1
+) {
+  const state = window.suvPlanningTeacherData;
+
+  const teacher = state.teachers.find(item =>
+    item.id === teacherId
+  );
+
+  if (!teacher) return false;
+
+  const requiredHours =
+    Number(teacher.weekly_required_hours || 0);
+
+  const assignedPeriods =
+    Number(state.assignedPeriods[teacherId] || 0);
+
+  if (requiredHours <= 0) return false;
+
+  return (
+    assignedPeriods + periodsCount <= requiredHours
+  );
+}
