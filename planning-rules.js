@@ -191,17 +191,61 @@ descriptionCell.append(
 );
 
     const valueCell = document.createElement("td");
-    const valueDetails = document.createElement("details");
-    const valueSummary = document.createElement("summary");
 
-    valueSummary.textContent = "Werte anzeigen";
+if (rule.rule_code === "class_daily_target_periods") {
+  const targetInput = document.createElement("input");
+  targetInput.type = "number";
+  targetInput.min = "1";
+  targetInput.max = "10";
+  targetInput.value = rule.rule_value.target ?? 6;
+  targetInput.style.width = "75px";
 
-    const valueContent = document.createElement("pre");
-    valueContent.textContent =
-      JSON.stringify(rule.rule_value, null, 2);
+  const minimumInput = document.createElement("input");
+  minimumInput.type = "number";
+  minimumInput.min = "1";
+  minimumInput.max = "10";
+  minimumInput.value =
+    rule.rule_value.acceptable_minimum ?? 5;
+  minimumInput.style.width = "75px";
 
-    valueDetails.append(valueSummary, valueContent);
-    valueCell.appendChild(valueDetails);
+  const targetLabel = document.createElement("label");
+  targetLabel.textContent = "Tagesziel: ";
+  targetLabel.appendChild(targetInput);
+
+  const minimumLabel = document.createElement("label");
+  minimumLabel.textContent = " Mindestzahl: ";
+  minimumLabel.appendChild(minimumInput);
+
+  const saveButton = document.createElement("button");
+  saveButton.type = "button";
+  saveButton.textContent = "Speichern";
+
+  saveButton.addEventListener("click", () => {
+    updateDailyTargetRule(
+      rule.id,
+      targetInput.value,
+      minimumInput.value
+    );
+  });
+
+  valueCell.append(
+    targetLabel,
+    minimumLabel,
+    saveButton
+  );
+} else {
+  const valueDetails = document.createElement("details");
+  const valueSummary = document.createElement("summary");
+
+  valueSummary.textContent = "Werte anzeigen";
+
+  const valueContent = document.createElement("pre");
+  valueContent.textContent =
+    JSON.stringify(rule.rule_value, null, 2);
+
+  valueDetails.append(valueSummary, valueContent);
+  valueCell.appendChild(valueDetails);
+}
 
     const statusCell = document.createElement("td");
 
