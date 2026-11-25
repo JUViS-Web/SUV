@@ -272,6 +272,31 @@ async function updatePlanningRulePriority(ruleId, newPriority) {
   await loadPlanningRules();
 }
 
+// Beschreibung einer Planungsregel ändern
+
+async function updatePlanningRuleDescription(ruleId, newDescription) {
+  planningRulesMessage.textContent =
+    "Beschreibung wird gespeichert ...";
+
+  const { error } = await suvDb
+    .from("planning_rules")
+    .update({
+      description: newDescription.trim() || null,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", ruleId);
+
+  if (error) {
+    planningRulesMessage.textContent =
+      "Fehler beim Speichern der Beschreibung: " +
+      error.message;
+    return;
+  }
+
+  planningRulesMessage.textContent =
+    "Beschreibung erfolgreich gespeichert.";
+}
+
 // Schuljahr wechseln
 
 planningRulesSchoolYear.addEventListener(
