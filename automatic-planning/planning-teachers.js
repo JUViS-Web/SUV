@@ -178,3 +178,42 @@ function hasPlanningTeacherCapacity(
     assignedPeriods + periodsCount <= requiredHours
   );
 }
+
+// Lehrkraft für einen Unterrichtsbedarf auswählen
+// und ihre Wochenstunden direkt reservieren
+
+function assignPlanningTeacher(
+  subjectId,
+  periodsCount = 1
+) {
+  const candidates =
+    getPlanningTeacherCandidates(
+      subjectId,
+      periodsCount
+    );
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  const teacher = candidates[0];
+
+  const recorded =
+    recordPlanningTeacherAssignment(
+      teacher.id,
+      periodsCount
+    );
+
+  if (!recorded) {
+    return null;
+  }
+
+  return {
+    teacher,
+    assignedPeriods: periodsCount,
+    remainingHours:
+      teacher.requiredHours -
+      teacher.assignedPeriods -
+      periodsCount
+  };
+}
