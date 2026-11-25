@@ -4162,12 +4162,13 @@ async function updateGradeCourseOffering(data) {
       const { data: newGroup, error } = await suvDb
         .from("grade_course_groups")
         .insert({
-          school_year_id: data.schoolYearId,
-          grade_level_id: data.gradeId,
-          subject_id: offer.subjectId,
-          weekly_periods: data.weeklyPeriods,
-          offering_id: offeringId
-        })
+  school_year_id: data.schoolYearId,
+  grade_level_id: data.gradeId,
+  subject_id: offer.subjectId,
+  weekly_periods: data.weeklyPeriods,
+  course_count: offer.courseCount,
+  offering_id: offeringId
+})
         .select("id, subject_id")
         .single();
 
