@@ -164,8 +164,31 @@ prioritySelect.addEventListener("change", () => {
 priorityCell.appendChild(prioritySelect);
 
     const descriptionCell = document.createElement("td");
-    descriptionCell.textContent =
-      rule.description || "Keine Beschreibung";
+
+const descriptionInput = document.createElement("textarea");
+descriptionInput.value = rule.description || "";
+descriptionInput.rows = 3;
+descriptionInput.placeholder = "Regelbeschreibung eingeben ...";
+descriptionInput.style.minWidth = "220px";
+descriptionInput.style.width = "100%";
+
+const saveDescriptionButton =
+  document.createElement("button");
+
+saveDescriptionButton.type = "button";
+saveDescriptionButton.textContent = "Speichern";
+
+saveDescriptionButton.addEventListener("click", () => {
+  updatePlanningRuleDescription(
+    rule.id,
+    descriptionInput.value
+  );
+});
+
+descriptionCell.append(
+  descriptionInput,
+  saveDescriptionButton
+);
 
     const valueCell = document.createElement("td");
     const valueDetails = document.createElement("details");
