@@ -154,6 +154,25 @@ if (offeringIds.length > 0) {
         item => item.id === subjectId
       );
 
+const trackOfferingIds = [
+  ...new Set(
+    subjectGroups.map(group => group.offering_id)
+  )
+];
+
+const trackBlockPeriods = trackOfferingIds.map(
+  offeringId => ({
+    offeringId,
+    periods: trackBlocks
+      .filter(
+        block =>
+          block.grade_course_offering_id === offeringId
+      )
+      .sort((a, b) => a.block_number - b.block_number)
+      .map(block => block.periods_count)
+  })
+);
+      
       const requirement = (requirements || []).find(
         item => item.subject_id === subjectId
       );
