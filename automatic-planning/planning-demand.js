@@ -137,6 +137,19 @@ async function loadPlanningDemandData(schoolYearId, gradeLevelId) {
         item => item.id === subjectId
       );
 
+      const requirement = (requirements || []).find(
+        item => item.subject_id === subjectId
+      );
+
+      const regularBlockPeriods = regularBlocks
+        .filter(
+          block =>
+            block.grade_subject_requirement_id ===
+            requirement?.id
+        )
+        .sort((a, b) => a.block_number - b.block_number)
+        .map(block => block.periods_count);
+      
       demand.push({
         classId: classItem.id,
         className: classItem.name,
