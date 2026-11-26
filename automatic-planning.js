@@ -1024,8 +1024,14 @@ async function runAutoPlanningCheck() {
   );
 
   let weeklyPeriods = 0;
-  let activeSubjects = 0;
-  const invalidSubjects = [];
+
+const activeSubjects = new Set(
+  demandResult.demand
+    .filter(item => item.totalHours > 0)
+    .map(item => item.subjectId)
+).size;
+
+const invalidSubjects = [];
 
   inputs.forEach(input => {
     const row = input.closest("tr");
