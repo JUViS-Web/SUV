@@ -433,6 +433,12 @@ async function loadAutoPlanningParallelTracks(schoolYearId) {
     .eq("school_year_id", schoolYearId)
     .order("name");
 
+    if (error) {
+    container.textContent =
+      "Fehler beim Laden der Klassen: " + error.message;
+    return;
+  }
+
   if (trackError) {
     container.textContent =
       "Fehler beim Laden der alten Schienen: " +
