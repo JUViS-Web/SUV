@@ -156,3 +156,84 @@ async function loadAutoPlanningEngineData(
 
   return engineData;
 }
+
+
+// Testfunktion für die Planungsengine
+
+document
+  .getElementById("autoPlanningEngineTestButton")
+  .addEventListener("click", async () => {
+    const button = document.getElementById(
+      "autoPlanningEngineTestButton"
+    );
+
+    const result = document.getElementById(
+      "autoPlanningEngineTestResult"
+    );
+
+    const schoolYearId =
+      document.getElementById(
+        "autoPlanningSchoolYear"
+      ).value;
+
+    const gradeLevelId =
+      document.getElementById(
+        "autoPlanningGrade"
+      ).value;
+
+    if (!schoolYearId || !gradeLevelId) {
+      result.textContent =
+        "Bitte zuerst ein Schuljahr und einen Jahrgang auswählen.";
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Planungsdaten werden geladen ...";
+    result.textContent = "";
+
+    try {
+      const data = await loadAutoPlanningEngineData(
+        schoolYearId,
+        gradeLevelId
+      );
+
+      result.innerHTML = "";
+
+      const heading = document.createElement("h4");
+      heading.textContent =
+        "Planungsdaten erfolgreich geladen";
+
+      const list = document.createElement("ul");
+
+      const entries = [
+        ["Unterrichtstage", data.schoolDays.length],
+        ["Unterrichtszeiten", data.lessonTimes.length],
+        ["Aktive Räume", data.rooms.length],
+        ["Planungsregeln", data.planningRules.length],
+        ["Zeitregeln", data.timeRules.length],
+        ["Klassen", data.classes.length],
+        ["Fachbedarfe", data.demand.length],
+        ["Fächer", data.subjects.length],
+        ["Klassenlehrkraft-Zuordnungen", data.classTeachers.length],
+        ["Lehrkräfte", data.teachers.length],
+        ["Fachqualifikationen", data.teacherSubjects.length]
+      ];
+
+      entries.forEach(([label, count]) => {
+        const item = document.createElement("li");
+        item.textContent = label + ": " + count;
+        list.appendChild(item);
+      });
+
+      result.append(heading, list);
+
+    } catch (error) {
+      result.textContent =
+        "Fehler beim Laden der Planungsdaten: " +
+        error.message;
+    } finally {
+      button.disabled = false;
+      button.textContent =
+        "Planungsdaten laden und prüfen";
+    }
+  });
