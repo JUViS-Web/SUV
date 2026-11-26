@@ -194,6 +194,10 @@ const trackBlockPeriods = trackOfferingIds.map(
         regularHours,
         regularBlockPeriods,
         trackHours,
+        regularHours,
+        regularBlockPeriods,
+        trackHours,
+        trackBlockPeriods,
         totalHours:
   subjectGroups.length > 0
     ? trackHours
