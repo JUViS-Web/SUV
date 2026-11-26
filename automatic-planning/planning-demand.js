@@ -281,11 +281,16 @@ async function renderPlanningDemand(schoolYearId, gradeLevelId) {
           const row = document.createElement("tr");
 
           [
-            item.subjectName,
-            item.regularHours,
-            item.trackHours,
-            item.totalHours
-          ].forEach(value => {
+  item.subjectName,
+  item.regularHours,
+  item.regularBlockPeriods.join(" + ") || "–",
+  item.trackHours,
+  item.trackBlockPeriods
+    .map(item => item.periods.join(" + "))
+    .filter(Boolean)
+    .join(" / ") || "–",
+  item.totalHours
+].forEach(value => {
             const cell = document.createElement("td");
             cell.textContent = value;
             row.appendChild(cell);
