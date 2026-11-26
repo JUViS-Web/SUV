@@ -979,12 +979,18 @@ async function saveAutoPlanningRequirements() {
     }
   }
 
+    saveButton.disabled = false;
+  saveButton.textContent = "Unterrichtsvorgaben speichern";
+
   autoPlanningMessage.textContent =
     "Unterrichtsvorgaben und Unterrichtsblöcke erfolgreich gespeichert.";
 
-  saveButton.disabled = false;
-  saveButton.textContent = "Unterrichtsvorgaben speichern";
-}
+  await runAutoPlanningCheck();
+
+  await renderPlanningDemand(
+    schoolYearId,
+    gradeLevelId
+  );
 
 
 // Planungsgrundlage prüfen
