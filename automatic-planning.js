@@ -124,6 +124,7 @@ autoPlanningSchoolYear.addEventListener(
 
 // Schienen und parallele Kursangebote laden
 
+
 async function loadAutoPlanningParallelTracks(schoolYearId) {
   const container = document.getElementById(
     "autoPlanningParallelTracks"
@@ -132,9 +133,299 @@ async function loadAutoPlanningParallelTracks(schoolYearId) {
   container.textContent = "Schienen werden geladen ...";
 
   if (!schoolYearId) {
-    container.textContent = "Bitte zuerst ein Schuljahr auswählen.";
+    container.textContent =
+      "Bitte zuerst ein Schuljahr auswählen.";
     return;
   }
+
+  // Neue Schienenangebote laden
+
+  const { data: offerings, error: offeringError } =
+    await suvDb
+      .from("grade_course_offerings")
+      .select("id, offering_name, grade_level_id")
+      .eq("school_year_id", schoolYearId)
+      .order("offering_name");
+
+  if (offeringError) {
+    container.textContent =
+      "Fehler beim Laden der Schienenangebote: " +
+      offeringError.message;
+    return;
+  }
+
+  const offeringIds = (offerings || []).map(item => item.id);
+
+  let groups = [];
+  let courses = [];
+  let classLinks = [];
+  let blocks = [];
+  let subjects = [];
+  let classes = [];
+  let grades = [];
+
+  if (offeringIds.length > 0) {
+    const { data, error } = await suvDb
+      .from("grade_course_groups")
+      .select(
+        "id, offering_id, subject_id, weekly_periods, course_count"
+      )
+      .in("offering_id", offeringIds);
+
+    if (error) {
+      container.textContent =
+        "Fehler beim Laden der Fächergruppen: " +
+        error.message;
+      return;
+    }
+
+    groups = data || [];
+
+    const groupIds = groups.map(item => item.id);
+
+    if (groupIds.length > 0) {
+      const { data, error } = await suvDb
+        .from("grade_courses")
+        .select(
+          "id, grade_course_group_id, course_number, course_name"
+        )
+        .in("grade_course_group_id", groupIds)
+        .order("course_number");
+
+      if (error) {
+        container.textContent =
+          "Fehler beim Laden der Einzelkurse: " +
+          error.message;
+        return;
+      }
+
+      courses = data || [];
+    }
+
+    const { data: links, error: linkError } = await suvDb
+      .from("grade_course_offering_classes")
+      .select("grade_course_offering_id, class_id")
+      .in("grade_course_offering_id", offeringIds);
+
+    if (linkError) {
+      container.textContent =
+        "Fehler beim Laden der Klassenzuordnungen: " +
+        linkError.message;
+      return;
+    }
+
+    classLinks = links || [];
+
+    const { data: blockData, error: blockError } =
+      await suvDb
+        .from("lesson_block_requirements")
+        .select(
+          "id, grade_course_offering_id, block_number, periods_count"
+        )
+        .in("grade_course_offering_id", offeringIds)
+        .order("block_number");
+
+    if (blockError) {
+      container.textContent =
+        "Fehler beim Laden der Unterrichtsblöcke: " +
+        blockError.message;
+      return;
+    }
+
+    blocks = blockData || [];
+
+    const subjectIds = [
+      ...new Set(groups.map(item => item.subject_id))
+    ];
+
+    if (subjectIds.length > 0) {
+      const { data, error } = await suvDb
+        .from("subjects")
+        .select("id, name, short_code")
+        .in("id", subjectIds);
+
+      if (error) {
+        container.textContent =
+          "Fehler beim Laden der Fächer: " +
+          error.message;
+        return;
+      }
+
+      subjects = data || [];
+    }
+
+    const classIds = [
+      ...new Set(classLinks.map(item => item.class_id))
+    ];
+
+    if (classIds.length > 0) {
+      const { data, error } = await suvDb
+        .from("classes")
+        .select("id, name, grade_level_id")
+        .in("id", classIds);
+
+      if (error) {
+        container.textContent =
+          "Fehler beim Laden der Klassen: " +
+          error.message;
+        return;
+      }
+
+      classes = data || [];
+    }
+
+    const { data: gradeData, error: gradeError } =
+      await suvDb
+        .from("grade_levels")
+        .select("id, name");
+
+    if (gradeError) {
+      container.textContent =
+        "Fehler beim Laden der Jahrgänge: " +
+        gradeError.message;
+      return;
+    }
+
+    grades = gradeData || [];
+  }
+
+  container.innerHTML = "";
+
+  // Neue Schienenangebote darstellen
+
+  (offerings || []).forEach(offering => {
+    const box = document.createElement("div");
+    box.className = "teacher-entry";
+
+    const heading = document.createElement("h4");
+    heading.textContent = offering.offering_name;
+
+    const offeringGrade = grades.find(
+      grade => grade.id === offering.grade_level_id
+    );
+
+    const info = document.createElement("p");
+    info.textContent =
+      "Jahrgang: " +
+      (offeringGrade?.name || "Mehrere Jahrgänge") +
+      " · Alle Kurse dieses Angebots laufen parallel.";
+
+    box.append(heading, info);
+
+    const offeringGroups = groups.filter(
+      group => group.offering_id === offering.id
+    );
+
+    offeringGroups.forEach(group => {
+      const groupBox = document.createElement("div");
+      groupBox.className = "teacher-entry";
+
+      const subject = subjects.find(
+        item => item.id === group.subject_id
+      );
+
+      const groupHeading = document.createElement("strong");
+      groupHeading.textContent =
+        subject?.name || "Unbekanntes Fach";
+
+      const groupInfo = document.createElement("p");
+      groupInfo.textContent =
+        group.weekly_periods +
+        " Wochenstunden · " +
+        group.course_count +
+        " parallele Kurse";
+
+      groupBox.append(groupHeading, groupInfo);
+
+      const groupCourses = courses.filter(
+        course =>
+          course.grade_course_group_id === group.id
+      );
+
+      const courseInfo = document.createElement("p");
+      courseInfo.textContent =
+        "Angelegte Kursdatensätze: " +
+        groupCourses.length +
+        " von " +
+        group.course_count;
+
+      groupBox.appendChild(courseInfo);
+
+      if (groupCourses.length !== group.course_count) {
+        const warning = document.createElement("p");
+        warning.textContent =
+          "Hinweis: Die Anzahl der Kursdatensätze stimmt " +
+          "noch nicht mit der festgelegten Kursanzahl überein.";
+        groupBox.appendChild(warning);
+      }
+
+      groupCourses.forEach(course => {
+        const courseLine = document.createElement("p");
+        courseLine.textContent =
+          course.course_name ||
+          ((subject?.name || "Kurs") +
+            " " +
+            course.course_number);
+
+        groupBox.appendChild(courseLine);
+      });
+
+      box.appendChild(groupBox);
+    });
+
+    const assignedClasses = classLinks
+      .filter(link =>
+        link.grade_course_offering_id === offering.id
+      )
+      .map(link => {
+        const classItem = classes.find(
+          item => item.id === link.class_id
+        );
+
+        if (!classItem) return null;
+
+        const grade = grades.find(
+          item => item.id === classItem.grade_level_id
+        );
+
+        return (
+          (grade?.name || "Jahrgang ?") +
+          " · " +
+          classItem.name
+        );
+      })
+      .filter(Boolean);
+
+    const classInfo = document.createElement("p");
+    classInfo.textContent =
+      "Beteiligte Klassen: " +
+      (assignedClasses.length
+        ? assignedClasses.join(", ")
+        : "Keine Klassen zugeordnet.");
+
+    box.appendChild(classInfo);
+
+    const offeringBlocks = blocks
+      .filter(block =>
+        block.grade_course_offering_id === offering.id
+      )
+      .sort((a, b) => a.block_number - b.block_number);
+
+    const blockInfo = document.createElement("p");
+    blockInfo.textContent =
+      "Unterrichtsblöcke: " +
+      (offeringBlocks.length
+        ? offeringBlocks.map(block =>
+            block.periods_count
+          ).join(" + ")
+        : "Noch keine Blöcke festgelegt.");
+
+    box.appendChild(blockInfo);
+
+    container.appendChild(box);
+  });
+
+  // Alte Schienenstruktur weiterhin laden
 
   const { data: tracks, error: trackError } = await suvDb
     .from("timetable_parallel_groups")
@@ -144,130 +435,120 @@ async function loadAutoPlanningParallelTracks(schoolYearId) {
 
   if (trackError) {
     container.textContent =
-      "Fehler beim Laden der Schienen: " + trackError.message;
+      "Fehler beim Laden der alten Schienen: " +
+      trackError.message;
     return;
   }
 
-  if (!tracks || tracks.length === 0) {
+  if (tracks && tracks.length > 0) {
+    const { data: oldCourses, error: courseError } =
+      await suvDb
+        .from("timetable_parallel_courses")
+        .select(`
+          id,
+          parallel_group_id,
+          course_name,
+          course_count,
+          subjects(name, short_code)
+        `)
+        .eq("school_year_id", schoolYearId)
+        .order("course_name");
+
+    if (courseError) {
+      container.textContent =
+        "Fehler beim Laden der alten Kursangebote: " +
+        courseError.message;
+      return;
+    }
+
+    const { data: oldClassLinks, error: classError } =
+      await suvDb
+        .from("timetable_parallel_course_classes")
+        .select(`
+          course_id,
+          classes(name, grade_levels(name))
+        `)
+        .eq("school_year_id", schoolYearId);
+
+    if (classError) {
+      container.textContent =
+        "Fehler beim Laden der alten Klassenzuordnungen: " +
+        classError.message;
+      return;
+    }
+
+    tracks.forEach(track => {
+      const trackBox = document.createElement("div");
+      trackBox.className = "teacher-entry";
+
+      const heading = document.createElement("h4");
+      heading.textContent = track.name;
+
+      const info = document.createElement("p");
+      info.textContent =
+        track.weekly_periods +
+        " Wochenstunden · Alle Kurse parallel";
+
+      trackBox.append(heading, info);
+
+      (oldCourses || [])
+        .filter(course =>
+          course.parallel_group_id === track.id
+        )
+        .forEach(course => {
+          const courseBox = document.createElement("div");
+          courseBox.className = "teacher-entry";
+
+          const title = document.createElement("strong");
+          title.textContent =
+            course.course_name +
+            " · " +
+            (course.subjects?.name || "Unbekanntes Fach");
+
+          const count = document.createElement("p");
+          count.textContent =
+            "Einzuplanende Kurse: " + course.course_count;
+
+          const assigned = (oldClassLinks || []).filter(
+            link => link.course_id === course.id
+          );
+
+          const classInfo = document.createElement("p");
+          classInfo.textContent =
+            "Beteiligte Klassen: " +
+            (assigned.length
+              ? assigned.map(link =>
+                  (link.classes?.grade_levels?.name ||
+                    "Jahrgang ?") +
+                  " · " +
+                  (link.classes?.name ||
+                    "Unbekannte Klasse")
+                ).join(", ")
+              : "Keine Klassen zugeordnet.");
+
+          courseBox.append(title, count, classInfo);
+
+          trackBox.appendChild(courseBox);
+        });
+
+      container.appendChild(trackBox);
+    });
+  }
+
+  if (
+    (!offerings || offerings.length === 0) &&
+    (!tracks || tracks.length === 0)
+  ) {
     container.textContent =
       "Für dieses Schuljahr wurden noch keine Schienen angelegt.";
     return;
   }
 
-  const { data: courses, error: courseError } = await suvDb
-    .from("timetable_parallel_courses")
-    .select(`
-      id,
-      parallel_group_id,
-      course_name,
-      course_count,
-      subjects(name, short_code)
-    `)
-    .eq("school_year_id", schoolYearId)
-    .order("course_name");
-
-  if (courseError) {
-    container.textContent =
-      "Fehler beim Laden der Kursangebote: " + courseError.message;
-    return;
-  }
-
-  const { data: classLinks, error: classError } = await suvDb
-    .from("timetable_parallel_course_classes")
-    .select(`
-      course_id,
-      classes(name, grade_levels(name))
-    `)
-    .eq("school_year_id", schoolYearId);
-
-  if (classError) {
-    container.textContent =
-      "Fehler beim Laden der Klassenzuordnungen: " +
-      classError.message;
-    return;
-  }
-
-  container.innerHTML = "";
-
-  tracks.forEach(track => {
-    const trackBox = document.createElement("div");
-    trackBox.className = "teacher-entry";
-
-    const heading = document.createElement("h4");
-    heading.textContent = track.name;
-
-    const info = document.createElement("p");
-    info.textContent =
-      track.weekly_periods + " Wochenstunden · Alle Kurse parallel";
-
-    trackBox.append(heading, info);
-
-    const trackCourses = (courses || []).filter(
-      course => course.parallel_group_id === track.id
-    );
-
-    if (trackCourses.length === 0) {
-      const empty = document.createElement("p");
-      empty.textContent = "Keine Kursangebote vorhanden.";
-      trackBox.appendChild(empty);
-    }
-
-    trackCourses.forEach(course => {
-      const courseBox = document.createElement("div");
-      courseBox.className = "teacher-entry";
-
-      const courseHeading = document.createElement("strong");
-      courseHeading.textContent =
-        course.course_name + " · " +
-        (course.subjects?.name || "Unbekanntes Fach");
-
-      courseBox.appendChild(courseHeading);
-
-      const countInfo = document.createElement("p");
-      countInfo.textContent =
-        "Einzuplanende Kurse: " + course.course_count;
-
-      courseBox.appendChild(countInfo);
-
-      const assignedClasses = (classLinks || []).filter(
-        link => link.course_id === course.id
-      );
-
-      const classInfo = document.createElement("p");
-      classInfo.textContent =
-        "Beteiligte Klassen: " +
-        (assignedClasses.length
-          ? assignedClasses.map(link => {
-              const grade =
-                link.classes?.grade_levels?.name || "Jahrgang ?";
-              const name =
-                link.classes?.name || "Unbekannte Klasse";
-
-              return grade + " · " + name;
-            }).join(", ")
-          : "Keine Klassen zugeordnet.");
-
-      courseBox.appendChild(classInfo);
-
-      const units = document.createElement("p");
-      units.textContent = "Einzelne Planungseinheiten:";
-
-      courseBox.appendChild(units);
-
-      for (let i = 1; i <= course.course_count; i++) {
-        const unit = document.createElement("p");
-        unit.textContent =
-          course.course_name + " – Kurs " +
-          i + " von " + course.course_count;
-
-        courseBox.appendChild(unit);
-      }
-
-      trackBox.appendChild(courseBox);
-    });
-
-    container.appendChild(trackBox);
-  });
+  autoPlanningMessage.textContent =
+    (offerings?.length || 0) +
+    " neue Schienenangebote und " +
+    (tracks?.length || 0) +
+    " alte Schienen geladen.";
 }
 
 // Unterrichtsvorgaben eines Jahrgangs laden
