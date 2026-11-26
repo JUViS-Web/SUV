@@ -991,7 +991,7 @@ async function saveAutoPlanningRequirements() {
     schoolYearId,
     gradeLevelId
   );
-
+}
 
 // Planungsgrundlage prüfen
 
