@@ -52,6 +52,23 @@ async function loadPlanningDemandData(schoolYearId, gradeLevelId) {
   const offeringIds = (offerings || []).map(item => item.id);
   const classIds = (classes || []).map(item => item.id);
 
+let trackBlocks = [];
+
+if (offeringIds.length > 0) {
+  const { data: trackBlockData, error: trackBlockError } =
+    await suvDb
+      .from("lesson_block_requirements")
+      .select(
+        "grade_course_offering_id, block_number, periods_count"
+      )
+      .in("grade_course_offering_id", offeringIds)
+      .order("block_number");
+
+  if (trackBlockError) throw trackBlockError;
+
+  trackBlocks = trackBlockData || [];
+}
+  
   let classLinks = [];
   let groups = [];
 
