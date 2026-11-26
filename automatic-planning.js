@@ -1005,9 +1005,17 @@ async function runAutoPlanningCheck() {
     .eq("grade_level_id", gradeLevelId)
     .order("name");
 
-  if (error) {
+    let demandResult;
+
+  try {
+    demandResult = await loadPlanningDemandData(
+      schoolYearId,
+      gradeLevelId
+    );
+  } catch (demandError) {
     container.textContent =
-      "Fehler bei der Klassenprüfung: " + error.message;
+      "Fehler beim Laden des Unterrichtsbedarfs: " +
+      demandError.message;
     return;
   }
 
