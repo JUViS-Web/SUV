@@ -166,6 +166,96 @@ async function loadAutoPlanningEngineData(
   return engineData;
 }
 
+// Unterrichtsbedarfe in planbare Blöcke umwandeln
+
+function buildAutoPlanningBlocks(data) {
+  const blocks = [];
+
+  // Reguläre Unterrichtsblöcke
+  for (const classItem of data.classes) {
+    for (const requirement of data.requirements) {
+      const subject = data.subjects.find(
+        item => item.id === requirement.subject_id
+      );
+
+      const matchingBlocks = data.regularBlocks
+        .filter(
+          block =>
+            block.grade_subject_requirement_id ===
+            requirement.id
+        )
+        .sort(
+          (a, b) => a.block_number - b.block_number
+        );
+
+      for (const block of matchingBlocks) {
+        blocks.push({
+          type: "regular",
+          classId: classItem.id,
+          className: classItem.name,
+          subjectId: requirement.subject_id,
+          subjectName: subject?.name || "Unbekannt",
+          blockNumber: block.block_number,
+          periodsCount: block.periods_count
+        });
+      }
+    }
+  }
+
+  // Schienenunterricht: ein gemeinsamer Zeitblock
+  for (const offering of data.offerings) {
+    const participatingClasses = data.classLinks
+      .filter(
+        link =>
+          link.grade_course_offering_id === offering.id
+      )
+      .map(link => {
+        return data.classes.find(
+          item => item.id === link.class_id
+        );
+      })
+      .filter(Boolean);
+
+    const matchingBlocks = data.trackBlocks
+      .filter(
+        block =>
+          block.grade_course_offering_id === offering.id
+      )
+      .sort(
+        (a, b) => a.block_number - b.block_number
+      );
+
+    for (const block of matchingBlocks) {
+      const groups = data.courseGroups
+        .filter(
+          group => group.offering_id === offering.id
+        );
+
+      for (const group of groups) {
+        const subject = data.subjects.find(
+          item => item.id === group.subject_id
+        );
+
+        blocks.push({
+          type: "track",
+          offeringId: offering.id,
+          offeringName: offering.offering_name,
+          participatingClassIds:
+            participatingClasses.map(item => item.id),
+          participatingClassNames:
+            participatingClasses.map(item => item.name),
+          subjectId: group.subject_id,
+          subjectName: subject?.name || "Unbekannt",
+          courseCount: Number(group.course_count || 0),
+          blockNumber: block.block_number,
+          periodsCount: block.periods_count
+        });
+      }
+    }
+  }
+
+  return blocks;
+}
 
 // Testfunktion für die Planungsengine
 
