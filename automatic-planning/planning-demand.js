@@ -20,6 +20,27 @@ async function loadPlanningDemandData(schoolYearId, gradeLevelId) {
 
   if (requirementError) throw requirementError;
 
+  const requirementIds = (requirements || []).map(
+    item => item.id
+  );
+
+  let regularBlocks = [];
+
+  if (requirementIds.length > 0) {
+    const { data: blockData, error: blockError } =
+      await suvDb
+        .from("lesson_block_requirements")
+        .select(
+          "grade_subject_requirement_id, block_number, periods_count"
+        )
+        .in("grade_subject_requirement_id", requirementIds)
+        .order("block_number");
+
+    if (blockError) throw blockError;
+
+    regularBlocks = blockData || [];
+  }
+  
   const { data: offerings, error: offeringError } =
     await suvDb
       .from("grade_course_offerings")
