@@ -1106,14 +1106,14 @@ async function runAutoPlanningCheck() {
   subjectInfo.textContent =
     "Fächer mit Unterricht: " + activeSubjects;
 
-  const hoursInfo = document.createElement("p");
+    const hoursInfo = document.createElement("p");
   hoursInfo.textContent =
-    "Wochenstunden je Klasse: " + weeklyPeriods;
+    "Reguläre Wochenstunden je Klasse: " + weeklyPeriods;
 
   const totalInfo = document.createElement("p");
   totalInfo.textContent =
-    "Unterrichtsstunden im gesamten Jahrgang: " +
-    (weeklyPeriods * classes.length);
+    "Tatsächliche Unterrichtsstunden im gesamten Jahrgang: " +
+    demandResult.totalWeeklyHours;
 
   container.append(
     classInfo,
