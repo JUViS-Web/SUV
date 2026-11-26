@@ -123,7 +123,10 @@ async function loadPlanningDemandData(schoolYearId, gradeLevelId) {
         subjectName: subject?.name || "Unbekanntes Fach",
         regularHours,
         trackHours,
-        totalHours: regularHours + trackHours,
+        totalHours:
+  subjectGroups.length > 0
+    ? trackHours
+    : regularHours,
         parallelCourseCount
       });
     }
