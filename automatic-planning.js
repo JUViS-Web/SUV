@@ -1057,10 +1057,6 @@ const invalidSubjects = [];
       valid = false;
     } else {
       weeklyPeriods += value;
-
-      if (value > 0) {
-        activeSubjects++;
-      }
     }
 
     if (!blocksInput) {
