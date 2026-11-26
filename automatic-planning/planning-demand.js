@@ -184,11 +184,11 @@ async function renderPlanningDemand(schoolYearId, gradeLevelId) {
       const header = document.createElement("tr");
 
       [
-        "Fach",
-        "Regulär",
-        "Schiene",
-        "Gesamt"
-      ].forEach(label => {
+  "Fach",
+  "Reguläre Vorgabe",
+  "Schiene (ersetzt)",
+  "Tatsächlicher Bedarf"
+].forEach(label => {
         const th = document.createElement("th");
         th.textContent = label;
         header.appendChild(th);
