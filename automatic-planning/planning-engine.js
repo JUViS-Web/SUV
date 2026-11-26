@@ -141,8 +141,17 @@ async function loadAutoPlanningEngineData(
     planningRules: rulesResult.data || [],
     timeRules: timeRulesResult.data || [],
 
-    classes: demandResult.classes,
+        classes: demandResult.classes,
     demand: demandResult.demand,
+
+    requirements: demandResult.requirements,
+    regularBlocks: demandResult.regularBlocks,
+
+    offerings: demandResult.offerings,
+    classLinks: demandResult.classLinks,
+    courseGroups: demandResult.groups,
+    trackBlocks: demandResult.trackBlocks,
+
     subjects,
 
     classTeachers,
