@@ -773,6 +773,7 @@ container.querySelectorAll(
     subjects.length + " Fächer für den ausgewählten Jahrgang geladen.";
 
   await runAutoPlanningCheck();
+  await renderPlanningDemand(schoolYearId, gradeLevelId);
 }
 
 
