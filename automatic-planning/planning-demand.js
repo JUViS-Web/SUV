@@ -138,3 +138,102 @@ async function loadPlanningDemandData(schoolYearId, gradeLevelId) {
     )
   };
 }
+
+// Berechneten Unterrichtsbedarf anzeigen
+
+async function renderPlanningDemand(schoolYearId, gradeLevelId) {
+  const container = document.getElementById(
+    "autoPlanningDemand"
+  );
+
+  container.textContent =
+    "Unterrichtsbedarf wird berechnet ...";
+
+  try {
+    const result = await loadPlanningDemandData(
+      schoolYearId,
+      gradeLevelId
+    );
+
+    container.innerHTML = "";
+
+    if (result.classes.length === 0) {
+      container.textContent =
+        "Für diesen Jahrgang wurden keine Klassen gefunden.";
+      return;
+    }
+
+    result.classes.forEach(classItem => {
+      const classDemand = result.demand.filter(
+        item => item.classId === classItem.id
+      );
+
+      const section = document.createElement("div");
+      section.className = "teacher-entry";
+
+      const heading = document.createElement("h4");
+      heading.textContent = classItem.name;
+
+      const table = document.createElement("table");
+      table.className = "data-table";
+
+      const thead = document.createElement("thead");
+      const header = document.createElement("tr");
+
+      [
+        "Fach",
+        "Regulär",
+        "Schiene",
+        "Gesamt"
+      ].forEach(label => {
+        const th = document.createElement("th");
+        th.textContent = label;
+        header.appendChild(th);
+      });
+
+      thead.appendChild(header);
+
+      const tbody = document.createElement("tbody");
+
+      classDemand
+        .filter(item => item.totalHours > 0)
+        .sort((a, b) =>
+          a.subjectName.localeCompare(b.subjectName)
+        )
+        .forEach(item => {
+          const row = document.createElement("tr");
+
+          [
+            item.subjectName,
+            item.regularHours,
+            item.trackHours,
+            item.totalHours
+          ].forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+          });
+
+          tbody.appendChild(row);
+        });
+
+      table.append(thead, tbody);
+
+      const total = document.createElement("p");
+      const classTotal = classDemand.reduce(
+        (sum, item) => sum + item.totalHours,
+        0
+      );
+
+      total.textContent =
+        "Gesamt: " + classTotal + " Wochenstunden";
+
+      section.append(heading, table, total);
+      container.appendChild(section);
+    });
+
+  } catch (error) {
+    container.textContent =
+      "Fehler bei der Berechnung: " + error.message;
+  }
+}
