@@ -202,18 +202,18 @@ function buildAutoPlanningBlocks(data) {
     }
   }
 
-  // Schienenunterricht: ein gemeinsamer Zeitblock
+   // Schienenunterricht als gemeinsame Zeitblöcke
   for (const offering of data.offerings) {
     const participatingClasses = data.classLinks
       .filter(
         link =>
           link.grade_course_offering_id === offering.id
       )
-      .map(link => {
-        return data.classes.find(
+      .map(link =>
+        data.classes.find(
           item => item.id === link.class_id
-        );
-      })
+        )
+      )
       .filter(Boolean);
 
     const matchingBlocks = data.trackBlocks
@@ -225,32 +225,40 @@ function buildAutoPlanningBlocks(data) {
         (a, b) => a.block_number - b.block_number
       );
 
-    for (const block of matchingBlocks) {
-      const groups = data.courseGroups
-        .filter(
-          group => group.offering_id === offering.id
-        );
-
-      for (const group of groups) {
+    const groups = data.courseGroups
+      .filter(
+        group => group.offering_id === offering.id
+      )
+      .map(group => {
         const subject = data.subjects.find(
           item => item.id === group.subject_id
         );
 
-        blocks.push({
-          type: "track",
-          offeringId: offering.id,
-          offeringName: offering.offering_name,
-          participatingClassIds:
-            participatingClasses.map(item => item.id),
-          participatingClassNames:
-            participatingClasses.map(item => item.name),
+        return {
           subjectId: group.subject_id,
           subjectName: subject?.name || "Unbekannt",
           courseCount: Number(group.course_count || 0),
-          blockNumber: block.block_number,
-          periodsCount: block.periods_count
-        });
-      }
+          weeklyPeriods: Number(group.weekly_periods || 0)
+        };
+      });
+
+    for (const block of matchingBlocks) {
+      blocks.push({
+        type: "track",
+        offeringId: offering.id,
+        offeringName: offering.offering_name,
+
+        participatingClassIds:
+          participatingClasses.map(item => item.id),
+
+        participatingClassNames:
+          participatingClasses.map(item => item.name),
+
+        blockNumber: block.block_number,
+        periodsCount: block.periods_count,
+
+        parallelGroups: groups
+      });
     }
   }
 
