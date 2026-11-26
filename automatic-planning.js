@@ -1133,7 +1133,7 @@ async function runAutoPlanningCheck() {
       "Prüfung nicht bestanden: Bei folgenden Fächern sind die Wochenstunden oder Unterrichtsblöcke ungültig: " +
       invalidSubjects.join(", ");
 
-  } else if (weeklyPeriods === 0) {
+    } else if (demandResult.totalWeeklyHours === 0) {
     status.textContent =
       "Prüfung nicht bestanden: Es wurden noch keine Wochenstunden festgelegt.";
 
