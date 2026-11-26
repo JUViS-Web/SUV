@@ -204,9 +204,18 @@ const trackBlockPeriods = trackOfferingIds.map(
     }
   }
 
-  return {
+    return {
     classes: classes || [],
     demand,
+
+    requirements: requirements || [],
+    regularBlocks,
+
+    offerings: offerings || [],
+    classLinks,
+    groups,
+    trackBlocks,
+
     totalWeeklyHours: demand.reduce(
       (sum, item) => sum + item.totalHours,
       0
