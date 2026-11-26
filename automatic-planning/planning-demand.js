@@ -258,7 +258,9 @@ async function renderPlanningDemand(schoolYearId, gradeLevelId) {
       [
   "Fach",
   "Reguläre Vorgabe",
+  "Reguläre Blöcke",
   "Schiene (ersetzt)",
+  "Schienenblöcke",
   "Tatsächlicher Bedarf"
 ].forEach(label => {
         const th = document.createElement("th");
