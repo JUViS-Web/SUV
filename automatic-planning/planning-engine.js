@@ -318,6 +318,19 @@ document
         item => item.type === "track"
       ).length;
 
+      const totalBlockPeriods = blocks.reduce(
+        (sum, item) =>
+          sum + Number(item.periodsCount || 0),
+        0
+      );
+
+      const invalidBlocks = blocks.filter(
+        item =>
+          !item.periodsCount ||
+          item.periodsCount < 1 ||
+          !Number.isInteger(Number(item.periodsCount))
+      ).length;
+       
       result.innerHTML = "";
 
       const heading = document.createElement("h4");
