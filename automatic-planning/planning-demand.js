@@ -13,7 +13,7 @@ async function loadPlanningDemandData(schoolYearId, gradeLevelId) {
   const { data: requirements, error: requirementError } =
     await suvDb
       .from("grade_subject_requirements")
-      .select("subject_id, weekly_periods")
+      .select("id, subject_id, weekly_periods")
       .eq("school_year_id", schoolYearId)
       .eq("grade_level_id", gradeLevelId)
       .eq("is_active", true);
