@@ -156,6 +156,7 @@ async function loadPlanningDemandData(schoolYearId, gradeLevelId) {
         subjectId,
         subjectName: subject?.name || "Unbekanntes Fach",
         regularHours,
+        regularBlockPeriods,
         trackHours,
         totalHours:
   subjectGroups.length > 0
