@@ -350,7 +350,11 @@ document
         ["Fächer", data.subjects.length],
         ["Klassenlehrkraft-Zuordnungen", data.classTeachers.length],
         ["Lehrkräfte", data.teachers.length],
-        ["Fachqualifikationen", data.teacherSubjects.length]
+                ["Fachqualifikationen", data.teacherSubjects.length],
+        ["Reguläre Unterrichtsblöcke", regularBlockCount],
+        ["Gemeinsame Schienenblöcke", trackBlockCount],
+        ["Unterrichtsstunden in allen Blöcken", totalBlockPeriods],
+        ["Fehlerhafte Blockgrößen", invalidBlocks]
       ];
 
       entries.forEach(([label, count]) => {
