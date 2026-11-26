@@ -299,10 +299,20 @@ document
     result.textContent = "";
 
     try {
-      const data = await loadAutoPlanningEngineData(
+            const data = await loadAutoPlanningEngineData(
         schoolYearId,
         gradeLevelId
       );
+
+      const blocks = buildAutoPlanningBlocks(data);
+
+      const regularBlockCount = blocks.filter(
+        item => item.type === "regular"
+      ).length;
+
+      const trackBlockCount = blocks.filter(
+        item => item.type === "track"
+      ).length;
 
       result.innerHTML = "";
 
