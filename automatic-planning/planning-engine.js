@@ -215,7 +215,11 @@ function buildAutoPlanningBlocks(data) {
         )
       )
       .filter(Boolean);
-
+     
+    if (participatingClasses.length === 0) {
+      continue;
+    }
+     
     const matchingBlocks = data.trackBlocks
       .filter(
         block =>
