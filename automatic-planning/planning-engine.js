@@ -360,6 +360,33 @@ document
           item.periodsCount < 1 ||
           !Number.isInteger(Number(item.periodsCount))
       ).length;
+
+      const totalTrackCourses = blocks
+        .filter(item => item.type === "track")
+        .reduce(
+          (sum, block) =>
+            sum +
+            block.parallelGroups.reduce(
+              (groupSum, group) =>
+                groupSum + group.courses.length,
+              0
+            ),
+          0
+        );
+
+      const invalidTrackGroups = blocks
+        .filter(item => item.type === "track")
+        .reduce(
+          (sum, block) =>
+            sum +
+            block.parallelGroups.filter(
+              group =>
+                group.courseCount < 1 ||
+                !Number.isInteger(group.courseCount) ||
+                group.courses.length !== group.courseCount
+            ).length,
+          0
+        );
        
       result.innerHTML = "";
 
