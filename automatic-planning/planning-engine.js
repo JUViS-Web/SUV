@@ -772,6 +772,9 @@ document
 
       const blocks = buildAutoPlanningBlocks(data);
 
+const hardRuleConflicts =
+  findAutoPlanningHardRuleConflicts(data);
+       
       const regularBlockCount = blocks.filter(
         item => item.type === "regular"
       ).length;
