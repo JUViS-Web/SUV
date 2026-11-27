@@ -580,20 +580,20 @@ function evaluateAutoPlanningPreferences(
         Number(periodStart) >= Number(rule.period_from) &&
         Number(periodEnd) <= Number(rule.period_to)
       ) {
-        score += priority;
+        score += priorityWeight;
         satisfied.push(rule);
       } else {
-        score -= priority;
+        score -= priorityWeight;
         deviations.push(rule);
       }
     }
 
     if (rule.rule_type === "prefer_free") {
       if (sameDay && overlaps) {
-        score -= priority;
+        score -= priorityWeight;
         deviations.push(rule);
       } else {
-        score += priority;
+        score += priorityWeight;
         satisfied.push(rule);
       }
     }
