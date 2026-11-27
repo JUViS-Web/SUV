@@ -392,6 +392,71 @@ function isAutoPlanningPlacementBlocked(
   );
 }
 
+
+function violatesAutoPlanningMustRules(
+  data,
+  block,
+  weekday,
+  periodStart,
+  periodEnd,
+  teacherId = null,
+  roomId = null
+) {
+  const classIds =
+    block.type === "track"
+      ? block.participatingClassIds || []
+      : [block.classId];
+
+  const subjectIds =
+    block.type === "track"
+      ? (block.parallelGroups || []).map(
+          group => group.subjectId
+        )
+      : [block.subjectId];
+
+  const mustRules = data.timeRules.filter(rule => {
+    if (rule.rule_type !== "must") {
+      return false;
+    }
+
+    if (
+      rule.teacher_id &&
+      rule.teacher_id !== teacherId
+    ) {
+      return false;
+    }
+
+    if (
+      rule.room_id &&
+      rule.room_id !== roomId
+    ) {
+      return false;
+    }
+
+    if (
+      rule.class_id &&
+      !classIds.includes(rule.class_id)
+    ) {
+      return false;
+    }
+
+    if (
+      rule.subject_id &&
+      !subjectIds.includes(rule.subject_id)
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
+  return mustRules.some(rule =>
+    Number(rule.weekday) !== Number(weekday) ||
+    Number(periodStart) < Number(rule.period_from) ||
+    Number(periodEnd) > Number(rule.period_to)
+  );
+}
+
 // Testfunktion für die Planungsengine
 
 document
