@@ -204,15 +204,21 @@ function buildAutoPlanningBlocks(data) {
         );
 
       for (const block of matchingBlocks) {
-        blocks.push({
-          type: "regular",
-          classId: classItem.id,
-          className: classItem.name,
-          subjectId: requirement.subject_id,
-          subjectName: subject?.name || "Unbekannt",
-          blockNumber: block.block_number,
-          periodsCount: block.periods_count
-        });
+        
+blocks.push({
+  type: "regular",
+  classId: classItem.id,
+  className: classItem.name,
+  subjectId: requirement.subject_id,
+  subjectName: subject?.name || "Unbekannt",
+  isClassTeacherLesson:
+    subject?.name === "Klassenlehrerstunde",
+  classTeacherIds: data.classTeachers
+    .filter(item => item.class_id === classItem.id)
+    .map(item => item.teacher_id),
+  blockNumber: block.block_number,
+  periodsCount: block.periods_count
+});
       }
     }
   }
