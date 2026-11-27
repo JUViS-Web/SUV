@@ -611,6 +611,7 @@ const priorityWeight =
 
 
 
+
 function evaluateAutoPlanningCandidate(
   data,
   block,
@@ -618,7 +619,8 @@ function evaluateAutoPlanningCandidate(
   periodStart,
   periodEnd,
   teacherId = null,
-  roomId = null
+  roomId = null,
+  subjectId = null
 ) {
   const hardCheck = checkAutoPlanningPlacement(
     data,
@@ -641,35 +643,30 @@ function evaluateAutoPlanningCandidate(
   }
 
   if (teacherId) {
-    const subjects =
-      block.type === "track"
-        ? (block.parallelGroups || []).map(
-            group => group.subjectId
-          )
-        : [block.subjectId];
+    const checkedSubjectId =
+      subjectId ||
+      (block.type === "regular"
+        ? block.subjectId
+        : null);
 
-    const teacherChecks = subjects.map(
-      subjectId =>
+    if (checkedSubjectId) {
+      const teacherCheck =
         checkAutoPlanningTeacherCandidate(
           data,
-          subjectId,
+          checkedSubjectId,
           teacherId,
           block.periodsCount
-        )
-    );
+        );
 
-    const failedCheck = teacherChecks.find(
-      check => !check.eligible
-    );
-
-    if (failedCheck) {
-      return {
-        allowed: false,
-        score: -Infinity,
-        reason: failedCheck.reason,
-        satisfied: [],
-        deviations: []
-      };
+      if (!teacherCheck.eligible) {
+        return {
+          allowed: false,
+          score: -Infinity,
+          reason: teacherCheck.reason,
+          satisfied: [],
+          deviations: []
+        };
+      }
     }
   }
 
@@ -689,7 +686,8 @@ function evaluateAutoPlanningCandidate(
     score: preferenceCheck.score,
     reason: null,
     satisfied: preferenceCheck.satisfied,
-    deviations: preferenceCheck.deviations
+    deviations: []
+      .concat(preferenceCheck.deviations)
   };
 }
 
