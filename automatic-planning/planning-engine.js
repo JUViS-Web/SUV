@@ -299,6 +299,75 @@ function buildAutoPlanningBlocks(data) {
   return blocks;
 }
 
+
+// Für einen Unterrichtsblock zutreffende Zeitregeln ermitteln
+
+function getApplicableAutoPlanningTimeRules(
+  data,
+  block,
+  weekday,
+  periodStart,
+  periodEnd,
+  teacherId = null,
+  roomId = null
+) {
+  const classIds =
+    block.type === "track"
+      ? block.participatingClassIds || []
+      : [block.classId];
+
+  const subjectIds =
+    block.type === "track"
+      ? (block.parallelGroups || []).map(
+          group => group.subjectId
+        )
+      : [block.subjectId];
+
+  return data.timeRules.filter(rule => {
+    const overlaps =
+      Number(rule.period_from) <= periodEnd &&
+      Number(rule.period_to) >= periodStart;
+
+    if (
+      Number(rule.weekday) !== Number(weekday) ||
+      !overlaps
+    ) {
+      return false;
+    }
+
+    if (
+      rule.teacher_id &&
+      rule.teacher_id !== teacherId
+    ) {
+      return false;
+    }
+
+    if (
+      rule.room_id &&
+      rule.room_id !== roomId
+    ) {
+      return false;
+    }
+
+    if (
+      rule.class_id &&
+      !classIds.includes(rule.class_id)
+    ) {
+      return false;
+    }
+
+    if (
+      rule.subject_id &&
+      !subjectIds.includes(rule.subject_id)
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+
 // Testfunktion für die Planungsengine
 
 document
