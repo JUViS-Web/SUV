@@ -813,6 +813,62 @@ function getAutoPlanningQualifiedTeachers(
 }
 
 
+function reserveAutoPlanningTeacher(
+  data,
+  subjectId,
+  teacherId,
+  periodsCount = 1
+) {
+  const check =
+    checkAutoPlanningTeacherCandidate(
+      data,
+      subjectId,
+      teacherId,
+      periodsCount
+    );
+
+  if (!check.eligible) {
+    return {
+      success: false,
+      reason: check.reason
+    };
+  }
+
+  const recorded =
+    recordPlanningTeacherAssignment(
+      teacherId,
+      periodsCount
+    );
+
+  if (!recorded) {
+    return {
+      success: false,
+      reason:
+        "Die Wochenstundenkapazität reicht nicht aus."
+    };
+  }
+
+  const teacher = data.teachers.find(
+    item => item.id === teacherId
+  );
+
+  const assignedPeriods =
+    Number(
+      window.suvPlanningTeacherData
+        .assignedPeriods[teacherId] || 0
+    );
+
+  const requiredHours =
+    Number(teacher.weekly_required_hours || 0);
+
+  return {
+    success: true,
+    teacher,
+    assignedPeriods,
+    remainingHours:
+      requiredHours - assignedPeriods
+  };
+}
 
 
 function findAutoPlanningHardRuleConflicts(data) {
