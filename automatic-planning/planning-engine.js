@@ -837,6 +837,7 @@ const hardRuleConflicts =
         ["Aktive Räume", data.rooms.length],
         ["Planungsregeln", data.planningRules.length],
         ["Zeitregeln", data.timeRules.length],
+        ["Konflikte zwischen harten Zeitregeln", hardRuleConflicts.length],
         ["Klassen", data.classes.length],
         ["Fachbedarfe", data.demand.length],
         ["Fächer", data.subjects.length],
