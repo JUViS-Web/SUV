@@ -457,6 +457,48 @@ function violatesAutoPlanningMustRules(
   );
 }
 
+
+function checkAutoPlanningPlacement(
+  data,
+  block,
+  weekday,
+  periodStart,
+  periodEnd,
+  teacherId = null,
+  roomId = null
+) {
+  const blocked = isAutoPlanningPlacementBlocked(
+    data,
+    block,
+    weekday,
+    periodStart,
+    periodEnd,
+    teacherId,
+    roomId
+  );
+
+  const violatesMust = violatesAutoPlanningMustRules(
+    data,
+    block,
+    weekday,
+    periodStart,
+    periodEnd,
+    teacherId,
+    roomId
+  );
+
+  return {
+    allowed: !blocked && !violatesMust,
+    blocked,
+    violatesMust,
+    reason: blocked
+      ? "Für diesen Zeitraum besteht eine Sperre."
+      : violatesMust
+        ? "Eine feste Zeitvorgabe wird nicht eingehalten."
+        : null
+  };
+}
+
 // Testfunktion für die Planungsengine
 
 document
