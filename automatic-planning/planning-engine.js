@@ -692,6 +692,60 @@ function evaluateAutoPlanningCandidate(
 }
 
 
+function getAutoPlanningClassTeacherCandidates(
+  data,
+  classId,
+  periodsCount = 1
+) {
+  const teacherIds = [
+    ...new Set(
+      data.classTeachers
+        .filter(item => item.class_id === classId)
+        .map(item => item.teacher_id)
+    )
+  ];
+
+  return teacherIds
+    .map(teacherId => {
+      const teacher = data.teachers.find(
+        item => item.id === teacherId
+      );
+
+      if (
+        !teacher ||
+        !hasPlanningTeacherCapacity(
+          teacherId,
+          periodsCount
+        )
+      ) {
+        return null;
+      }
+
+      const requiredHours =
+        Number(teacher.weekly_required_hours || 0);
+
+      const assignedPeriods =
+        Number(
+          window.suvPlanningTeacherData
+            .assignedPeriods[teacherId] || 0
+        );
+
+      return {
+        ...teacher,
+        assignedPeriods,
+        remainingHours:
+          requiredHours - assignedPeriods,
+        workloadRatio:
+          assignedPeriods / requiredHours
+      };
+    })
+    .filter(Boolean)
+    .sort(
+      (a, b) =>
+        a.workloadRatio - b.workloadRatio
+    );
+}
+
 function checkAutoPlanningTeacherCandidate(
   data,
   subjectId,
