@@ -1131,15 +1131,25 @@ const hardRuleConflicts =
         );
 
 
+
 const regularBlocksWithoutTeachers = blocks
   .filter(item => item.type === "regular")
-  .filter(item =>
-    getAutoPlanningQualifiedTeachers(
+  .filter(item => {
+    if (item.subjectName === "Klassenlehrerstunde") {
+      return getAutoPlanningClassTeacherCandidates(
+        data,
+        item.classId,
+        item.periodsCount
+      ).length === 0;
+    }
+
+    return getAutoPlanningQualifiedTeachers(
       data,
       item.subjectId,
       item.periodsCount
-    ).length === 0
-  ).length;
+    ).length === 0;
+  }).length;
+
 
 
 const trackGroupsWithoutEnoughTeachers = blocks
@@ -1160,9 +1170,40 @@ const trackGroupsWithoutEnoughTeachers = blocks
     0
   );
 
+
 const regularTeacherProblems = blocks
   .filter(item => item.type === "regular")
   .map(block => {
+    const isClassTeacherLesson =
+      block.subjectName === "Klassenlehrerstunde";
+
+    if (isClassTeacherLesson) {
+      const assignedCount = data.classTeachers.filter(
+        item => item.class_id === block.classId
+      ).length;
+
+      const availableCount =
+        getAutoPlanningClassTeacherCandidates(
+          data,
+          block.classId,
+          block.periodsCount
+        ).length;
+
+      if (availableCount > 0) return null;
+
+      return {
+        text:
+          block.className +
+          " – Klassenlehrerstunde (" +
+          block.periodsCount +
+          " Std.)",
+        reason:
+          assignedCount === 0
+            ? "Keine Klassenlehrkraft zugeordnet"
+            : "Wochenstundenkapazität der Klassenlehrkräfte ausgeschöpft"
+      };
+    }
+
     const qualifiedIds = new Set(
       data.teacherSubjects
         .filter(item =>
@@ -1199,6 +1240,7 @@ const regularTeacherProblems = blocks
     };
   })
   .filter(Boolean);
+
 
 const trackTeacherProblems = blocks
   .filter(item => item.type === "track")
