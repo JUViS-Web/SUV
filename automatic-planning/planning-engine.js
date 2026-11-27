@@ -607,6 +607,55 @@ function evaluateAutoPlanningPreferences(
 }
 
 
+function evaluateAutoPlanningCandidate(
+  data,
+  block,
+  weekday,
+  periodStart,
+  periodEnd,
+  teacherId = null,
+  roomId = null
+) {
+  const hardCheck = checkAutoPlanningPlacement(
+    data,
+    block,
+    weekday,
+    periodStart,
+    periodEnd,
+    teacherId,
+    roomId
+  );
+
+  if (!hardCheck.allowed) {
+    return {
+      allowed: false,
+      score: -Infinity,
+      reason: hardCheck.reason,
+      satisfied: [],
+      deviations: []
+    };
+  }
+
+  const preferenceCheck =
+    evaluateAutoPlanningPreferences(
+      data,
+      block,
+      weekday,
+      periodStart,
+      periodEnd,
+      teacherId,
+      roomId
+    );
+
+  return {
+    allowed: true,
+    score: preferenceCheck.score,
+    reason: null,
+    satisfied: preferenceCheck.satisfied,
+    deviations: preferenceCheck.deviations
+  };
+}
+
 // Testfunktion für die Planungsengine
 
 document
