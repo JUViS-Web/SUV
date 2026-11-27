@@ -567,6 +567,9 @@ function evaluateAutoPlanningPreferences(
   for (const rule of preferences) {
     const priority = Number(rule.priority || 1);
 
+const priorityWeight =
+  Math.pow(preferences.length + 1, priority - 1);
+     
     const sameDay =
       Number(rule.weekday) === Number(weekday);
 
