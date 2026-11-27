@@ -610,6 +610,7 @@ const priorityWeight =
 }
 
 
+
 function evaluateAutoPlanningCandidate(
   data,
   block,
@@ -637,6 +638,39 @@ function evaluateAutoPlanningCandidate(
       satisfied: [],
       deviations: []
     };
+  }
+
+  if (teacherId) {
+    const subjects =
+      block.type === "track"
+        ? (block.parallelGroups || []).map(
+            group => group.subjectId
+          )
+        : [block.subjectId];
+
+    const teacherChecks = subjects.map(
+      subjectId =>
+        checkAutoPlanningTeacherCandidate(
+          data,
+          subjectId,
+          teacherId,
+          block.periodsCount
+        )
+    );
+
+    const failedCheck = teacherChecks.find(
+      check => !check.eligible
+    );
+
+    if (failedCheck) {
+      return {
+        allowed: false,
+        score: -Infinity,
+        reason: failedCheck.reason,
+        satisfied: [],
+        deviations: []
+      };
+    }
   }
 
   const preferenceCheck =
