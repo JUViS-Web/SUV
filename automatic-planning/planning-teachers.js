@@ -154,14 +154,23 @@ function recordPlanningTeacherAssignment(
 
 // Prüfen, ob eine Lehrkraft noch Wochenstunden-Kapazität hat
 
+
 function hasPlanningTeacherCapacity(
   teacherId,
   periodsCount = 1
 ) {
   const state = window.suvPlanningTeacherData;
 
-  const teacher = state.teachers.find(item =>
-    item.id === teacherId
+  if (
+    !teacherId ||
+    !Number.isInteger(periodsCount) ||
+    periodsCount < 1
+  ) {
+    return false;
+  }
+
+  const teacher = state.teachers.find(
+    item => item.id === teacherId
   );
 
   if (!teacher) return false;
@@ -172,12 +181,20 @@ function hasPlanningTeacherCapacity(
   const assignedPeriods =
     Number(state.assignedPeriods[teacherId] || 0);
 
-  if (requiredHours <= 0) return false;
+  if (
+    !Number.isFinite(requiredHours) ||
+    requiredHours <= 0 ||
+    !Number.isFinite(assignedPeriods) ||
+    assignedPeriods < 0
+  ) {
+    return false;
+  }
 
   return (
     assignedPeriods + periodsCount <= requiredHours
   );
 }
+
 
 // Lehrkraft für einen Unterrichtsbedarf auswählen
 // und ihre Wochenstunden direkt reservieren
