@@ -499,6 +499,114 @@ function checkAutoPlanningPlacement(
   };
 }
 
+
+function evaluateAutoPlanningPreferences(
+  data,
+  block,
+  weekday,
+  periodStart,
+  periodEnd,
+  teacherId = null,
+  roomId = null
+) {
+  const classIds =
+    block.type === "track"
+      ? block.participatingClassIds || []
+      : [block.classId];
+
+  const subjectIds =
+    block.type === "track"
+      ? (block.parallelGroups || []).map(
+          group => group.subjectId
+        )
+      : [block.subjectId];
+
+  const preferences = data.timeRules.filter(rule => {
+    if (
+      rule.rule_type !== "prefer" &&
+      rule.rule_type !== "prefer_free"
+    ) {
+      return false;
+    }
+
+    if (
+      rule.teacher_id &&
+      rule.teacher_id !== teacherId
+    ) {
+      return false;
+    }
+
+    if (
+      rule.room_id &&
+      rule.room_id !== roomId
+    ) {
+      return false;
+    }
+
+    if (
+      rule.class_id &&
+      !classIds.includes(rule.class_id)
+    ) {
+      return false;
+    }
+
+    if (
+      rule.subject_id &&
+      !subjectIds.includes(rule.subject_id)
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
+  let score = 0;
+  const deviations = [];
+  const satisfied = [];
+
+  for (const rule of preferences) {
+    const priority = Number(rule.priority || 1);
+
+    const sameDay =
+      Number(rule.weekday) === Number(weekday);
+
+    const overlaps =
+      Number(periodStart) <= Number(rule.period_to) &&
+      Number(periodEnd) >= Number(rule.period_from);
+
+    if (rule.rule_type === "prefer") {
+      if (
+        sameDay &&
+        Number(periodStart) >= Number(rule.period_from) &&
+        Number(periodEnd) <= Number(rule.period_to)
+      ) {
+        score += priority;
+        satisfied.push(rule);
+      } else {
+        score -= priority;
+        deviations.push(rule);
+      }
+    }
+
+    if (rule.rule_type === "prefer_free") {
+      if (sameDay && overlaps) {
+        score -= priority;
+        deviations.push(rule);
+      } else {
+        score += priority;
+        satisfied.push(rule);
+      }
+    }
+  }
+
+  return {
+    score,
+    satisfied,
+    deviations
+  };
+}
+
+
 // Testfunktion für die Planungsengine
 
 document
