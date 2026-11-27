@@ -804,6 +804,48 @@ function checkAutoPlanningTeacherCandidate(
 }
 
 
+function getAutoPlanningClassTeacherCandidates(
+  data,
+  classId,
+  periodsCount = 1
+) {
+  const assignedTeacherIds = data.classTeachers
+    .filter(item => item.class_id === classId)
+    .map(item => item.teacher_id);
+
+  const uniqueTeacherIds = [...new Set(assignedTeacherIds)];
+
+  return uniqueTeacherIds
+    .map(teacherId =>
+      data.teachers.find(
+        teacher => teacher.id === teacherId
+      )
+    )
+    .filter(Boolean)
+    .filter(teacher =>
+      hasPlanningTeacherCapacity(
+        teacher.id,
+        periodsCount
+      )
+    )
+    .sort((a, b) => {
+      const aHours = Number(a.weekly_required_hours || 0);
+      const bHours = Number(b.weekly_required_hours || 0);
+
+      const aAssigned = Number(
+        window.suvPlanningTeacherData.assignedPeriods[a.id] || 0
+      );
+      const bAssigned = Number(
+        window.suvPlanningTeacherData.assignedPeriods[b.id] || 0
+      );
+
+      return (
+        aAssigned / aHours -
+        bAssigned / bHours
+      );
+    });
+}
+
 
 function getAutoPlanningQualifiedTeachers(
   data,
