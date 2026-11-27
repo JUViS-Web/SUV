@@ -1136,12 +1136,6 @@ const trackTeacherProblems = blocks
       }))
   );
 
-         
-        return candidates.length < group.courseCount;
-      }).length,
-    0
-  );
-
        
       result.innerHTML = "";
 
