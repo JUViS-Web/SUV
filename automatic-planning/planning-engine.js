@@ -1088,6 +1088,8 @@ const trackGroupsWithoutEnoughTeachers = blocks
         ["Reguläre Unterrichtsblöcke", regularBlockCount],
         ["Gemeinsame Schienenblöcke", trackBlockCount],
         ["Einzelne Schienenkurse", totalTrackCourses],
+        ["Reguläre Blöcke ohne geeignete Lehrkraft", regularBlocksWithoutTeachers],
+        ["Schienenfachgruppen mit zu wenigen Lehrkräften", trackGroupsWithoutEnoughTeachers],
         ["Fehlerhafte Kursgruppen", invalidTrackGroups],
         ["Unterrichtsstunden in allen Blöcken", totalBlockPeriods],
         ["Fehlerhafte Blockgrößen", invalidBlocks]
