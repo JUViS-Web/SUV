@@ -750,6 +750,7 @@ function checkAutoPlanningTeacherCandidate(
 }
 
 
+
 function getAutoPlanningQualifiedTeachers(
   data,
   subjectId,
@@ -784,24 +785,34 @@ function getAutoPlanningQualifiedTeachers(
         item => item.id === teacherId
       );
 
-      return teacher
-        ? {
-            ...teacher,
-            remainingHours:
-              Number(teacher.weekly_required_hours || 0) -
-              Number(
-                window.suvPlanningTeacherData
-                  .assignedPeriods[teacherId] || 0
-              )
-          }
-        : null;
+      if (!teacher) return null;
+
+      const requiredHours =
+        Number(teacher.weekly_required_hours || 0);
+
+      const assignedPeriods =
+        Number(
+          window.suvPlanningTeacherData
+            .assignedPeriods[teacherId] || 0
+        );
+
+      return {
+        ...teacher,
+        assignedPeriods,
+        remainingHours:
+          requiredHours - assignedPeriods,
+        workloadRatio:
+          assignedPeriods / requiredHours
+      };
     })
     .filter(Boolean)
     .sort(
       (a, b) =>
-        a.remainingHours - b.remainingHours
+        a.workloadRatio - b.workloadRatio
     );
 }
+
+
 
 
 function findAutoPlanningHardRuleConflicts(data) {
