@@ -368,6 +368,30 @@ function getApplicableAutoPlanningTimeRules(
 }
 
 
+function isAutoPlanningPlacementBlocked(
+  data,
+  block,
+  weekday,
+  periodStart,
+  periodEnd,
+  teacherId = null,
+  roomId = null
+) {
+  const rules = getApplicableAutoPlanningTimeRules(
+    data,
+    block,
+    weekday,
+    periodStart,
+    periodEnd,
+    teacherId,
+    roomId
+  );
+
+  return rules.some(
+    rule => rule.rule_type === "blocked"
+  );
+}
+
 // Testfunktion für die Planungsengine
 
 document
