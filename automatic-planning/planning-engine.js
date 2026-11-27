@@ -1163,6 +1163,26 @@ const trackTeacherProblems = blocks
         ["Fehlerhafte Blockgrößen", invalidBlocks]
       ];
 
+const problemHeading = document.createElement("h4");
+problemHeading.textContent =
+  "Lehrkräfteprobleme im Detail";
+
+const problemList = document.createElement("ul");
+
+[
+  ...regularTeacherProblems,
+  ...trackTeacherProblems
+].forEach(problem => {
+  const item = document.createElement("li");
+
+  item.textContent =
+    problem.text + " – " + problem.reason;
+
+  problemList.appendChild(item);
+});
+
+result.append(problemHeading, problemList);
+       
       entries.forEach(([label, count]) => {
         const item = document.createElement("li");
         item.textContent = label + ": " + count;
