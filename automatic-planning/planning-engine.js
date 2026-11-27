@@ -747,6 +747,7 @@ function getAutoPlanningClassTeacherCandidates(
 }
 
 
+
 function assignAutoPlanningClassTeachers(
   data,
   classId,
@@ -771,29 +772,32 @@ function assignAutoPlanningClassTeachers(
 
   for (const teacher of candidates) {
     if (
-      recordPlanningTeacherAssignment(
+      hasPlanningTeacherCapacity(
         teacher.id,
         periodsCount
       )
     ) {
-      assignedTeacherIds.push(teacher.id);
+      if (
+        recordPlanningTeacherAssignment(
+          teacher.id,
+          periodsCount
+        )
+      ) {
+        assignedTeacherIds.push(teacher.id);
+      }
     }
   }
 
-  if (assignedTeacherIds.length === 0) {
-    return {
-      success: false,
-      teacherIds: [],
-      reason: "Wochenstundenkapazität ausgeschöpft"
-    };
-  }
-
   return {
-    success: true,
+    success: assignedTeacherIds.length > 0,
     teacherIds: assignedTeacherIds,
-    reason: null
+    reason:
+      assignedTeacherIds.length > 0
+        ? null
+        : "Wochenstundenkapazität ausgeschöpft"
   };
 }
+
 
 
 function checkAutoPlanningTeacherCandidate(
