@@ -1045,6 +1045,7 @@ const regularBlocksWithoutTeachers = blocks
     ).length === 0
   ).length;
 
+
 const trackGroupsWithoutEnoughTeachers = blocks
   .filter(item => item.type === "track")
   .reduce(
@@ -1057,6 +1058,11 @@ const trackGroupsWithoutEnoughTeachers = blocks
             group.subjectId,
             block.periodsCount
           );
+
+        return candidates.length < group.courseCount;
+      }).length,
+    0
+  );
 
 const regularTeacherProblems = blocks
   .filter(item => item.type === "regular")
@@ -1118,13 +1124,18 @@ const trackTeacherProblems = blocks
           group.courseCount +
           ")",
         reason:
-          data.teacherSubjects.some(
-            item => item.subject_id === group.subjectId
+          data.teachers.some(teacher =>
+            data.teacherSubjects.some(
+              assignment =>
+                assignment.teacher_id === teacher.id &&
+                assignment.subject_id === group.subjectId
+            )
           )
             ? "Zu wenige verfügbare Lehrkräfte"
             : "Keine Fachzuordnung"
       }))
   );
+
          
         return candidates.length < group.courseCount;
       }).length,
