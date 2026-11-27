@@ -660,6 +660,64 @@ function evaluateAutoPlanningCandidate(
 }
 
 
+function checkAutoPlanningTeacherCandidate(
+  data,
+  subjectId,
+  teacherId,
+  periodsCount = 1
+) {
+  const teacher = data.teachers.find(
+    item => item.id === teacherId
+  );
+
+  if (!teacher) {
+    return {
+      eligible: false,
+      qualified: false,
+      hasCapacity: false,
+      reason: "Lehrkraft wurde nicht gefunden."
+    };
+  }
+
+  const qualified = data.teacherSubjects.some(
+    assignment =>
+      assignment.teacher_id === teacherId &&
+      assignment.subject_id === subjectId
+  );
+
+  if (!qualified) {
+    return {
+      eligible: false,
+      qualified: false,
+      hasCapacity: false,
+      reason: "Keine Lehrbefähigung für dieses Fach."
+    };
+  }
+
+  const hasCapacity =
+    hasPlanningTeacherCapacity(
+      teacherId,
+      periodsCount
+    );
+
+  if (!hasCapacity) {
+    return {
+      eligible: false,
+      qualified: true,
+      hasCapacity: false,
+      reason: "Wochenstundenkapazität ausgeschöpft."
+    };
+  }
+
+  return {
+    eligible: true,
+    qualified: true,
+    hasCapacity: true,
+    reason: null
+  };
+}
+
+
 function findAutoPlanningHardRuleConflicts(data) {
   const hardRules = (data.timeRules || []).filter(
     rule =>
