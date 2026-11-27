@@ -58,8 +58,8 @@ async function loadAutoPlanningEngineData(
     suvDb
       .from("time_rules")
       .select(
-        "teacher_id, class_id, room_id, subject_id, rule_type, weekday, period_from, period_to, priority"
-      )
+      "id, teacher_id, class_id, room_id, subject_id, rule_type, weekday, period_from, period_to, reason, priority"
+)
       .eq("school_year_id", schoolYearId),
 
     loadPlanningDemandData(
