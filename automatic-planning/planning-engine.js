@@ -253,11 +253,26 @@ function buildAutoPlanningBlocks(data) {
           item => item.id === group.subject_id
         );
 
+                const courseCount = Number(
+          group.course_count || 0
+        );
+
         return {
           subjectId: group.subject_id,
           subjectName: subject?.name || "Unbekannt",
-          courseCount: Number(group.course_count || 0),
-          weeklyPeriods: Number(group.weekly_periods || 0)
+          courseCount,
+          weeklyPeriods: Number(
+            group.weekly_periods || 0
+          ),
+
+          courses: Array.from(
+            { length: courseCount },
+            (_, index) => ({
+              courseNumber: index + 1,
+              teacherId: null,
+              roomId: null
+            })
+          )
         };
       });
 
