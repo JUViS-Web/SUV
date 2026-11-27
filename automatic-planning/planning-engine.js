@@ -49,8 +49,8 @@ async function loadAutoPlanningEngineData(
     suvDb
       .from("planning_rules")
       .select(
-        "rule_code, rule_value, rule_strength, priority"
-      )
+      "id, rule_code, scope_type, grade_level_id, class_id, teacher_id, subject_id, room_id, rule_value, rule_strength, priority"
+)
       .eq("school_year_id", schoolYearId)
       .eq("is_active", true)
       .order("priority"),
