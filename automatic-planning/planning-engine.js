@@ -659,6 +659,78 @@ function evaluateAutoPlanningCandidate(
   };
 }
 
+
+function findAutoPlanningHardRuleConflicts(data) {
+  const hardRules = (data.timeRules || []).filter(
+    rule =>
+      rule.rule_type === "blocked" ||
+      rule.rule_type === "must"
+  );
+
+  const conflicts = [];
+  const scopes = [
+    "teacher_id",
+    "class_id",
+    "room_id",
+    "subject_id"
+  ];
+
+  for (let i = 0; i < hardRules.length; i++) {
+    for (let j = i + 1; j < hardRules.length; j++) {
+      const first = hardRules[i];
+      const second = hardRules[j];
+
+      if (first.rule_type === second.rule_type) {
+        continue;
+      }
+
+      if (
+        Number(first.weekday) !==
+        Number(second.weekday)
+      ) {
+        continue;
+      }
+
+      const overlaps =
+        Number(first.period_from) <=
+          Number(second.period_to) &&
+        Number(second.period_from) <=
+          Number(first.period_to);
+
+      if (!overlaps) {
+        continue;
+      }
+
+      const sameScope = scopes.some(
+        scope =>
+          first[scope] &&
+          first[scope] === second[scope]
+      );
+
+      if (!sameScope) {
+        continue;
+      }
+
+      conflicts.push({
+        firstRule: first,
+        secondRule: second,
+        weekday: first.weekday,
+        periodFrom: Math.max(
+          Number(first.period_from),
+          Number(second.period_from)
+        ),
+        periodTo: Math.min(
+          Number(first.period_to),
+          Number(second.period_to)
+        )
+      });
+    }
+  }
+
+  return conflicts;
+}
+
+
 // Testfunktion für die Planungsengine
 
 document
