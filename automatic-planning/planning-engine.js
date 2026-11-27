@@ -1058,6 +1058,74 @@ const trackGroupsWithoutEnoughTeachers = blocks
             block.periodsCount
           );
 
+const regularTeacherProblems = blocks
+  .filter(item => item.type === "regular")
+  .map(block => {
+    const qualifiedIds = new Set(
+      data.teacherSubjects
+        .filter(item =>
+          item.subject_id === block.subjectId
+        )
+        .map(item => item.teacher_id)
+    );
+
+    const qualifiedCount = data.teachers.filter(
+      teacher => qualifiedIds.has(teacher.id)
+    ).length;
+
+    const availableCount =
+      getAutoPlanningQualifiedTeachers(
+        data,
+        block.subjectId,
+        block.periodsCount
+      ).length;
+
+    if (availableCount > 0) return null;
+
+    return {
+      text:
+        block.className +
+        " – " +
+        block.subjectName +
+        " (" +
+        block.periodsCount +
+        " Std.)",
+      reason:
+        qualifiedCount === 0
+          ? "Keine Fachzuordnung"
+          : "Wochenstundenkapazität ausgeschöpft"
+    };
+  })
+  .filter(Boolean);
+
+const trackTeacherProblems = blocks
+  .filter(item => item.type === "track")
+  .flatMap(block =>
+    block.parallelGroups
+      .filter(group =>
+        getAutoPlanningQualifiedTeachers(
+          data,
+          group.subjectId,
+          block.periodsCount
+        ).length < group.courseCount
+      )
+      .map(group => ({
+        text:
+          block.offeringName +
+          " – " +
+          group.subjectName +
+          " (benötigt: " +
+          group.courseCount +
+          ")",
+        reason:
+          data.teacherSubjects.some(
+            item => item.subject_id === group.subjectId
+          )
+            ? "Zu wenige verfügbare Lehrkräfte"
+            : "Keine Fachzuordnung"
+      }))
+  );
+         
         return candidates.length < group.courseCount;
       }).length,
     0
