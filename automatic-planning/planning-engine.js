@@ -750,6 +750,60 @@ function checkAutoPlanningTeacherCandidate(
 }
 
 
+function getAutoPlanningQualifiedTeachers(
+  data,
+  subjectId,
+  periodsCount = 1
+) {
+  const qualifiedTeachers = data.teacherSubjects
+    .filter(
+      assignment =>
+        assignment.subject_id === subjectId
+    )
+    .map(assignment => assignment.teacher_id);
+
+  const uniqueTeacherIds = [
+    ...new Set(qualifiedTeachers)
+  ];
+
+  return uniqueTeacherIds
+    .map(teacherId => {
+      const check =
+        checkAutoPlanningTeacherCandidate(
+          data,
+          subjectId,
+          teacherId,
+          periodsCount
+        );
+
+      if (!check.eligible) {
+        return null;
+      }
+
+      const teacher = data.teachers.find(
+        item => item.id === teacherId
+      );
+
+      return teacher
+        ? {
+            ...teacher,
+            remainingHours:
+              Number(teacher.weekly_required_hours || 0) -
+              Number(
+                window.suvPlanningTeacherData
+                  .assignedPeriods[teacherId] || 0
+              )
+          }
+        : null;
+    })
+    .filter(Boolean)
+    .sort(
+      (a, b) =>
+        a.remainingHours - b.remainingHours
+    );
+}
+
+
 function findAutoPlanningHardRuleConflicts(data) {
   const hardRules = (data.timeRules || []).filter(
     rule =>
