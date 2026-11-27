@@ -178,6 +178,21 @@ function buildAutoPlanningBlocks(data) {
         item => item.id === requirement.subject_id
       );
 
+      const replacedByTrack = data.classLinks.some(
+        link =>
+          link.class_id === classItem.id &&
+          data.courseGroups.some(
+            group =>
+              group.offering_id ===
+                link.grade_course_offering_id &&
+              group.subject_id === requirement.subject_id
+          )
+      );
+
+      if (replacedByTrack) {
+        continue;
+      }
+       
       const matchingBlocks = data.regularBlocks
         .filter(
           block =>
