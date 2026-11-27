@@ -407,9 +407,11 @@ document
         ["Fächer", data.subjects.length],
         ["Klassenlehrkraft-Zuordnungen", data.classTeachers.length],
         ["Lehrkräfte", data.teachers.length],
-                ["Fachqualifikationen", data.teacherSubjects.length],
+        ["Fachqualifikationen", data.teacherSubjects.length],
         ["Reguläre Unterrichtsblöcke", regularBlockCount],
         ["Gemeinsame Schienenblöcke", trackBlockCount],
+        ["Einzelne Schienenkurse", totalTrackCourses],
+        ["Fehlerhafte Kursgruppen", invalidTrackGroups],
         ["Unterrichtsstunden in allen Blöcken", totalBlockPeriods],
         ["Fehlerhafte Blockgrößen", invalidBlocks]
       ];
