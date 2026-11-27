@@ -746,6 +746,56 @@ function getAutoPlanningClassTeacherCandidates(
     );
 }
 
+
+function assignAutoPlanningClassTeachers(
+  data,
+  classId,
+  periodsCount = 1
+) {
+  const candidates =
+    getAutoPlanningClassTeacherCandidates(
+      data,
+      classId,
+      periodsCount
+    );
+
+  if (candidates.length === 0) {
+    return {
+      success: false,
+      teacherIds: [],
+      reason: "Keine verfügbare Klassenlehrkraft"
+    };
+  }
+
+  const assignedTeacherIds = [];
+
+  for (const teacher of candidates) {
+    if (
+      recordPlanningTeacherAssignment(
+        teacher.id,
+        periodsCount
+      )
+    ) {
+      assignedTeacherIds.push(teacher.id);
+    }
+  }
+
+  if (assignedTeacherIds.length === 0) {
+    return {
+      success: false,
+      teacherIds: [],
+      reason: "Wochenstundenkapazität ausgeschöpft"
+    };
+  }
+
+  return {
+    success: true,
+    teacherIds: assignedTeacherIds,
+    reason: null
+  };
+}
+
+
 function checkAutoPlanningTeacherCandidate(
   data,
   subjectId,
