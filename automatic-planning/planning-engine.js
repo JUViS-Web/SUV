@@ -864,11 +864,6 @@ function checkAutoPlanningTeacherCandidate(
 }
 
 
-function getAutoPlanningClassTeacherCandidates(
-  data,
-  classId,
-  periodsCount = 1
-) {
   const assignedTeacherIds = data.classTeachers
     .filter(item => item.class_id === classId)
     .map(item => item.teacher_id);
