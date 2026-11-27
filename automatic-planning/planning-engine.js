@@ -1033,6 +1033,36 @@ const hardRuleConflicts =
             ).length,
           0
         );
+
+
+const regularBlocksWithoutTeachers = blocks
+  .filter(item => item.type === "regular")
+  .filter(item =>
+    getAutoPlanningQualifiedTeachers(
+      data,
+      item.subjectId,
+      item.periodsCount
+    ).length === 0
+  ).length;
+
+const trackGroupsWithoutEnoughTeachers = blocks
+  .filter(item => item.type === "track")
+  .reduce(
+    (sum, block) =>
+      sum +
+      block.parallelGroups.filter(group => {
+        const candidates =
+          getAutoPlanningQualifiedTeachers(
+            data,
+            group.subjectId,
+            block.periodsCount
+          );
+
+        return candidates.length < group.courseCount;
+      }).length,
+    0
+  );
+
        
       result.innerHTML = "";
 
