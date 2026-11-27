@@ -648,7 +648,34 @@ function evaluateAutoPlanningCandidate(
     };
   }
 
-  if (teacherId) {
+  
+if (teacherId) {
+  if (block.isClassTeacherLesson) {
+    const isAssignedClassTeacher =
+      data.classTeachers.some(
+        item =>
+          item.class_id === block.classId &&
+          item.teacher_id === teacherId
+      );
+
+    const hasCapacity =
+      hasPlanningTeacherCapacity(
+        teacherId,
+        block.periodsCount
+      );
+
+    if (!isAssignedClassTeacher || !hasCapacity) {
+      return {
+        allowed: false,
+        score: -Infinity,
+        reason: !isAssignedClassTeacher
+          ? "Lehrkraft ist keine Klassenlehrkraft dieser Klasse."
+          : "Wochenstundenkapazität ausgeschöpft.",
+        satisfied: [],
+        deviations: []
+      };
+    }
+  } else {
     const checkedSubjectId =
       subjectId ||
       (block.type === "regular"
@@ -675,6 +702,8 @@ function evaluateAutoPlanningCandidate(
       }
     }
   }
+}
+
 
   const preferenceCheck =
     evaluateAutoPlanningPreferences(
