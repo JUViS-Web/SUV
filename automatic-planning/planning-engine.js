@@ -1938,7 +1938,7 @@ const placementResult =
         ["Schienenfachgruppen mit zu wenigen Lehrkräften", trackGroupsWithoutEnoughTeachers],
         ["Fehlerhafte Kursgruppen", invalidTrackGroups],
         ["Unterrichtsstunden in allen Blöcken", totalBlockPeriods],
-        ["Fehlerhafte Blockgrößen", invalidBlocks]
+        ["Fehlerhafte Blockgrößen", invalidBlocks],
         ["Reguläre Blöcke platziert", placementResult.placedRegularBlocks],
         ["Reguläre Blöcke nicht platziert", placementResult.unplacedRegularBlocks],
         ["Reguläre Planung vollständig", placementResult.isComplete ? "Ja" : "Nein"]
