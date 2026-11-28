@@ -343,6 +343,81 @@ function createAutoPlanningPlacementState(data) {
 }
 
 
+function getAutoPlanningBlockTimeWindows(
+  state,
+  periodsCount
+) {
+  const windows = [];
+
+  const days = [
+    ...new Set(
+      state.slots.map(slot => slot.weekday)
+    )
+  ];
+
+  for (const weekday of days) {
+    const daySlots = state.slots
+      .filter(slot => slot.weekday === weekday)
+      .sort(
+        (a, b) => a.periodNumber - b.periodNumber
+      );
+
+    for (
+      let index = 0;
+      index <= daySlots.length - periodsCount;
+      index++
+    ) {
+      const windowSlots = daySlots.slice(
+        index,
+        index + periodsCount
+      );
+
+      const isContinuous = windowSlots.every(
+        (slot, slotIndex) =>
+          slot.periodNumber ===
+          windowSlots[0].periodNumber + slotIndex
+      );
+
+      if (!isContinuous) continue;
+
+      windows.push({
+        weekday,
+        dayName: windowSlots[0].dayName,
+        periodStart: windowSlots[0].periodNumber,
+        periodEnd:
+          windowSlots[windowSlots.length - 1].periodNumber,
+        slots: windowSlots
+      });
+    }
+  }
+
+  return windows;
+}
+
+
+function isAutoPlanningClassAvailable(
+  state,
+  classId,
+  weekday,
+  periodStart,
+  periodEnd
+) {
+  for (
+    let period = periodStart;
+    period <= periodEnd;
+    period++
+  ) {
+    const key = `${classId}:${weekday}:${period}`;
+
+    if (state.classOccupancy.has(key)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
 // Für einen Unterrichtsblock zutreffende Zeitregeln ermitteln
 
 function getApplicableAutoPlanningTimeRules(
