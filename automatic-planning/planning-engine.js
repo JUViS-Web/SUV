@@ -418,6 +418,41 @@ function isAutoPlanningClassAvailable(
 }
 
 
+function isAutoPlanningTeacherAvailable(
+  state,
+  teacherId,
+  weekday,
+  periodStart,
+  periodEnd
+) {
+  for (
+    let period = periodStart;
+    period <= periodEnd;
+    period++
+  ) {
+    const key = `${teacherId}:${weekday}:${period}`;
+
+    if (state.teacherOccupancy.has(key)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+function isAutoPlanningSubjectAlreadyScheduled(
+  state,
+  classId,
+  subjectId,
+  weekday
+) {
+  const key = `${classId}:${subjectId}:${weekday}`;
+
+  return state.subjectDays.has(key);
+}
+
+
 // Für einen Unterrichtsblock zutreffende Zeitregeln ermitteln
 
 function getApplicableAutoPlanningTimeRules(
