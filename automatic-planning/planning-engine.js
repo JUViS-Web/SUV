@@ -2366,6 +2366,9 @@ const validationResult =
         ["Reguläre Blöcke platziert", placementResult.placedRegularBlocks],
         ["Reguläre Blöcke nicht platziert", placementResult.unplacedRegularBlocks],
         ["Reguläre Planung vollständig", placementResult.isComplete ? "Ja" : "Nein"],
+        ["Schienenblöcke insgesamt", trackPlacementResult.totalTrackBlocks],
+        ["Schienenblöcke platziert", trackPlacementResult.placedTrackBlocks],
+        ["Schienenblöcke nicht platziert", trackPlacementResult.unplacedTrackBlocks],
         ["Validierung bestanden", validationResult.valid ? "Ja" : "Nein"],
         ["Erkannte Platzierungskonflikte", validationResult.conflictCount]
       ];
