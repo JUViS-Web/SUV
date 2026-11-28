@@ -626,6 +626,141 @@ function reserveAutoPlanningBlock(
 }
 
 
+function findAutoPlanningRegularBlockCandidates(
+  data,
+  state,
+  block
+) {
+  if (block.type !== "regular") {
+    return [];
+  }
+
+  const timeWindows =
+    getAutoPlanningBlockTimeWindows(
+      state,
+      block.periodsCount
+    );
+
+  const candidates = [];
+
+  for (const timeWindow of timeWindows) {
+    const {
+      weekday,
+      periodStart,
+      periodEnd
+    } = timeWindow;
+
+    if (
+      !isAutoPlanningClassAvailable(
+        state,
+        block.classId,
+        weekday,
+        periodStart,
+        periodEnd
+      )
+    ) {
+      continue;
+    }
+
+    if (
+      isAutoPlanningSubjectAlreadyScheduled(
+        state,
+        block.classId,
+        block.subjectId,
+        weekday
+      )
+    ) {
+      continue;
+    }
+
+    let teacherCandidates = [];
+
+    if (block.isClassTeacherLesson) {
+      teacherCandidates =
+        getAutoPlanningClassTeacherCandidates(
+          data,
+          block.classId,
+          block.periodsCount
+        );
+    } else {
+      teacherCandidates =
+        getAutoPlanningQualifiedTeachers(
+          data,
+          block.subjectId,
+          block.periodsCount
+        );
+    }
+
+    const eligibleTeachers = [];
+
+    for (const teacher of teacherCandidates) {
+      if (
+        !isAutoPlanningTeacherAvailable(
+          state,
+          teacher.id,
+          weekday,
+          periodStart,
+          periodEnd
+        )
+      ) {
+        continue;
+      }
+
+      const evaluation =
+        evaluateAutoPlanningCandidate(
+          data,
+          block,
+          weekday,
+          periodStart,
+          periodEnd,
+          teacher.id
+        );
+
+      if (evaluation.allowed) {
+        eligibleTeachers.push({
+          teacher,
+          evaluation
+        });
+      }
+    }
+
+    if (eligibleTeachers.length === 0) {
+      continue;
+    }
+
+    const teacherIds =
+      block.isClassTeacherLesson
+        ? eligibleTeachers.map(
+            item => item.teacher.id
+          )
+        : [eligibleTeachers[0].teacher.id];
+
+    const score = eligibleTeachers.reduce(
+      (sum, item) =>
+        sum + item.evaluation.score,
+      0
+    );
+
+    const deviations =
+      eligibleTeachers.flatMap(
+        item => item.evaluation.deviations
+      );
+
+    candidates.push({
+      block,
+      timeWindow,
+      teacherIds,
+      score,
+      deviations
+    });
+  }
+
+  return candidates.sort(
+    (a, b) => b.score - a.score
+  );
+}
+
+
 
 // Für einen Unterrichtsblock zutreffende Zeitregeln ermitteln
 
