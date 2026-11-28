@@ -524,7 +524,7 @@ function reserveAutoPlanningBlock(
     }
   }
 
-  for (const teacherId of teacherIds) {
+  for (const teacherId of uniqueTeacherIds) {
     if (
       !isAutoPlanningTeacherAvailable(
         state,
@@ -572,7 +572,7 @@ function reserveAutoPlanningBlock(
     }
   }
 
-  for (const teacherId of teacherIds) {
+  for (const teacherId of uniqueTeacherIds) {
     for (
       let period = periodStart;
       period <= periodEnd;
