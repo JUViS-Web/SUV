@@ -2332,11 +2332,7 @@ const validationResult =
     data.teachers
   );
 
-const validationResult =
-  validateAutoPlanningPlacements(
-    placementResult,
-    data.teachers
-  );
+       
        
       result.innerHTML = "";
 
