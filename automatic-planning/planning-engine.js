@@ -217,6 +217,7 @@ blocks.push({
     .filter(item => item.class_id === classItem.id)
     .map(item => item.teacher_id),
   blockNumber: block.block_number,
+  lessonBlockRequirementId: block.id,
   periodsCount: block.periods_count
 });
       }
