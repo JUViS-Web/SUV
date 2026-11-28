@@ -477,6 +477,26 @@ function reserveAutoPlanningBlock(
         )
       : [block.subjectId];
 
+
+  const uniqueTeacherIds = [
+    ...new Set(teacherIds)
+  ];
+
+  for (const teacherId of uniqueTeacherIds) {
+    if (
+      !hasPlanningTeacherCapacity(
+        teacherId,
+        block.periodsCount
+      )
+    ) {
+      return {
+        success: false,
+        reason: "Die Wochenstundenkapazität einer Lehrkraft ist ausgeschöpft."
+      };
+    }
+  }
+
+   
   if (
     periodEnd - periodStart + 1 !==
     Number(block.periodsCount)
