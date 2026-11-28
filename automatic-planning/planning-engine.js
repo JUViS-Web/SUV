@@ -1213,6 +1213,91 @@ function placeAutoPlanningRegularBlocks(data, blocks) {
   };
 }
 
+function placeAutoPlanningTrackBlocks(
+  data,
+  blocks,
+  placementState
+) {
+  const trackBlocks = blocks.filter(
+    block => block.type === "track"
+  );
+
+  const orderedBlocks = trackBlocks
+    .map(block => ({
+      block,
+      candidateCount:
+        findAutoPlanningTrackBlockCandidates(
+          data,
+          placementState,
+          block
+        ).length
+    }))
+    .sort((a, b) => {
+      if (a.candidateCount !== b.candidateCount) {
+        return a.candidateCount - b.candidateCount;
+      }
+
+      return b.block.periodsCount - a.block.periodsCount;
+    });
+
+  const unplacedTracks = [];
+
+  for (const item of orderedBlocks) {
+    const block = item.block;
+
+    const candidates =
+      findAutoPlanningTrackBlockCandidates(
+        data,
+        placementState,
+        block
+      );
+
+    let placed = false;
+    let lastReason = null;
+
+    for (const candidate of candidates) {
+      const reservation =
+        reserveAutoPlanningBlock(
+          placementState,
+          block,
+          candidate.timeWindow,
+          candidate.teacherIds
+        );
+
+      if (reservation.success) {
+        reservation.placement.score =
+          candidate.score;
+
+        reservation.placement.assignments =
+          candidate.assignments;
+
+        placed = true;
+        break;
+      }
+
+      lastReason = reservation.reason;
+    }
+
+    if (!placed) {
+      unplacedTracks.push({
+        block,
+        reason:
+          lastReason ||
+          "Kein zulässiger gemeinsamer Zeitraum mit ausreichend qualifizierten Lehrkräften gefunden."
+      });
+    }
+  }
+
+  return {
+    ...placementState,
+    totalTrackBlocks: trackBlocks.length,
+    placedTrackBlocks:
+      trackBlocks.length - unplacedTracks.length,
+    unplacedTrackBlocks: unplacedTracks.length,
+    unplacedTracks
+  };
+}
+
 
 
 // Für einen Unterrichtsblock zutreffende Zeitregeln ermitteln
