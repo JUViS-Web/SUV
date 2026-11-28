@@ -782,6 +782,113 @@ function findAutoPlanningRegularBlockCandidates(
 }
 
 
+function placeAutoPlanningRegularBlocks(data, blocks) {
+  // Wochenstundenkonto für diesen Planungslauf zurücksetzen
+  resetPlanningTeacherWorkload();
+
+  const state =
+    createAutoPlanningPlacementState(data);
+
+  const regularBlocks = blocks.filter(
+    block => block.type === "regular"
+  );
+
+  // Zuerst die Blöcke mit den wenigsten Möglichkeiten planen
+  const orderedBlocks = regularBlocks
+    .map(block => ({
+      block,
+      initialCandidateCount:
+        findAutoPlanningRegularBlockCandidates(
+          data,
+          state,
+          block
+        ).length
+    }))
+    .sort((a, b) => {
+      if (
+        a.initialCandidateCount !==
+        b.initialCandidateCount
+      ) {
+        return (
+          a.initialCandidateCount -
+          b.initialCandidateCount
+        );
+      }
+
+      return (
+        b.block.periodsCount -
+        a.block.periodsCount
+      );
+    });
+
+  for (const item of orderedBlocks) {
+    const block = item.block;
+
+    // Kandidaten nach jeder vorherigen Platzierung neu berechnen
+    const candidates =
+      findAutoPlanningRegularBlockCandidates(
+        data,
+        state,
+        block
+      );
+
+    if (candidates.length === 0) {
+      state.unplaced.push({
+        block,
+        reason:
+          "Kein zulässiger Zeitraum mit verfügbarer Lehrkraft gefunden."
+      });
+
+      continue;
+    }
+
+    let placed = false;
+    let lastReason = null;
+
+    // Beste Bewertung zuerst ausprobieren
+    for (const candidate of candidates) {
+      const reservation =
+        reserveAutoPlanningBlock(
+          state,
+          block,
+          candidate.timeWindow,
+          candidate.teacherIds
+        );
+
+      if (reservation.success) {
+        reservation.placement.score =
+          candidate.score;
+
+        reservation.placement.deviations =
+          candidate.deviations;
+
+        placed = true;
+        break;
+      }
+
+      lastReason = reservation.reason;
+    }
+
+    if (!placed) {
+      state.unplaced.push({
+        block,
+        reason:
+          lastReason ||
+          "Der Block konnte nicht reserviert werden."
+      });
+    }
+  }
+
+  return {
+    ...state,
+    totalRegularBlocks: regularBlocks.length,
+    placedRegularBlocks: state.placements.length,
+    unplacedRegularBlocks: state.unplaced.length,
+    isComplete: state.unplaced.length === 0
+  };
+}
+
+
 
 // Für einen Unterrichtsblock zutreffende Zeitregeln ermitteln
 
