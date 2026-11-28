@@ -2319,6 +2319,19 @@ const trackTeacherProblems = blocks
 const placementResult =
   placeAutoPlanningRegularBlocks(data, blocks);
 
+const trackPlacementResult =
+  placeAutoPlanningTrackBlocks(
+    data,
+    blocks,
+    placementResult
+  );
+
+const validationResult =
+  validateAutoPlanningPlacements(
+    trackPlacementResult,
+    data.teachers
+  );
+
 const validationResult =
   validateAutoPlanningPlacements(
     placementResult,
