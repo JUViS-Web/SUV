@@ -2070,8 +2070,10 @@ const placementResult =
   placeAutoPlanningRegularBlocks(data, blocks);
 
 const validationResult =
-  validateAutoPlanningPlacements(placementResult);
-
+  validateAutoPlanningPlacements(
+    placementResult,
+    data.teachers
+  );
        
       result.innerHTML = "";
 
