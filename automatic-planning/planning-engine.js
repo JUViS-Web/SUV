@@ -594,6 +594,21 @@ function reserveAutoPlanningBlock(
     }
   }
 
+  for (const teacherId of uniqueTeacherIds) {
+    if (
+      !recordPlanningTeacherAssignment(
+        teacherId,
+        block.periodsCount
+      )
+    ) {
+      throw new Error(
+        "Lehrkraft konnte nicht im Wochenstundenkonto reserviert werden."
+      );
+    }
+  }
+
+   
+   
   const placement = {
     block,
     weekday,
