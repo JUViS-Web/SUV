@@ -782,7 +782,7 @@ function findAutoPlanningRegularBlockCandidates(
 }
 
 
-function validateAutoPlanningPlacements(state) {
+function validateAutoPlanningPlacements(state, teachers) {
   const conflicts = [];
 
   const classSlots = new Map();
@@ -903,6 +903,36 @@ for (const teacherId of teacherIds) {
     }
   }
 
+   // Wochenstunden gegen die zulässigen Lehrkraftstunden prüfen
+for (const [teacherId, assignedHours] of teacherWeeklyHours) {
+  const teacher = teachers.find(
+    item => item.id === teacherId
+  );
+
+  if (!teacher) {
+    conflicts.push({
+      type: "teacher_missing",
+      message: "Lehrkraft wurde nicht gefunden.",
+      teacherId
+    });
+
+    continue;
+  }
+
+  const maxHours =
+    Number(teacher.weekly_required_hours || 0);
+
+  if (assignedHours > maxHours) {
+    conflicts.push({
+      type: "teacher_weekly_capacity",
+      message: "Wöchentliche Höchststundenzahl überschritten.",
+      teacherId,
+      assignedHours,
+      maxHours
+    });
+  }
+}
+   
   return {
     valid: conflicts.length === 0,
     conflictCount: conflicts.length,
