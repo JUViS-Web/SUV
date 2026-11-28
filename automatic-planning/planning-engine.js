@@ -728,23 +728,44 @@ function findAutoPlanningRegularBlockCandidates(
       continue;
     }
 
-    const teacherIds =
-      block.isClassTeacherLesson
-        ? eligibleTeachers.map(
-            item => item.teacher.id
-          )
-        : [eligibleTeachers[0].teacher.id];
+    
+    if (!block.isClassTeacherLesson) {
+      eligibleTeachers.sort((a, b) => {
+        const scoreDifference =
+          b.evaluation.score - a.evaluation.score;
 
-    const score = eligibleTeachers.reduce(
+        if (scoreDifference !== 0) {
+          return scoreDifference;
+        }
+
+        return (
+          a.teacher.workloadRatio -
+          b.teacher.workloadRatio
+        );
+      });
+    }
+
+    const selectedTeachers =
+      block.isClassTeacherLesson
+        ? eligibleTeachers
+        : eligibleTeachers.slice(0, 1);
+
+    const teacherIds = selectedTeachers.map(
+      item => item.teacher.id
+    );
+
+    const score = selectedTeachers.reduce(
       (sum, item) =>
         sum + item.evaluation.score,
       0
     );
 
     const deviations =
-      eligibleTeachers.flatMap(
+      selectedTeachers.flatMap(
         item => item.evaluation.deviations
       );
+
+     
 
     candidates.push({
       block,
