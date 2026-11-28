@@ -2391,7 +2391,7 @@ const problemList = document.createElement("ul");
   problemList.appendChild(item);
 });
 
-result.append(problemHeading, problemList);
+
 
 const unplacedTrackHeading =
   document.createElement("h4");
