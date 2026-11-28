@@ -788,6 +788,7 @@ function validateAutoPlanningPlacements(state) {
   const classSlots = new Map();
   const teacherSlots = new Map();
   const subjectDays = new Map();
+   const teacherWeeklyHours = new Map();
 
   for (const placement of state.placements) {
     const block = placement.block;
@@ -866,6 +867,17 @@ function validateAutoPlanningPlacements(state) {
     }
 
     // Lehrkraftbelegung prüfen
+     // Wöchentliche Lehrkraftstunden unabhängig summieren
+for (const teacherId of teacherIds) {
+  const currentHours =
+    teacherWeeklyHours.get(teacherId) || 0;
+
+  teacherWeeklyHours.set(
+    teacherId,
+    currentHours + Number(block.periodsCount)
+  );
+}
+     
     for (const teacherId of teacherIds) {
       for (
         let period = placement.periodStart;
