@@ -2062,7 +2062,7 @@ const validationResult =
         ["Fehlerhafte Blockgrößen", invalidBlocks],
         ["Reguläre Blöcke platziert", placementResult.placedRegularBlocks],
         ["Reguläre Blöcke nicht platziert", placementResult.unplacedRegularBlocks],
-        ["Reguläre Planung vollständig", placementResult.isComplete ? "Ja" : "Nein"]
+        ["Reguläre Planung vollständig", placementResult.isComplete ? "Ja" : "Nein"],
         ["Validierung bestanden", validationResult.valid ? "Ja" : "Nein"],
         ["Erkannte Platzierungskonflikte", validationResult.conflictCount]
       ];
