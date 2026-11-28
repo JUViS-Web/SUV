@@ -1905,6 +1905,10 @@ const trackTeacherProblems = blocks
       }))
   );
 
+
+const placementResult =
+  placeAutoPlanningRegularBlocks(data, blocks);
+
        
       result.innerHTML = "";
 
@@ -1935,6 +1939,10 @@ const trackTeacherProblems = blocks
         ["Fehlerhafte Kursgruppen", invalidTrackGroups],
         ["Unterrichtsstunden in allen Blöcken", totalBlockPeriods],
         ["Fehlerhafte Blockgrößen", invalidBlocks]
+        ["Reguläre Blöcke platziert", placementResult.placedRegularBlocks],
+        ["Reguläre Blöcke nicht platziert", placementResult.unplacedRegularBlocks],
+        ["Reguläre Planung vollständig", placementResult.isComplete ? "Ja" : "Nein"]
+
       ];
 
 const problemHeading = document.createElement("h4");
