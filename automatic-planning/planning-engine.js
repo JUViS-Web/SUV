@@ -782,6 +782,124 @@ function findAutoPlanningRegularBlockCandidates(
 }
 
 
+function validateAutoPlanningPlacements(state) {
+  const conflicts = [];
+
+  const classSlots = new Map();
+  const teacherSlots = new Map();
+  const subjectDays = new Map();
+
+  for (const placement of state.placements) {
+    const block = placement.block;
+
+    const classIds =
+      block.type === "track"
+        ? block.participatingClassIds
+        : [block.classId];
+
+    const subjectIds =
+      block.type === "track"
+        ? block.parallelGroups.map(
+            group => group.subjectId
+          )
+        : [block.subjectId];
+
+    const teacherIds = [
+      ...new Set(placement.teacherIds || [])
+    ];
+
+    // Blockgröße prüfen
+    if (
+      placement.periodEnd -
+        placement.periodStart + 1 !==
+      Number(block.periodsCount)
+    ) {
+      conflicts.push({
+        type: "block_size",
+        message:
+          "Blockgröße stimmt nicht mit der Platzierung überein.",
+        block
+      });
+    }
+
+    // Klassenbelegung prüfen
+    for (const classId of classIds) {
+      for (
+        let period = placement.periodStart;
+        period <= placement.periodEnd;
+        period++
+      ) {
+        const key =
+          `${classId}:${placement.weekday}:${period}`;
+
+        if (classSlots.has(key)) {
+          conflicts.push({
+            type: "class_overlap",
+            message: "Klasse ist doppelt belegt.",
+            classId,
+            weekday: placement.weekday,
+            period
+          });
+        } else {
+          classSlots.set(key, block);
+        }
+      }
+
+      // Fach darf nur einmal täglich vorkommen
+      for (const subjectId of subjectIds) {
+        const key =
+          `${classId}:${subjectId}:${placement.weekday}`;
+
+        if (subjectDays.has(key)) {
+          conflicts.push({
+            type: "subject_repeat",
+            message:
+              "Fach ist mehrfach am selben Tag eingeplant.",
+            classId,
+            subjectId,
+            weekday: placement.weekday
+          });
+        } else {
+          subjectDays.set(key, block);
+        }
+      }
+    }
+
+    // Lehrkraftbelegung prüfen
+    for (const teacherId of teacherIds) {
+      for (
+        let period = placement.periodStart;
+        period <= placement.periodEnd;
+        period++
+      ) {
+        const key =
+          `${teacherId}:${placement.weekday}:${period}`;
+
+        if (teacherSlots.has(key)) {
+          conflicts.push({
+            type: "teacher_overlap",
+            message:
+              "Lehrkraft ist doppelt belegt.",
+            teacherId,
+            weekday: placement.weekday,
+            period
+          });
+        } else {
+          teacherSlots.set(key, block);
+        }
+      }
+    }
+  }
+
+  return {
+    valid: conflicts.length === 0,
+    conflictCount: conflicts.length,
+    conflicts
+  };
+}
+
+
+
 function placeAutoPlanningRegularBlocks(data, blocks) {
   // Wochenstundenkonto für diesen Planungslauf zurücksetzen
   resetPlanningTeacherWorkload();
