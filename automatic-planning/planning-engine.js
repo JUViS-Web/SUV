@@ -453,6 +453,145 @@ function isAutoPlanningSubjectAlreadyScheduled(
 }
 
 
+function reserveAutoPlanningBlock(
+  state,
+  block,
+  timeWindow,
+  teacherIds = []
+) {
+  const {
+    weekday,
+    periodStart,
+    periodEnd
+  } = timeWindow;
+
+  const classIds =
+    block.type === "track"
+      ? block.participatingClassIds
+      : [block.classId];
+
+  const subjectIds =
+    block.type === "track"
+      ? block.parallelGroups.map(
+          group => group.subjectId
+        )
+      : [block.subjectId];
+
+  if (
+    periodEnd - periodStart + 1 !==
+    Number(block.periodsCount)
+  ) {
+    return {
+      success: false,
+      reason: "Blockgröße stimmt nicht mit dem Zeitfenster überein."
+    };
+  }
+
+  for (const classId of classIds) {
+    if (
+      !isAutoPlanningClassAvailable(
+        state,
+        classId,
+        weekday,
+        periodStart,
+        periodEnd
+      )
+    ) {
+      return {
+        success: false,
+        reason: "Eine Klasse ist bereits belegt."
+      };
+    }
+  }
+
+  for (const teacherId of teacherIds) {
+    if (
+      !isAutoPlanningTeacherAvailable(
+        state,
+        teacherId,
+        weekday,
+        periodStart,
+        periodEnd
+      )
+    ) {
+      return {
+        success: false,
+        reason: "Eine Lehrkraft ist bereits belegt."
+      };
+    }
+  }
+
+  for (const classId of classIds) {
+    for (const subjectId of subjectIds) {
+      if (
+        isAutoPlanningSubjectAlreadyScheduled(
+          state,
+          classId,
+          subjectId,
+          weekday
+        )
+      ) {
+        return {
+          success: false,
+          reason: "Dieses Fach ist an diesem Tag bereits eingeplant."
+        };
+      }
+    }
+  }
+
+  for (const classId of classIds) {
+    for (
+      let period = periodStart;
+      period <= periodEnd;
+      period++
+    ) {
+      state.classOccupancy.set(
+        `${classId}:${weekday}:${period}`,
+        true
+      );
+    }
+  }
+
+  for (const teacherId of teacherIds) {
+    for (
+      let period = periodStart;
+      period <= periodEnd;
+      period++
+    ) {
+      state.teacherOccupancy.set(
+        `${teacherId}:${weekday}:${period}`,
+        true
+      );
+    }
+  }
+
+  for (const classId of classIds) {
+    for (const subjectId of subjectIds) {
+      state.subjectDays.set(
+        `${classId}:${subjectId}:${weekday}`,
+        true
+      );
+    }
+  }
+
+  const placement = {
+    block,
+    weekday,
+    periodStart,
+    periodEnd,
+    teacherIds: [...teacherIds]
+  };
+
+  state.placements.push(placement);
+
+  return {
+    success: true,
+    placement
+  };
+}
+
+
+
 // Für einen Unterrichtsblock zutreffende Zeitregeln ermitteln
 
 function getApplicableAutoPlanningTimeRules(
