@@ -2027,6 +2027,9 @@ const trackTeacherProblems = blocks
 const placementResult =
   placeAutoPlanningRegularBlocks(data, blocks);
 
+const validationResult =
+  validateAutoPlanningPlacements(placementResult);
+
        
       result.innerHTML = "";
 
@@ -2060,7 +2063,8 @@ const placementResult =
         ["Reguläre Blöcke platziert", placementResult.placedRegularBlocks],
         ["Reguläre Blöcke nicht platziert", placementResult.unplacedRegularBlocks],
         ["Reguläre Planung vollständig", placementResult.isComplete ? "Ja" : "Nein"]
-
+        ["Validierung bestanden", validationResult.valid ? "Ja" : "Nein"],
+        ["Erkannte Platzierungskonflikte", validationResult.conflictCount]
       ];
 
 const problemHeading = document.createElement("h4");
