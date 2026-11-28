@@ -2392,6 +2392,70 @@ const problemList = document.createElement("ul");
 });
 
 result.append(problemHeading, problemList);
+
+const unplacedTrackHeading =
+  document.createElement("h4");
+
+unplacedTrackHeading.textContent =
+  "Nicht eingeplante Schienenblöcke";
+
+const unplacedTrackList =
+  document.createElement("ul");
+
+trackPlacementResult.unplacedTracks.forEach(
+  ({ block, reason }) => {
+    const item = document.createElement("li");
+
+    const missingGroups =
+      block.parallelGroups.filter(group => {
+        const availableTeachers =
+          getAutoPlanningQualifiedTeachers(
+            data,
+            group.subjectId,
+            block.periodsCount
+          ).length;
+
+        return availableTeachers < group.courseCount;
+      });
+
+    if (missingGroups.length > 0) {
+      const details = missingGroups.map(group => {
+        const availableTeachers =
+          getAutoPlanningQualifiedTeachers(
+            data,
+            group.subjectId,
+            block.periodsCount
+          ).length;
+
+        return (
+          group.subjectName +
+          ": " +
+          availableTeachers +
+          " von " +
+          group.courseCount +
+          " benötigten Lehrkräften"
+        );
+      });
+
+      item.textContent =
+        block.offeringName +
+        " – " +
+        details.join("; ");
+    } else {
+      item.textContent =
+        block.offeringName + " – " + reason;
+    }
+
+    unplacedTrackList.appendChild(item);
+  }
+);
+
+if (trackPlacementResult.unplacedTracks.length > 0) {
+  result.append(
+    unplacedTrackHeading,
+    unplacedTrackList
+  );
+}
        
       entries.forEach(([label, count]) => {
         const item = document.createElement("li");
