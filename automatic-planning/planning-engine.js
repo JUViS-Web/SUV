@@ -782,6 +782,171 @@ function findAutoPlanningRegularBlockCandidates(
 }
 
 
+function findAutoPlanningTrackBlockCandidates(
+  data,
+  state,
+  block
+) {
+  if (block.type !== "track") {
+    return [];
+  }
+
+  const timeWindows =
+    getAutoPlanningBlockTimeWindows(
+      state,
+      block.periodsCount
+    );
+
+  const candidates = [];
+
+  for (const timeWindow of timeWindows) {
+    const {
+      weekday,
+      periodStart,
+      periodEnd
+    } = timeWindow;
+
+    // Alle beteiligten Klassen müssen gleichzeitig frei sein
+    const classesAvailable =
+      block.participatingClassIds.every(classId =>
+        isAutoPlanningClassAvailable(
+          state,
+          classId,
+          weekday,
+          periodStart,
+          periodEnd
+        )
+      );
+
+    if (!classesAvailable) continue;
+
+    // Kein Fach darf an diesem Tag bereits stattfinden
+    const subjectsAvailable =
+      block.participatingClassIds.every(classId =>
+        block.parallelGroups.every(group =>
+          !isAutoPlanningSubjectAlreadyScheduled(
+            state,
+            classId,
+            group.subjectId,
+            weekday
+          )
+        )
+      );
+
+    if (!subjectsAvailable) continue;
+
+    const selectedTeacherIds = new Set();
+    const assignments = [];
+    let totalScore = 0;
+    let valid = true;
+
+    // Für jeden parallelen Kurs eine eigene Lehrkraft finden
+    for (const group of block.parallelGroups) {
+      for (
+        let courseNumber = 1;
+        courseNumber <= group.courseCount;
+        courseNumber++
+      ) {
+        const teacherCandidates =
+          getAutoPlanningQualifiedTeachers(
+            data,
+            group.subjectId,
+            block.periodsCount
+          );
+
+        const eligibleTeachers = [];
+
+        for (const teacher of teacherCandidates) {
+          if (selectedTeacherIds.has(teacher.id)) {
+            continue;
+          }
+
+          if (
+            !isAutoPlanningTeacherAvailable(
+              state,
+              teacher.id,
+              weekday,
+              periodStart,
+              periodEnd
+            )
+          ) {
+            continue;
+          }
+
+          const evaluation =
+            evaluateAutoPlanningCandidate(
+              data,
+              block,
+              weekday,
+              periodStart,
+              periodEnd,
+              teacher.id,
+              null,
+              group.subjectId
+            );
+
+          if (evaluation.allowed) {
+            eligibleTeachers.push({
+              teacher,
+              evaluation
+            });
+          }
+        }
+
+        eligibleTeachers.sort((a, b) => {
+          const scoreDifference =
+            b.evaluation.score - a.evaluation.score;
+
+          if (scoreDifference !== 0) {
+            return scoreDifference;
+          }
+
+          return (
+            a.teacher.workloadRatio -
+            b.teacher.workloadRatio
+          );
+        });
+
+        if (eligibleTeachers.length === 0) {
+          valid = false;
+          break;
+        }
+
+        const selected = eligibleTeachers[0];
+
+        selectedTeacherIds.add(selected.teacher.id);
+
+        assignments.push({
+          subjectId: group.subjectId,
+          subjectName: group.subjectName,
+          courseNumber,
+          teacherId: selected.teacher.id
+        });
+
+        totalScore += selected.evaluation.score;
+      }
+
+      if (!valid) break;
+    }
+
+    if (!valid) continue;
+
+    candidates.push({
+      block,
+      timeWindow,
+      assignments,
+      teacherIds: [...selectedTeacherIds],
+      score: totalScore
+    });
+  }
+
+  return candidates.sort(
+    (a, b) => b.score - a.score
+  );
+}
+
+
+
 function validateAutoPlanningPlacements(state, teachers) {
   const conflicts = [];
 
