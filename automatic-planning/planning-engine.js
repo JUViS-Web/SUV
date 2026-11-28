@@ -306,6 +306,42 @@ blocks.push({
 }
 
 
+function createAutoPlanningPlacementState(data) {
+  const slots = [];
+
+  const schoolDays = [...data.schoolDays].sort(
+    (a, b) => a.day_number - b.day_number
+  );
+
+  const lessonTimes = [...data.lessonTimes].sort(
+    (a, b) => a.lesson_number - b.lesson_number
+  );
+
+  for (const day of schoolDays) {
+    for (const lesson of lessonTimes) {
+      slots.push({
+        weekday: day.day_number,
+        dayName: day.day_name,
+        periodNumber: lesson.lesson_number,
+        startTime: lesson.start_time,
+        endTime: lesson.end_time
+      });
+    }
+  }
+
+  return {
+    slots,
+    placements: [],
+    unplaced: [],
+    classOccupancy: new Map(),
+    teacherOccupancy: new Map(),
+    subjectDays: new Map(),
+    roomOccupancy: new Map(),
+    conflicts: []
+  };
+}
+
+
 // Für einen Unterrichtsblock zutreffende Zeitregeln ermitteln
 
 function getApplicableAutoPlanningTimeRules(
